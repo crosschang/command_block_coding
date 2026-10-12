@@ -19,6 +19,71 @@
 namespace MCFunctionPreview {
     let previewQueryBusy = false;
 
+    // Preview-only catalog command, separate from canonical /gamerule LIST.
+    // PXT chat-command number arguments are supported by Minecraft MakeCode.
+    // The viewer never reads or claims to read live Gamerule values.
+    const GAMERULE_CATALOG_PAGE_SIZE = 6;
+    let gameRuleCatalogChatRegistered = false;
+
+    export function gameRuleCatalogChatCommandName(): string {
+        return "cbi_rules";
+    }
+
+    export function isReservedGameRuleCatalogChatCommand(name: string): boolean {
+        return name == gameRuleCatalogChatCommandName();
+    }
+
+    /** Register once per program run; no canonical Minecraft command is added. */
+    export function ensureGameRuleCatalogChatRegistered(): void {
+        if (gameRuleCatalogChatRegistered) return;
+        gameRuleCatalogChatRegistered = true;
+        player.onChat(gameRuleCatalogChatCommandName(), function (page: number) {
+            showGameRuleCatalogPage(page);
+        });
+    }
+
+    /**
+     * Display a page of Registry IDs/types. NOT the live /gamerule result.
+     * One tellraw per page prevents flooding delayed Minecraft chat output.
+     */
+    export function showGameRuleCatalogPage(requestedPage: number): void {
+        let ids = MCFunctionGameruleRegistry.knownRuleIds();
+        let totalPages = Math.ceil(ids.length / GAMERULE_CATALOG_PAGE_SIZE);
+        if (totalPages < 1) {
+            previewSay("GAMERULE Registry has no known rules. Live world values: type /gamerule in game chat.");
+            return;
+        }
+        let page = requestedPage;
+        // MakeCode onChat supplies 0 if the optional numeric argument is omitted.
+        if (page == 0) page = 1;
+        if (page < 1 || page > totalPages || page % 1 != 0) {
+            previewSay("GAMERULE Registry page must be 1-" + totalPages +
+                ". Usage: cbi_rules 1. Live world values: /gamerule.");
+            return;
+        }
+
+        let output = "GAMERULE Registry " + page + "/" + totalPages +
+            " (names/types ONLY, NOT live values)";
+        let start = (page - 1) * GAMERULE_CATALOG_PAGE_SIZE;
+        let end = start + GAMERULE_CATALOG_PAGE_SIZE;
+        if (end > ids.length) end = ids.length;
+        for (let i = start; i < end; i++) {
+            let type = "Unknown";
+            let kind = MCFunctionGameruleRegistry.valueKindOf(ids[i]);
+            if (kind == 1) type = "Boolean";
+            else if (kind == 2) type = "Integer";
+            else if (kind == 3) type = "Enum";
+            output += "\n" + ids[i] + " [" + type + "]";
+        }
+        if (page < totalPages) {
+            output += "\nNext: cbi_rules " + (page + 1);
+        } else {
+            output += "\nLast page.";
+        }
+        output += " Live: /gamerule or /gamerule <rule>";
+        previewSay(output);
+    }
+
     /**
      * Observe successfully validated structured commands after runtime execution.
      * This records authored tag vocabulary; it does not replace Minecraft state.
@@ -95,21 +160,14 @@ namespace MCFunctionPreview {
             return handledQuery(QueryConfidence.Unavailable, "live gamerule value unavailable");
         }
         if (command.action == MCFunctionAST.GameRuleAction.List) {
-            let names = MCFunctionGameruleRegistry.knownRuleIds();
-            previewSay("GAMERULE Registry: " + names.length +
-                " Bedrock-defined names (NOT current world values). For live values, type /gamerule in game chat.");
-            // A type-labelled catalog; split to avoid oversized chat lines.
-            printGameRuleCatalog(names, 1, "Boolean");
-            printGameRuleCatalog(names, 2, "Integer");
-            printGameRuleCatalog(names, 3, "Enum");
-            let changed = getPreviewSetGameRuleIds();
-            if (changed.length > 0) {
-                previewSay("GAMERULE session-known: last successful sets below (NOT live world state).");
-                for (let i = 0; i < changed.length; i++) {
-                    previewSay(changed[i] + " = " + getLastSetGameRuleValue(changed[i]) + " (last Preview set)");
-                }
-            }
-            return handledQuery(QueryConfidence.Partial, "Registry names and optional session-known sets, not live values");
+            // Canonical "gamerule" returns live world settings in game chat.
+            // player.execute() cannot expose that text; never substitute Registry
+            // metadata or cached session values as if they were live state.
+            previewSay("GAMERULE LIST live world values are OUTPUT_HIDDEN in MakeCode Preview. " +
+                "Type /gamerule in game chat. Registry reference (NOT live values): cbi_rules 1.");
+            showGameRuleCatalogPage(1);
+            return handledQuery(QueryConfidence.Partial,
+                "canonical live Gamerule output hidden; paged Registry reference shown separately");
         }
         if (command.action == MCFunctionAST.GameRuleAction.SetEnum &&
             command.ruleId == "playerwaypoints") {
@@ -121,21 +179,6 @@ namespace MCFunctionPreview {
             return handledQuery(QueryConfidence.Unavailable, "playerwaypoints Preview compatibility limitation");
         }
         return unhandledQuery();
-    }
-
-    function printGameRuleCatalog(ids: string[], valueKind: number, typeLabel: string): void {
-        let line = "";
-        for (let i = 0; i < ids.length; i++) {
-            if (MCFunctionGameruleRegistry.valueKindOf(ids[i]) != valueKind) continue;
-            let candidate = line.length == 0 ? ids[i] : line + ", " + ids[i];
-            if (candidate.length > 112) {
-                previewSay("GAMERULE " + typeLabel + ": " + line);
-                line = ids[i];
-            } else {
-                line = candidate;
-            }
-        }
-        if (line.length > 0) previewSay("GAMERULE " + typeLabel + ": " + line);
     }
 
     function executeTagListQuery(

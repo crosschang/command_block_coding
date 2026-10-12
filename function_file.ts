@@ -70,12 +70,16 @@ namespace FunctionFile {
         // Human-facing diagnostics viewer. Multiple define() calls are safe because
         // the runtime registers this chat command only once per program run.
         MCFunctionDiagnostics.ensureChatRegistered();
+        MCFunctionPreview.ensureGameRuleCatalogChatRegistered();
 
-        if (MCFunctionDiagnostics.isReservedChatCommand(name)) {
+        if (MCFunctionDiagnostics.isReservedChatCommand(name) ||
+            MCFunctionPreview.isReservedGameRuleCatalogChatCommand(name)) {
             let reservedIssues: MCFunctionValidator.ValidationIssue[] = [{
                 level: MCFunctionValidator.ValidationLevel.Error,
                 code: "FUNCTION_NAME_RESERVED",
-                message: "mcfunction name cbi_diag is reserved for the diagnostic viewer."
+                message: name == MCFunctionDiagnostics.chatCommandName()
+                    ? "mcfunction name cbi_diag is reserved for the diagnostic viewer."
+                    : "mcfunction name cbi_rules is reserved for the Gamerule Registry viewer."
             }];
 
             register(name, createPreparedHandler([]), false);
