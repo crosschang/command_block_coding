@@ -5,6 +5,9 @@ namespace MCFunctionCompiler {
             case MCFunctionAST.CommandKind.Raw:
                 return compileRaw(<MCFunctionAST.RawCommand>command);
 
+            case MCFunctionAST.CommandKind.Particle:
+                return compileParticle(<MCFunctionAST.ParticleCommand>command);
+
             case MCFunctionAST.CommandKind.Say:
                 return compileSay(<MCFunctionAST.SayCommand>command);
 
@@ -51,6 +54,13 @@ namespace MCFunctionCompiler {
 
     function compileRaw(command: MCFunctionAST.RawCommand): string {
         return command.raw;
+    }
+
+    /** Bedrock command: particle <effect> [x y z]. No leading slash in .mcfunction. */
+    function compileParticle(command: MCFunctionAST.ParticleCommand): string {
+        let result = "particle " + command.particleId;
+        if (command.position) result = result + " " + compilePosition(command.position);
+        return result;
     }
 
     function compileSay(command: MCFunctionAST.SayCommand): string {

@@ -211,6 +211,59 @@ namespace MCFunctionValidator {
         return false;
     }
 
+    /** Particle effect identifiers: preserve unknown valid IDs but reject broken tokens. */
+    function isParticleIdToken(value: string): boolean {
+        if (!value || value.length == 0) return false;
+        let colon = -1;
+        for (let i = 0; i < value.length; i++) {
+            let ch = value.charAt(i);
+            let allowed =
+                (ch >= "a" && ch <= "z") ||
+                (ch >= "0" && ch <= "9") ||
+                ch == "_" || ch == "-" || ch == "." || ch == "/";
+            if (ch == ":") {
+                if (colon >= 0 || i == 0 || i == value.length - 1) return false;
+                colon = i;
+            } else if (!allowed) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Warning/Info never block export or Preview. Unknown particles may be silent. */
+    export function validateParticleCommand(
+        command: MCFunctionAST.ParticleCommand
+    ): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (!isParticleIdToken(command.particleId)) {
+            addIssue(
+                issues,
+                ValidationLevel.Error,
+                "PARTICLE_ID_INVALID",
+                "Particle ID must be a nonempty Minecraft identifier without spaces or invalid characters."
+            );
+        } else if (MCFunctionRegistryLookup.isCustomNamespace(command.particleId)) {
+            addIssue(
+                issues,
+                ValidationLevel.Info,
+                "PARTICLE_ID_CUSTOM_NAMESPACE",
+                "Particle ID " + command.particleId + " uses a custom namespace. Preview and export will continue; the resource pack must define this particle."
+            );
+        } else if (!MCFunctionRegistryLookup.isKnownParticle(command.particleId)) {
+            addIssue(
+                issues,
+                ValidationLevel.Warning,
+                "PARTICLE_ID_UNKNOWN",
+                "Particle ID " + command.particleId + " is not in the current Bedrock Registry. Preview and export will continue; runtime feedback is not reliable."
+            );
+        }
+        if (command.position) {
+            appendIssues(issues, validatePosition(command.position));
+        }
+        return issues;
+    }
+
     function validateBlockRegistryId(
         blockId: string,
         issues: ValidationIssue[]
@@ -1297,6 +1350,10 @@ namespace MCFunctionValidator {
             if (!fn.functionId || fn.functionId.length == 0) {
                 addIssue(issues, ValidationLevel.Error, "FUNCTION_EMPTY_ID", "Function ID cannot be empty.");
             }
+        }
+
+        if (command.kind == MCFunctionAST.CommandKind.Particle) {
+            appendIssues(issues, validateParticleCommand(<MCFunctionAST.ParticleCommand>command));
         }
 
         if (command.kind == MCFunctionAST.CommandKind.Give) {

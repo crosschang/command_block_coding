@@ -43,6 +43,7 @@
         "src/libraries/family_library.generated.ts",
         "src/libraries/entity_event_library.generated.ts",
         "src/libraries/spawn_event_library.generated.ts",
+        "commands/particle.ts",
         "commands/say.ts",
         "commands/mcfunction.ts",
         "commands/give.ts",
@@ -102,6 +103,7 @@
         "docs/CHANGELOG_VALIDATION_REGISTRY_UX_2026-10-09.md",
         "docs/CHANGELOG_DIAGNOSTIC_STORE_0.0.35.md",
         "docs/CHANGELOG_DIAGNOSTIC_SUMMARY_0.0.36.md",
+        "docs/CHANGELOG_PARTICLE_LIBRARY_0.0.40.md",
         "docs/CHANGELOG_EXISTING_LIBRARY_POLICY_0.0.37.md",
         "docs/CHANGELOG_EVENT_OWNER_SCOPED_0.0.38.md",
         "docs/CHANGELOG_SUMMON_NO_ORIENTATION_TAIL_0.0.39.md"

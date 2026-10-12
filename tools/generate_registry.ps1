@@ -599,6 +599,7 @@ function Generate-RegistryLookup() {
         ' * - registry/source/bedrock/entities.json',
         ' * - registry/source/bedrock/items.json',
         ' * - registry/source/bedrock/effects.json',
+        ' * - registry/source/bedrock/particles.json',
         ' * Generator: tools/generate_registry.ps1',
         ' *',
         ' * Hidden runtime lookup used only by Definition Validation.',
@@ -612,7 +613,8 @@ function Generate-RegistryLookup() {
         [ordered]@{ Kind='blocks'; Name='knownBlockIds' },
         [ordered]@{ Kind='entities'; Name='knownEntityIds' },
         [ordered]@{ Kind='items'; Name='knownItemIds' },
-        [ordered]@{ Kind='effects'; Name='knownEffectIds' }
+        [ordered]@{ Kind='effects'; Name='knownEffectIds' },
+        [ordered]@{ Kind='particles'; Name='knownParticleIds' }
     )
 
     foreach ($Lookup in $LookupKinds) {
@@ -672,6 +674,10 @@ function Generate-RegistryLookup() {
         '',
         '    export function isKnownEffect(value: string): boolean {',
         '        return containsSorted(knownEffectIds, value);',
+        '    }',
+        '',
+        '    export function isKnownParticle(value: string): boolean {',
+        '        return containsSorted(knownParticleIds, normalizeVanillaId(value));',
         '    }',
         '}',
         ''

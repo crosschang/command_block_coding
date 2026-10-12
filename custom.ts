@@ -11,7 +11,7 @@
  * .mcfunction output keeps the real `=` syntax.
  */
 //% color=#4C97FF weight=100 icon="\uf1b2"
-//% groups='["SETBLOCK", "FILL", "CLONE", "TAG", "GAMEMODE", "KILL", "CLEAR", "SUMMON", "EFFECT", "TELEPORT", "GIVE", "SAY", "FUNCTION", "RAW COMMAND"]'
+//% groups='["SETBLOCK", "FILL", "CLONE", "PARTICLE", "TAG", "GAMEMODE", "KILL", "CLEAR", "SUMMON", "EFFECT", "TELEPORT", "GIVE", "SAY", "FUNCTION", "RAW COMMAND"]'
 namespace Command {
     function executeValidatedCommandNow(command: MCFunctionAST.CommandNode): void {
         let queryResult = MCFunctionPreview.tryHandleQuery(command);
@@ -68,6 +68,26 @@ namespace Command {
     //% command.defl="camera @s fade time 1 1 1"
     export function raw(command: string): void {
         executeCommand(MCFunctionBlocks.createRawCommand(command));
+    }
+
+    /** Emit a Bedrock/Education particle at the executor or an optional Position. */
+    //% blockId=command_particle
+    //% group="PARTICLE" weight=100
+    //% block="PARTICLE $particle || position $position"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% particle.shadow="mcfunction_particle_registry_minecraft_basic_flame_particle"
+    //% position.shadow="mcfunction_position_relative"
+    export function particle(
+        particle: MCFunctionFields.ParticleValue,
+        position?: MCFunctionPositionFields.PositionValue
+    ): void {
+        executeCommand(
+            MCFunctionBlocks.createParticleCommand(
+                particle ? particle.particleId : "",
+                position ? position.position : undefined
+            )
+        );
     }
 
     /** Execute a Minecraft `say` command. */

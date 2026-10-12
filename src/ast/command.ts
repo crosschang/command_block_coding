@@ -17,7 +17,8 @@ namespace MCFunctionAST {
         Clear = 10,
         SetBlock = 11,
         Fill = 12,
-        Clone = 13
+        Clone = 13,
+        Particle = 14
     }
 
     export interface CommandNode {

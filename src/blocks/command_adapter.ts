@@ -4,6 +4,14 @@ namespace MCFunctionBlocks {
         return MCFunctionAST.createRawCommand(text);
     }
 
+    /** Reuse the Particle ID and optional Position input types. */
+    export function createParticleCommand(
+        particleId: string,
+        position?: MCFunctionAST.Position
+    ): MCFunctionAST.ParticleCommand {
+        return MCFunctionAST.createParticleCommand(particleId, position);
+    }
+
     export function createSayCommand(message: string): MCFunctionAST.SayCommand {
         return MCFunctionAST.createSayCommand(message);
     }
