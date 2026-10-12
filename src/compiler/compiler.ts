@@ -5,6 +5,9 @@ namespace MCFunctionCompiler {
             case MCFunctionAST.CommandKind.Raw:
                 return compileRaw(<MCFunctionAST.RawCommand>command);
 
+            case MCFunctionAST.CommandKind.Enchant:
+                return compileEnchant(<MCFunctionAST.EnchantCommand>command);
+
             case MCFunctionAST.CommandKind.Gamerule:
                 return compileGameRule(<MCFunctionAST.GameRuleCommand>command);
 
@@ -133,6 +136,15 @@ namespace MCFunctionCompiler {
         if (command.action == MCFunctionAST.GameRuleAction.SetEnum) {
             return result + " " + command.enumValue;
         }
+        return result;
+    }
+
+    /** Bedrock canonical names and numeric IDs, no arbitrary level insertion. */
+    function compileEnchant(command: MCFunctionAST.EnchantCommand): string {
+        let token = command.idKind == MCFunctionAST.EnchantmentIdKind.Numeric
+            ? "" + command.enchantmentNumber : command.enchantmentName;
+        let result = "enchant " + compileSelector(command.target) + " " + token;
+        if (command.level != undefined) result = result + " " + command.level;
         return result;
     }
 

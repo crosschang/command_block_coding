@@ -1,6 +1,6 @@
 {
     "name": "command_block_coding",
-    "version": "0.0.43",
+    "version": "0.0.40",
     "description": "Minecraft Education command blocks for MakeCode",
     "dependencies": {
         "core": "*",
@@ -121,7 +121,13 @@
         "docs/CHANGELOG_EVENT_OWNER_SCOPED_0.0.38.md",
         "docs/CHANGELOG_SUMMON_NO_ORIENTATION_TAIL_0.0.39.md",
         "docs/CHANGELOG_AUDIO_RUNTIME_0.0.41_2026-10-12.md",
-        "docs/CHANGELOG_GAMERULE_TYPED_LIBRARY_0.0.42.md"
+        "docs/CHANGELOG_GAMERULE_TYPED_LIBRARY_0.0.42.md",
+        "commands/enchant.ts",
+        "src/libraries/enchantment_library.ts",
+        "src/libraries/enchantment_library.generated.ts",
+        "src/registry/enchantment_registry.generated.ts",
+        "src/blocks/enchant_blocks.ts",
+        "docs/CHANGELOG_ENCHANT_NATIVE_ENUM_0.0.43.md"
     ],
     "testFiles": [
         "test.ts"

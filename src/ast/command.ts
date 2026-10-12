@@ -22,7 +22,8 @@ namespace MCFunctionAST {
         PlaySound = 15,
         StopSound = 16,
         Music = 17,
-        Gamerule = 18
+        Gamerule = 18,
+        Enchant = 19
     }
 
     export interface CommandNode {

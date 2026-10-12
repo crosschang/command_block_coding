@@ -293,6 +293,63 @@ namespace MCFunctionValidator {
         return issues;
     }
 
+    /** Name-based native enchantment values and numeric legacy command form. */
+    function isEnchantNameToken(name: string): boolean {
+        if (!name || name.length == 0) return false;
+        for (let i = 0; i < name.length; i++) {
+            let c = name.charAt(i);
+            if (!((c >= "a" && c <= "z") || (c >= "0" && c <= "9") || c == "_")) return false;
+        }
+        return true;
+    }
+
+    export function validateEnchantCommand(command: MCFunctionAST.EnchantCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (!command.target) {
+            addIssue(issues, ValidationLevel.Error, "ENCHANT_TARGET_MISSING", "ENCHANT requires a player target Selector.");
+        } else {
+            appendIssues(issues, validateSelector(command.target));
+            if (command.target.base == MCFunctionAST.SelectorBase.AllEntities ||
+                command.target.base == MCFunctionAST.SelectorBase.Initiator) {
+                addIssue(issues, ValidationLevel.Warning, "ENCHANT_TARGET_PLAYER_REQUIRED",
+                    "ENCHANT acts on players holding an eligible item; target must resolve to a player.");
+            }
+        }
+        if (command.idKind == MCFunctionAST.EnchantmentIdKind.Name) {
+            if (!isEnchantNameToken(command.enchantmentName) || command.enchantmentNumber != undefined) {
+                addIssue(issues, ValidationLevel.Error, "ENCHANT_ID_INVALID", "Name enchantment must be a nonempty native identifier (a-z, 0-9, _).");
+            } else if (!MCFunctionEnchantmentRegistry.isKnown(command.enchantmentName)) {
+                addIssue(issues, ValidationLevel.Warning, "ENCHANT_ID_UNKNOWN",
+                    "Native enchantment " + command.enchantmentName + " is not in this Bedrock Registry; value is preserved for other versions.");
+            }
+        } else if (command.idKind == MCFunctionAST.EnchantmentIdKind.Numeric) {
+            let n = command.enchantmentNumber;
+            if (n == undefined || !(n - n == 0) || Math.floor(n) != n || n < 0 ||
+                command.enchantmentName != undefined && command.enchantmentName.length > 0) {
+                addIssue(issues, ValidationLevel.Error, "ENCHANT_NUMERIC_ID_INVALID", "Numeric enchantment ID must be a nonnegative finite integer.");
+            } else {
+                addIssue(issues, ValidationLevel.Info, "ENCHANT_NUMERIC_ID_UNVERIFIED",
+                    "Numeric enchantment ID has no verified version-specific mapping in this Registry; verify in the target runtime.");
+            }
+        } else {
+            addIssue(issues, ValidationLevel.Error, "ENCHANT_ID_KIND_INVALID", "Unsupported enchantment ID kind.");
+        }
+        if (command.level != undefined) {
+            let level = command.level;
+            if (!(level - level == 0) || Math.floor(level) != level || level < 1) {
+                addIssue(issues, ValidationLevel.Error, "ENCHANT_LEVEL_INVALID", "ENCHANT level must be a positive finite integer.");
+            } else if (command.idKind == MCFunctionAST.EnchantmentIdKind.Name &&
+                       MCFunctionEnchantmentRegistry.isKnown(command.enchantmentName)) {
+                let maxLevel = MCFunctionEnchantmentRegistry.maxLevelOf(command.enchantmentName);
+                if (maxLevel > 0 && level > maxLevel) {
+                    addIssue(issues, ValidationLevel.Error, "ENCHANT_LEVEL_OUT_OF_RANGE",
+                        "Known enchantment " + command.enchantmentName + " supports level 1 to " + maxLevel + ".");
+                }
+            }
+        }
+        return issues;
+    }
+
     /** Particle effect identifiers: preserve unknown valid IDs but reject broken tokens. */
     function isParticleIdToken(value: string): boolean {
         if (!value || value.length == 0) return false;
@@ -1524,6 +1581,9 @@ namespace MCFunctionValidator {
             }
         }
 
+        if (command.kind == MCFunctionAST.CommandKind.Enchant) {
+            appendIssues(issues, validateEnchantCommand(<MCFunctionAST.EnchantCommand>command));
+        }
         if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
             appendIssues(issues, validateGameRuleCommand(<MCFunctionAST.GameRuleCommand>command));
         }

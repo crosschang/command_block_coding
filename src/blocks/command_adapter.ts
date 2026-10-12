@@ -1,5 +1,16 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    export function createEnchantCommand(
+        target: MCFunctionAST.Selector,
+        idKind: MCFunctionAST.EnchantmentIdKind,
+        enchantmentName?: string,
+        enchantmentNumber?: number,
+        level?: number
+    ): MCFunctionAST.EnchantCommand {
+        return MCFunctionAST.createEnchantCommand(
+            target, idKind, enchantmentName, enchantmentNumber, level);
+    }
+
     export function createGameRuleCommand(
         action: MCFunctionAST.GameRuleAction, ruleId?: string,
         booleanValue?: boolean, integerValue?: number, enumValue?: string

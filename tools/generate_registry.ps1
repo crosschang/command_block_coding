@@ -1026,9 +1026,6 @@ function Generate-GameRuleLibrary {
         $SeenNames[$Name] = $true
         $Group = [string]$Entry.valueKind
         $BlockId = Get-BlockId 'gamerules' $Id
-        # IMPORTANT: Add every entry as a separate line. PowerShell's expression
-        # parsing may concatenate the strings in a mixed array expression,
-        # causing `//%` annotations to comment out the entire TS function.
         [void]$Lines.Add('    //% group="' + $Group + '"')
         [void]$Lines.Add('    //% blockId=' + $BlockId)
         [void]$Lines.Add('    //% block="gamerule ' + $Id + '"')
@@ -1062,16 +1059,6 @@ function Generate-GameRuleLookup {
     }
     @(
         '        return 0;',
-        '    }',
-        '    /** Search/list catalog only. Runtime world values are not available here. */',
-        '    export function knownRuleIds(): string[] {',
-        '        return ['
-    ) | ForEach-Object { [void]$Lines.Add($_) }
-    foreach ($Entry in $Entries) {
-        [void]$Lines.Add('            "' + [string]$Entry.id + '",')
-    }
-    @(
-        '        ];',
         '    }',
         '    export function isDocumentedEnumValue(ruleId: string, value: string): boolean {'
     ) | ForEach-Object { [void]$Lines.Add($_) }
@@ -1119,6 +1106,81 @@ if ($GameruleLookupActual -ne $GameruleLookupGenerated) {
     if (-not $Check) { [System.IO.File]::WriteAllText($GameruleLookupPath, $GameruleLookupGenerated, $Utf8NoBom) }
 }
 $Counts['gamerules'] = @((Get-Content -Raw -Encoding UTF8 (Join-Path $SourceDir 'gamerules.json') | ConvertFrom-Json).entries).Count
+
+# 0.0.43 native enchantments: versioned name IDs + sourced individual maximum levels.
+function Generate-EnchantmentLibrary {
+    $Data = Get-Content -Raw -Encoding UTF8 (Join-Path $SourceDir 'enchantments.json') | ConvertFrom-Json
+    $Lines = New-Object 'System.Collections.Generic.List[string]'
+    [void]$Lines.Add('/** AUTO-GENERATED FILE. DO NOT EDIT BY HAND.')
+    [void]$Lines.Add(' * Source: registry/source/bedrock/enchantments.json')
+    [void]$Lines.Add(' * Generator: tools/generate_registry.ps1 */')
+    [void]$Lines.Add('namespace MCFunctionEnchantmentLibrary {')
+    $SeenIds = @{}
+    $SeenNames = @{}
+    foreach ($Entry in @($Data.entries)) {
+        $Id = [string]$Entry.id
+        if ($Id -cnotmatch '^[a-z][a-z0-9_]*$') { throw "Invalid enchantment ID: $Id" }
+        if ($SeenIds.ContainsKey($Id)) { throw "Duplicate enchantment ID: $Id" }
+        $SeenIds[$Id] = $true
+        $Name = Get-FunctionName $Entry
+        if ($SeenNames.ContainsKey($Name)) { throw "Enchantment reporter collision: $Name" }
+        $SeenNames[$Name] = $true
+        if ($null -ne $Entry.maxLevel -and ([int]$Entry.maxLevel -lt 1)) { throw "Invalid maxLevel for $Id" }
+        [void]$Lines.Add('    //% group="Registry"')
+        [void]$Lines.Add('    //% blockId=mcfunction_enchantment_registry_' + $Id)
+        [void]$Lines.Add('    //% block="enchantment ' + $Id + '"')
+        [void]$Lines.Add('    export function ' + $Name + '(): EnchantmentRef {')
+        [void]$Lines.Add('        return new EnchantmentRef(MCFunctionAST.EnchantmentIdKind.Name, "' + $Id + '");')
+        [void]$Lines.Add('    }')
+        [void]$Lines.Add('')
+    }
+    [void]$Lines.Add('}')
+    [void]$Lines.Add('')
+    return (($Lines -join "`n") + "`n")
+}
+
+function Generate-EnchantmentLookup {
+    $Data = Get-Content -Raw -Encoding UTF8 (Join-Path $SourceDir 'enchantments.json') | ConvertFrom-Json
+    $Lines = New-Object 'System.Collections.Generic.List[string]'
+    [void]$Lines.Add('/** AUTO-GENERATED FILE. DO NOT EDIT BY HAND.')
+    [void]$Lines.Add(' * Source: registry/source/bedrock/enchantments.json')
+    [void]$Lines.Add(' * Generator: tools/generate_registry.ps1 */')
+    [void]$Lines.Add('namespace MCFunctionEnchantmentRegistry {')
+    [void]$Lines.Add('    export function isKnown(id: string): boolean {')
+    foreach ($Entry in @($Data.entries)) {
+        [void]$Lines.Add('        if (id == "' + $Entry.id + '") return true;')
+    }
+    [void]$Lines.Add('        return false;')
+    [void]$Lines.Add('    }')
+    [void]$Lines.Add('    /** 0 means no level metadata is available, not that this ID is invalid. */')
+    [void]$Lines.Add('    export function maxLevelOf(id: string): number {')
+    foreach ($Entry in @($Data.entries)) {
+        if ($null -ne $Entry.maxLevel) {
+            [void]$Lines.Add('        if (id == "' + $Entry.id + '") return ' + [string]$Entry.maxLevel + ';')
+        }
+    }
+    [void]$Lines.Add('        return 0;')
+    [void]$Lines.Add('    }')
+    [void]$Lines.Add('}')
+    [void]$Lines.Add('')
+    return (($Lines -join "`n") + "`n")
+}
+
+$EnchantLibrary = Generate-EnchantmentLibrary
+$EnchantLibraryPath = Join-Path $OutDir 'enchantment_library.generated.ts'
+$EnchantLibraryActual = if (Test-Path $EnchantLibraryPath) { [System.IO.File]::ReadAllText($EnchantLibraryPath) } else { $null }
+if ($EnchantLibraryActual -ne $EnchantLibrary) {
+    [void]$Changed.Add('src/libraries/enchantment_library.generated.ts')
+    if (-not $Check) { [System.IO.File]::WriteAllText($EnchantLibraryPath, $EnchantLibrary, $Utf8NoBom) }
+}
+$EnchantLookup = Generate-EnchantmentLookup
+$EnchantLookupPath = Join-Path $LookupOutDir 'enchantment_registry.generated.ts'
+$EnchantLookupActual = if (Test-Path $EnchantLookupPath) { [System.IO.File]::ReadAllText($EnchantLookupPath) } else { $null }
+if ($EnchantLookupActual -ne $EnchantLookup) {
+    [void]$Changed.Add('src/registry/enchantment_registry.generated.ts')
+    if (-not $Check) { [System.IO.File]::WriteAllText($EnchantLookupPath, $EnchantLookup, $Utf8NoBom) }
+}
+$Counts['enchantments'] = @((Get-Content -Raw -Encoding UTF8 (Join-Path $SourceDir 'enchantments.json') | ConvertFrom-Json).entries).Count
 
 $GroupedSpecs = @(
     [ordered]@{ Kind='entity_events'; Namespace='MCFunctionEntityEventLibrary'; Category='EVENT'; Prefix='event'; BlockIdPrefix='mcfunction_entity_event'; Color='#E67E22'; Weight=83; Icon='\uf0e7'; File='entity_event_library.generated.ts' },

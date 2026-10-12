@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "customPolicy": "VERSIONED_NATIVE_ENUM",
+  "platform": "bedrock",
+  "target": "stable",
+  "source": {
+    "provider": "Microsoft Minecraft Creator / Bedrock Wiki / Mojang Release Notes",
+    "urls": [
+      "https://learn.microsoft.com/en-us/minecraft/creator/reference/content/commandsreference/examples/commands/enchant?view=minecraft-bedrock-stable",
+      "https://learn.microsoft.com/en-us/minecraft/creator/documents/introtoenchantments?view=minecraft-bedrock-stable",
+      "https://wiki.bedrock.dev/items/enchantments",
+      "https://feedback.minecraft.net/hc/en-us/articles/27451789924237-Minecraft-Bedrock-Edition-1-21-Tricky-Trials"
+    ],
+    "sourceAsOf": "2026-10-12",
+    "note": "Bedrock known name IDs and documented max levels. Education 26.32 runtime availability of each ID is unverified; no numeric ID mappings are asserted."
+  },
+  "notes": [
+    "Native enchantment name is versioned and is not assumed extensible by Add-ons.",
+    "Unrecognized well-formed names must be preserved with a warning.",
+    "Level maximum applies only to known IDs with sourced level metadata.",
+    "Numeric enchantment IDs are accepted as separate syntax without assuming a name mapping.",
+    "No claim of item compatibility without actual Minecraft runtime."
+  ],
+  "entries": [
+    {
+      "id": "aqua_affinity",
+      "minLevel": 1,
+      "maxLevel": 1
+    },
+    {
+      "id": "bane_of_arthropods",
+      "minLevel": 1,
+      "maxLevel": 5
+    },
+    {
+      "id": "blast_protection",
+      "minLevel": 1,
+      "maxLevel": 4
+    },
+    {
+      "id": "breach",
+      "minLevel": 1,
+      "maxLevel": 4
+    },
+    {
+      "id": "channeling",
+      "minLevel": 1,
+      "maxLevel": 1
+    },
+    {
+      "id": "curse_of_binding",
+      "minLevel": 1,
+      "maxLevel": 1
+    },
+    {
+      "id": "curse_of_vanishing",
+      "minLevel": 1,
+      "maxLevel": 1
+    },
+    {
+      "id": "density",
+      "minLevel": 1,
+      "maxLevel": 5
+    },
+    {
+      "id": "depth_strider",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "efficiency",
+      "minLevel": 1,
+      "maxLevel": 5
+    },
+    {
+      "id": "feather_falling",
+      "minLevel": 1,
+      "maxLevel": 4
+    },
+    {
+      "id": "fire_aspect",
+      "minLevel": 1,
+      "maxLevel": 2
+    },
+    {
+      "id": "fire_protection",
+      "minLevel": 1,
+      "maxLevel": 4
+    },
+    {
+      "id": "flame",
+      "minLevel": 1,
+      "maxLevel": 1
+    },
+    {
+      "id": "fortune",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "frost_walker",
+      "minLevel": 1,
+      "maxLevel": 2
+    },
+    {
+      "id": "impaling",
+      "minLevel": 1,
+      "maxLevel": 5
+    },
+    {
+      "id": "infinity",
+      "minLevel": 1,
+      "maxLevel": 1
+    },
+    {
+      "id": "knockback",
+      "minLevel": 1,
+      "maxLevel": 2
+    },
+    {
+      "id": "looting",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "loyalty",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "luck_of_the_sea",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "lure",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "mending",
+      "minLevel": 1,
+      "maxLevel": 1
+    },
+    {
+      "id": "multishot",
+      "minLevel": 1,
+      "maxLevel": 1
+    },
+    {
+      "id": "piercing",
+      "minLevel": 1,
+      "maxLevel": 4
+    },
+    {
+      "id": "power",
+      "minLevel": 1,
+      "maxLevel": 5
+    },
+    {
+      "id": "projectile_protection",
+      "minLevel": 1,
+      "maxLevel": 4
+    },
+    {
+      "id": "protection",
+      "minLevel": 1,
+      "maxLevel": 4
+    },
+    {
+      "id": "punch",
+      "minLevel": 1,
+      "maxLevel": 2
+    },
+    {
+      "id": "quick_charge",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "respiration",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "riptide",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "sharpness",
+      "minLevel": 1,
+      "maxLevel": 5
+    },
+    {
+      "id": "silk_touch",
+      "minLevel": 1,
+      "maxLevel": 1
+    },
+    {
+      "id": "smite",
+      "minLevel": 1,
+      "maxLevel": 5
+    },
+    {
+      "id": "soul_speed",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "swift_sneak",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "thorns",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "unbreaking",
+      "minLevel": 1,
+      "maxLevel": 3
+    },
+    {
+      "id": "wind_burst",
+      "minLevel": 1,
+      "maxLevel": 3
+    }
+  ]
+}
