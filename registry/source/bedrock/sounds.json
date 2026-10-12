@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "platform": "bedrock",
+  "coverage": "starter-subset-not-full",
+  "source": {
+    "kind": "manually-curated-seed",
+    "provider": "Mojang/bedrock-samples",
+    "url": "https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/sounds",
+    "note": "Run tools/update_audio_registry.cmd -Apply to replace with complete fetched catalog."
+  },
+  "notes": [
+    "Starter list only; unknown IDs never hard-block.",
+    "Updater validates official source and changes registry only after explicit -Apply."
+  ],
+  "entries": [
+    {
+      "id": "block.note_block.pling"
+    },
+    {
+      "id": "mob.villager.no"
+    },
+    {
+      "id": "mob.villager.yes"
+    },
+    {
+      "id": "note.bass"
+    },
+    {
+      "id": "note.harp"
+    },
+    {
+      "id": "note.pling"
+    },
+    {
+      "id": "random.anvil_use"
+    },
+    {
+      "id": "random.chestopen"
+    },
+    {
+      "id": "random.click"
+    },
+    {
+      "id": "random.explode"
+    },
+    {
+      "id": "random.levelup"
+    },
+    {
+      "id": "random.orb"
+    },
+    {
+      "id": "random.pop"
+    }
+  ]
+}

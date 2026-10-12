@@ -6,7 +6,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$GeneratorVersion = '15.0.0'
+$GeneratorVersion = '16.0.0'
 if ($ExpectedVersion -and $ExpectedVersion -ne $GeneratorVersion) {
     throw "Registry generator version mismatch. Expected $ExpectedVersion but found $GeneratorVersion."
 }
@@ -23,6 +23,8 @@ $FlatSpecs = @(
     [ordered]@{ Kind='blocks';    SourceDir=$SourceDir;  Namespace='MCFunctionBlockLibrary';    Prefix='block';    ReturnType='MCFunctionFields.BlockValue';    WrapPrefix='MCFunctionFields.block(';    WrapSuffix=')'; File='block_library.generated.ts' },
     [ordered]@{ Kind='entities';  SourceDir=$SourceDir;  Namespace='MCFunctionEntityLibrary';   Prefix='entity';   ReturnType='MCFunctionFields.EntityValue';   WrapPrefix='MCFunctionFields.entity(';   WrapSuffix=')'; File='entity_library.generated.ts' },
     [ordered]@{ Kind='effects';   SourceDir=$SourceDir;  Namespace='MCFunctionEffectLibrary';   Prefix='effect';   ReturnType='MCFunctionFields.EffectValue';   WrapPrefix='MCFunctionFields.effect(';   WrapSuffix=')'; File='effect_library.generated.ts' },
+    [ordered]@{ Kind='sounds';    SourceDir=$SourceDir;  Namespace='MCFunctionSoundLibrary'; Prefix='sound'; ReturnType='MCFunctionFields.SoundValue'; WrapPrefix='MCFunctionFields.sound('; WrapSuffix=')'; File='sound_library.generated.ts' },
+    [ordered]@{ Kind='music_tracks'; SourceDir=$SourceDir; Namespace='MCFunctionMusicLibrary'; Prefix='track'; ReturnType='MCFunctionFields.MusicTrackValue'; WrapPrefix='MCFunctionFields.musicTrack('; WrapSuffix=')'; File='music_library.generated.ts' },
     [ordered]@{ Kind='particles'; SourceDir=$SourceDir;  Namespace='MCFunctionParticleLibrary'; Prefix='particle'; ReturnType='MCFunctionFields.ParticleValue'; WrapPrefix='MCFunctionFields.particle('; WrapSuffix=')'; File='particle_library.generated.ts' },
     [ordered]@{ Kind='families';  SourceDir=$DerivedDir; Namespace='MCFunctionFamilyLibrary';   Prefix='family';   ReturnType='string';                         WrapPrefix='';                         WrapSuffix=''; File='family_library.generated.ts' }
 )
@@ -199,6 +201,17 @@ function Generate-FlatLibrary($Spec) {
         $Id = [string]$Entry.id
         $FunctionName = Get-FunctionName $Entry
         $BlockId = Get-BlockId $Spec.Kind $Id
+
+        # Audio dotted IDs can collide with underscore IDs after camel-casing
+        # or Blockly ID sanitization. Preserve existing registry IDs and add
+        # a deterministic, injective UTF-8-hex suffix only for audio collisions.
+        if ($Spec.Kind -eq 'sounds' -or $Spec.Kind -eq 'music_tracks') {
+            if ($UsedNames.ContainsKey($FunctionName) -or $UsedBlockIds.ContainsKey($BlockId)) {
+                $Hex = [System.BitConverter]::ToString([System.Text.Encoding]::UTF8.GetBytes($Id)).Replace('-', '').ToLowerInvariant()
+                if ($UsedNames.ContainsKey($FunctionName)) { $FunctionName += 'Id' + $Hex }
+                if ($UsedBlockIds.ContainsKey($BlockId)) { $BlockId += '_id_' + $Hex }
+            }
+        }
 
         if ($UsedNames.ContainsKey($FunctionName)) {
             throw "Function-name collision in $($Spec.Kind): ${FunctionName}: $($UsedNames[$FunctionName]) / $Id"
@@ -600,6 +613,8 @@ function Generate-RegistryLookup() {
         ' * - registry/source/bedrock/items.json',
         ' * - registry/source/bedrock/effects.json',
         ' * - registry/source/bedrock/particles.json',
+        ' * - registry/source/bedrock/sounds.json',
+        ' * - registry/source/bedrock/music_tracks.json',
         ' * Generator: tools/generate_registry.ps1',
         ' *',
         ' * Hidden runtime lookup used only by Definition Validation.',
@@ -614,7 +629,9 @@ function Generate-RegistryLookup() {
         [ordered]@{ Kind='entities'; Name='knownEntityIds' },
         [ordered]@{ Kind='items'; Name='knownItemIds' },
         [ordered]@{ Kind='effects'; Name='knownEffectIds' },
-        [ordered]@{ Kind='particles'; Name='knownParticleIds' }
+        [ordered]@{ Kind='particles'; Name='knownParticleIds' },
+        [ordered]@{ Kind='sounds'; Name='knownSoundIds' },
+        [ordered]@{ Kind='music_tracks'; Name='knownMusicTrackIds' }
     )
 
     foreach ($Lookup in $LookupKinds) {
@@ -674,6 +691,14 @@ function Generate-RegistryLookup() {
         '',
         '    export function isKnownEffect(value: string): boolean {',
         '        return containsSorted(knownEffectIds, value);',
+        '    }',
+        '',
+        '    export function isKnownSound(value: string): boolean {',
+        '        return containsSorted(knownSoundIds, value);',
+        '    }',
+        '',
+        '    export function isKnownMusicTrack(value: string): boolean {',
+        '        return containsSorted(knownMusicTrackIds, value);',
         '    }',
         '',
         '    export function isKnownParticle(value: string): boolean {',

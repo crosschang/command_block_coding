@@ -117,3 +117,18 @@ namespace MCFunctionFields {
         return new ParticleValue(particleId);
     }
 }
+
+/** Shared typed audio command inputs. */
+namespace MCFunctionFields {
+    export class SoundValue {
+        soundId: string;
+        constructor(soundId: string) { this.soundId = soundId; }
+    }
+    export function sound(soundId: string): SoundValue { return new SoundValue(soundId); }
+
+    export class MusicTrackValue {
+        trackId: string;
+        constructor(trackId: string) { this.trackId = trackId; }
+    }
+    export function musicTrack(trackId: string): MusicTrackValue { return new MusicTrackValue(trackId); }
+}

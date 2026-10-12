@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "platform": "bedrock",
+  "coverage": "starter-subset-not-full",
+  "source": {
+    "kind": "manually-curated-seed",
+    "provider": "Mojang/bedrock-samples",
+    "url": "https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/sounds",
+    "note": "Run tools/update_audio_registry.cmd -Apply to replace with complete fetched catalog."
+  },
+  "notes": [
+    "Starter list only; unknown IDs never hard-block.",
+    "Updater validates official source and changes registry only after explicit -Apply."
+  ],
+  "entries": [
+    {
+      "id": "music.game"
+    },
+    {
+      "id": "music.game.creative"
+    },
+    {
+      "id": "record.13"
+    },
+    {
+      "id": "record.blocks"
+    },
+    {
+      "id": "record.cat"
+    }
+  ]
+}

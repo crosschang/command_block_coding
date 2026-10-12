@@ -12,6 +12,28 @@ namespace MCFunctionBlocks {
         return MCFunctionAST.createParticleCommand(particleId, position);
     }
 
+    export function createPlaySoundCommand(
+        soundId: string, target?: MCFunctionAST.Selector,
+        position?: MCFunctionAST.Position, volume?: number,
+        pitch?: number, minimumVolume?: number
+    ): MCFunctionAST.PlaySoundCommand {
+        return MCFunctionAST.createPlaySoundCommand(soundId, target, position, volume, pitch, minimumVolume);
+    }
+
+    export function createStopSoundCommand(
+        target: MCFunctionAST.Selector, soundId?: string
+    ): MCFunctionAST.StopSoundCommand {
+        return MCFunctionAST.createStopSoundCommand(target, soundId);
+    }
+
+    export function createMusicCommand(
+        action: MCFunctionAST.MusicAction, trackId?: string,
+        volume?: number, fadeSeconds?: number,
+        repeatMode?: MCFunctionAST.MusicRepeatMode
+    ): MCFunctionAST.MusicCommand {
+        return MCFunctionAST.createMusicCommand(action, trackId, volume, fadeSeconds, repeatMode);
+    }
+
     export function createSayCommand(message: string): MCFunctionAST.SayCommand {
         return MCFunctionAST.createSayCommand(message);
     }

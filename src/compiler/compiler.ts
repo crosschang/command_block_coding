@@ -5,6 +5,15 @@ namespace MCFunctionCompiler {
             case MCFunctionAST.CommandKind.Raw:
                 return compileRaw(<MCFunctionAST.RawCommand>command);
 
+            case MCFunctionAST.CommandKind.PlaySound:
+                return compilePlaySound(<MCFunctionAST.PlaySoundCommand>command);
+
+            case MCFunctionAST.CommandKind.StopSound:
+                return compileStopSound(<MCFunctionAST.StopSoundCommand>command);
+
+            case MCFunctionAST.CommandKind.Music:
+                return compileMusic(<MCFunctionAST.MusicCommand>command);
+
             case MCFunctionAST.CommandKind.Particle:
                 return compileParticle(<MCFunctionAST.ParticleCommand>command);
 
@@ -60,6 +69,52 @@ namespace MCFunctionCompiler {
     function compileParticle(command: MCFunctionAST.ParticleCommand): string {
         let result = "particle " + command.particleId;
         if (command.position) result = result + " " + compilePosition(command.position);
+        return result;
+    }
+
+    /** Keep omitted optional args omitted until a later positional argument needs a default. */
+    function compilePlaySound(command: MCFunctionAST.PlaySoundCommand): string {
+        let result = "playsound " + command.soundId;
+        let needsTarget = command.target != undefined || command.position != undefined ||
+            command.volume != undefined || command.pitch != undefined || command.minimumVolume != undefined;
+        let needsPosition = command.position != undefined || command.volume != undefined ||
+            command.pitch != undefined || command.minimumVolume != undefined;
+        if (needsTarget) result += " " + (command.target ? compileSelector(command.target) : "@a");
+        if (needsPosition) result += " " + (command.position ? compilePosition(command.position) : "~ ~ ~");
+        if (command.volume != undefined || command.pitch != undefined || command.minimumVolume != undefined) {
+            result += " " + (command.volume == undefined ? "1" : command.volume);
+        }
+        if (command.pitch != undefined || command.minimumVolume != undefined) {
+            result += " " + (command.pitch == undefined ? "1" : command.pitch);
+        }
+        if (command.minimumVolume != undefined) result += " " + command.minimumVolume;
+        return result;
+    }
+
+    function compileStopSound(command: MCFunctionAST.StopSoundCommand): string {
+        let result = "stopsound " + compileSelector(command.target);
+        if (command.soundId != undefined) result += " " + command.soundId;
+        return result;
+    }
+
+    function compileMusic(command: MCFunctionAST.MusicCommand): string {
+        if (command.action == MCFunctionAST.MusicAction.Stop) {
+            return "music stop" + (command.fadeSeconds == undefined ? "" : " " + command.fadeSeconds);
+        }
+        if (command.action == MCFunctionAST.MusicAction.Volume) {
+            return "music volume " + command.volume;
+        }
+        let result = command.action == MCFunctionAST.MusicAction.Queue ? "music queue " : "music play ";
+        result += command.trackId;
+        if (command.volume != undefined || command.fadeSeconds != undefined || command.repeatMode != undefined) {
+            result += " " + (command.volume == undefined ? "1" : command.volume);
+        }
+        if (command.fadeSeconds != undefined || command.repeatMode != undefined) {
+            result += " " + (command.fadeSeconds == undefined ? "0" : command.fadeSeconds);
+        }
+        if (command.repeatMode != undefined) {
+            result += command.repeatMode == MCFunctionAST.MusicRepeatMode.Loop ? " loop" : " play_once";
+        }
         return result;
     }
 

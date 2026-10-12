@@ -18,7 +18,10 @@ namespace MCFunctionAST {
         SetBlock = 11,
         Fill = 12,
         Clone = 13,
-        Particle = 14
+        Particle = 14,
+        PlaySound = 15,
+        StopSound = 16,
+        Music = 17
     }
 
     export interface CommandNode {

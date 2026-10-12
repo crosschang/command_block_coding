@@ -11,7 +11,7 @@
  * .mcfunction output keeps the real `=` syntax.
  */
 //% color=#4C97FF weight=100 icon="\uf1b2"
-//% groups='["SETBLOCK", "FILL", "CLONE", "PARTICLE", "TAG", "GAMEMODE", "KILL", "CLEAR", "SUMMON", "EFFECT", "TELEPORT", "GIVE", "SAY", "FUNCTION", "RAW COMMAND"]'
+//% groups='["SETBLOCK", "FILL", "CLONE", "PARTICLE", "SOUND", "MUSIC", "TAG", "GAMEMODE", "KILL", "CLEAR", "SUMMON", "EFFECT", "TELEPORT", "GIVE", "SAY", "FUNCTION", "RAW COMMAND"]'
 namespace Command {
     function executeValidatedCommandNow(command: MCFunctionAST.CommandNode): void {
         let queryResult = MCFunctionPreview.tryHandleQuery(command);
@@ -58,6 +58,11 @@ namespace Command {
         }
 
         executeValidatedCommandNow(command);
+    }
+
+    /** Internal shared entry for audio blocks, preserving FunctionFile validation/capture. */
+    export function executeAudioCommand(command: MCFunctionAST.CommandNode): void {
+        executeCommand(command);
     }
 
     /** Execute a command line that is not yet represented by a structured block. */

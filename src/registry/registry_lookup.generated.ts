@@ -7,6 +7,8 @@
  * - registry/source/bedrock/items.json
  * - registry/source/bedrock/effects.json
  * - registry/source/bedrock/particles.json
+ * - registry/source/bedrock/sounds.json
+ * - registry/source/bedrock/music_tracks.json
  * Generator: tools/generate_registry.ps1
  *
  * Hidden runtime lookup used only by Definition Validation.
@@ -3192,6 +3194,30 @@ namespace MCFunctionRegistryLookup {
         "minecraft:yellow_poplar_leaves_particle",
     ];
 
+    let knownSoundIds: string[] = [
+        "block.note_block.pling",
+        "mob.villager.no",
+        "mob.villager.yes",
+        "note.bass",
+        "note.harp",
+        "note.pling",
+        "random.anvil_use",
+        "random.chestopen",
+        "random.click",
+        "random.explode",
+        "random.levelup",
+        "random.orb",
+        "random.pop",
+    ];
+
+    let knownMusicTrackIds: string[] = [
+        "music.game",
+        "music.game.creative",
+        "record.13",
+        "record.blocks",
+        "record.cat",
+    ];
+
     function normalizeVanillaId(value: string): string {
         if (!value) return value;
         if (value.indexOf(":") < 0) return "minecraft:" + value;
@@ -3235,6 +3261,14 @@ namespace MCFunctionRegistryLookup {
 
     export function isKnownEffect(value: string): boolean {
         return containsSorted(knownEffectIds, value);
+    }
+
+    export function isKnownSound(value: string): boolean {
+        return containsSorted(knownSoundIds, value);
+    }
+
+    export function isKnownMusicTrack(value: string): boolean {
+        return containsSorted(knownMusicTrackIds, value);
     }
 
     export function isKnownParticle(value: string): boolean {

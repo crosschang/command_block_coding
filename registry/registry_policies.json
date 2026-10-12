@@ -97,6 +97,28 @@
       "runtimeValidationReliability": "MEDIUM",
       "requiresNamespace": false
     },
+    "music_tracks": {
+      "customPolicy": "EXTENSIBLE_STRING_ID",
+      "sourceRole": "MUSIC_TRACK_EVENTS_FROM_VANILLA_RESOURCE_PACK",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "MEDIUM",
+      "requiresNamespace": false,
+      "notes": [
+        "Track Registry is distinct from the general Sound Registry.",
+        "Mojang music_definitions event_name and record.* sound entries are candidate tracks.",
+        "Unknown/add-on/forward-version track IDs remain authorable."
+      ]
+    },
+    "music_repeat_modes": {
+      "customPolicy": "VERSIONED_COMMAND_ENUM",
+      "sourceRole": "COMMAND_GRAMMAR_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true,
+      "documentedValues": ["play_once", "loop"]
+    },
     "gamerules": {
       "customPolicy": "VERSIONED_NATIVE_ENUM",
       "sourceRole": "COMMAND_TYPED_ENUM",

@@ -264,6 +264,96 @@ namespace MCFunctionValidator {
         return issues;
     }
 
+    /** Accept dotted Bedrock sound IDs and resource-pack custom identifiers. */
+    function isAudioIdToken(value: string): boolean {
+        if (!value || value.length == 0) return false;
+        let colons = 0;
+        for (let i = 0; i < value.length; i++) {
+            let c = value.charAt(i);
+            let allowed = (c >= "a" && c <= "z") || (c >= "0" && c <= "9") ||
+                c == "_" || c == "-" || c == "." || c == "/";
+            if (c == ":") {
+                colons++;
+                if (colons > 1 || i == 0 || i == value.length - 1) return false;
+            } else if (!allowed) return false;
+        }
+        return true;
+    }
+
+    function validateSoundId(value: string, issues: ValidationIssue[], prefix: string): void {
+        if (!isAudioIdToken(value)) {
+            addIssue(issues, ValidationLevel.Error, prefix + "_ID_INVALID", "Audio ID contains invalid characters or is empty.");
+        } else if (MCFunctionRegistryLookup.isCustomNamespace(value)) {
+            addIssue(issues, ValidationLevel.Info, prefix + "_ID_CUSTOM_NAMESPACE", "Custom audio ID " + value + " requires matching pack content.");
+        } else if (prefix == "SOUND" && !MCFunctionRegistryLookup.isKnownSound(value)) {
+            addIssue(issues, ValidationLevel.Warning, "SOUND_ID_UNKNOWN", "Sound " + value + " is not in the current Sound Registry; audio content or version may differ.");
+        } else if (prefix == "MUSIC" && !MCFunctionRegistryLookup.isKnownMusicTrack(value)) {
+            addIssue(issues, ValidationLevel.Warning, "MUSIC_ID_UNKNOWN", "Music track " + value + " is not in the current Music Registry; audio content or version may differ.");
+        }
+    }
+
+    function validateAudioNumber(issues: ValidationIssue[], value: number, name: string, min: number, max: number): void {
+        if (value == undefined) return;
+        if (!(value >= min && value <= max)) {
+            addIssue(issues, ValidationLevel.Error, name + "_OUT_OF_RANGE", name + " must be a finite number between " + min + " and " + max + ".");
+        }
+    }
+
+    export function validatePlaySoundCommand(command: MCFunctionAST.PlaySoundCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        validateSoundId(command.soundId, issues, "SOUND");
+        if (command.target) appendIssues(issues, validateSelector(command.target));
+        if (command.position) appendIssues(issues, validatePosition(command.position));
+        validateAudioNumber(issues, command.volume, "SOUND_VOLUME", 0, 1);
+        validateAudioNumber(issues, command.pitch, "SOUND_PITCH", 0, 256);
+        validateAudioNumber(issues, command.minimumVolume, "SOUND_MIN_VOLUME", 0, 1);
+        return issues;
+    }
+
+    export function validateStopSoundCommand(command: MCFunctionAST.StopSoundCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (!command.target) {
+            addIssue(issues, ValidationLevel.Error, "STOPSOUND_TARGET_MISSING", "STOPSOUND requires a player target.");
+        } else appendIssues(issues, validateSelector(command.target));
+        if (command.soundId != undefined) validateSoundId(command.soundId, issues, "SOUND");
+        return issues;
+    }
+
+    export function validateMusicCommand(command: MCFunctionAST.MusicCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (command.action == MCFunctionAST.MusicAction.Play || command.action == MCFunctionAST.MusicAction.Queue) {
+            validateSoundId(command.trackId, issues, "MUSIC");
+            if (command.repeatMode != undefined &&
+                command.repeatMode != MCFunctionAST.MusicRepeatMode.PlayOnce &&
+                command.repeatMode != MCFunctionAST.MusicRepeatMode.Loop) {
+                addIssue(issues, ValidationLevel.Error, "MUSIC_REPEAT_INVALID", "Music repeat must be play_once or loop.");
+            }
+        } else if (command.action != MCFunctionAST.MusicAction.Stop && command.action != MCFunctionAST.MusicAction.Volume) {
+            addIssue(issues, ValidationLevel.Error, "MUSIC_ACTION_INVALID", "Unknown music action.");
+        }
+        if (command.action == MCFunctionAST.MusicAction.Volume && command.volume == undefined) {
+            addIssue(issues, ValidationLevel.Error, "MUSIC_VOLUME_MISSING", "MUSIC VOLUME requires a numeric value.");
+        }
+        if (command.action == MCFunctionAST.MusicAction.Stop &&
+            (command.trackId != undefined || command.volume != undefined || command.repeatMode != undefined)) {
+            addIssue(issues, ValidationLevel.Error, "MUSIC_STOP_EXTRA_ARGUMENT", "MUSIC STOP accepts only optional fade seconds.");
+        }
+        if (command.action == MCFunctionAST.MusicAction.Volume &&
+            (command.trackId != undefined || command.fadeSeconds != undefined || command.repeatMode != undefined)) {
+            addIssue(issues, ValidationLevel.Error, "MUSIC_VOLUME_EXTRA_ARGUMENT", "MUSIC VOLUME accepts only a volume value.");
+        }
+        // Conservative compile-time ranges; Minecraft performs final target/version checks.
+        // /music docs specify a float but do not publish a universal maximum.
+        // Do not hard-block future/target-specific numeric values by assuming one.
+        if (command.volume != undefined && !(command.volume >= 0 && (command.volume - command.volume) == 0)) {
+            addIssue(issues, ValidationLevel.Error, "MUSIC_VOLUME_INVALID", "Music volume must be a finite nonnegative number.");
+        }
+        if (command.fadeSeconds != undefined && !(command.fadeSeconds >= 0 && (command.fadeSeconds - command.fadeSeconds) == 0)) {
+            addIssue(issues, ValidationLevel.Error, "MUSIC_FADE_INVALID", "Music fade seconds must be a finite nonnegative number.");
+        }
+        return issues;
+    }
+
     function validateBlockRegistryId(
         blockId: string,
         issues: ValidationIssue[]
@@ -1352,6 +1442,15 @@ namespace MCFunctionValidator {
             }
         }
 
+        if (command.kind == MCFunctionAST.CommandKind.PlaySound) {
+            appendIssues(issues, validatePlaySoundCommand(<MCFunctionAST.PlaySoundCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.StopSound) {
+            appendIssues(issues, validateStopSoundCommand(<MCFunctionAST.StopSoundCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Music) {
+            appendIssues(issues, validateMusicCommand(<MCFunctionAST.MusicCommand>command));
+        }
         if (command.kind == MCFunctionAST.CommandKind.Particle) {
             appendIssues(issues, validateParticleCommand(<MCFunctionAST.ParticleCommand>command));
         }
