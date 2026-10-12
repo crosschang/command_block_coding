@@ -27,6 +27,22 @@ namespace MCFunctionPreview {
         command: MCFunctionAST.CommandNode,
         success: boolean
     ): void {
+        // Only successful world changes are recorded, never mere attempts.
+        if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
+            if (!success) return;
+            let rule = <MCFunctionAST.GameRuleCommand>command;
+            let value = "";
+            if (rule.action == MCFunctionAST.GameRuleAction.SetBoolean) {
+                value = rule.booleanValue ? "true" : "false";
+            } else if (rule.action == MCFunctionAST.GameRuleAction.SetInteger) {
+                value = "" + rule.integerValue;
+            } else if (rule.action == MCFunctionAST.GameRuleAction.SetEnum) {
+                value = rule.enumValue;
+            }
+            if (value.length > 0) rememberSuccessfulGameRuleSet(rule.ruleId, value);
+            return;
+        }
+
         if (command.kind != MCFunctionAST.CommandKind.Tag) return;
 
         let tagCommand = <MCFunctionAST.TagCommand>command;
@@ -44,6 +60,9 @@ namespace MCFunctionPreview {
     export function tryHandleQuery(
         command: MCFunctionAST.CommandNode
     ): QueryResult {
+        if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
+            return handleGameRulePreview(<MCFunctionAST.GameRuleCommand>command);
+        }
         if (command.kind != MCFunctionAST.CommandKind.Tag) {
             return unhandledQuery();
         }
@@ -54,6 +73,69 @@ namespace MCFunctionPreview {
         }
 
         return executeTagListQuery(tagCommand);
+    }
+
+    /**
+     * The MakeCode API returns only a boolean from player.execute(); it cannot
+     * read current gamerule values or capture /gamerule text output. Never fake
+     * a live value, and never use a Java-edition-only execute store workaround.
+     * Bedrock/Education canonical AST and export remain unchanged.
+     */
+    function handleGameRulePreview(command: MCFunctionAST.GameRuleCommand): QueryResult {
+        if (command.action == MCFunctionAST.GameRuleAction.Query) {
+            let last = getLastSetGameRuleValue(command.ruleId);
+            if (last.length > 0) {
+                previewSay("GAMERULE " + command.ruleId + " last set by this Preview: " + last +
+                    " (SESSION_KNOWN, NOT live). Current value: type /gamerule " + command.ruleId + " in game chat.");
+                return handledQuery(QueryConfidence.SessionKnown, "last successful Preview set, not live state");
+            }
+            previewSay("GAMERULE " + command.ruleId +
+                " live value cannot be read by player.execute(). Type /gamerule " +
+                command.ruleId + " in game chat.");
+            return handledQuery(QueryConfidence.Unavailable, "live gamerule value unavailable");
+        }
+        if (command.action == MCFunctionAST.GameRuleAction.List) {
+            let names = MCFunctionGameruleRegistry.knownRuleIds();
+            previewSay("GAMERULE Registry: " + names.length +
+                " Bedrock-defined names (NOT current world values). For live values, type /gamerule in game chat.");
+            // A type-labelled catalog; split to avoid oversized chat lines.
+            printGameRuleCatalog(names, 1, "Boolean");
+            printGameRuleCatalog(names, 2, "Integer");
+            printGameRuleCatalog(names, 3, "Enum");
+            let changed = getPreviewSetGameRuleIds();
+            if (changed.length > 0) {
+                previewSay("GAMERULE session-known: last successful sets below (NOT live world state).");
+                for (let i = 0; i < changed.length; i++) {
+                    previewSay(changed[i] + " = " + getLastSetGameRuleValue(changed[i]) + " (last Preview set)");
+                }
+            }
+            return handledQuery(QueryConfidence.Partial, "Registry names and optional session-known sets, not live values");
+        }
+        if (command.action == MCFunctionAST.GameRuleAction.SetEnum &&
+            command.ruleId == "playerwaypoints") {
+            // Minecraft Education 26.32 chat succeeds; player.execute rejects this
+            // rule name. Preserve the command, but do not claim a successful set.
+            previewSay("GAMERULE playerwaypoints: Education 26.32 player.execute() rejected this syntax. " +
+                "Use direct game chat: /gamerule playerwaypoints " + command.enumValue +
+                ". Canonical command is unchanged.");
+            return handledQuery(QueryConfidence.Unavailable, "playerwaypoints Preview compatibility limitation");
+        }
+        return unhandledQuery();
+    }
+
+    function printGameRuleCatalog(ids: string[], valueKind: number, typeLabel: string): void {
+        let line = "";
+        for (let i = 0; i < ids.length; i++) {
+            if (MCFunctionGameruleRegistry.valueKindOf(ids[i]) != valueKind) continue;
+            let candidate = line.length == 0 ? ids[i] : line + ", " + ids[i];
+            if (candidate.length > 112) {
+                previewSay("GAMERULE " + typeLabel + ": " + line);
+                line = ids[i];
+            } else {
+                line = candidate;
+            }
+        }
+        if (line.length > 0) previewSay("GAMERULE " + typeLabel + ": " + line);
     }
 
     function executeTagListQuery(

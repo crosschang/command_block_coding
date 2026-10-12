@@ -45,6 +45,49 @@ namespace MCFunctionGameruleRegistry {
         if (ruleId == "tntexplosiondropdecay") return 1;
         return 0;
     }
+    /** Search/list catalog only. Runtime world values are not available here. */
+    export function knownRuleIds(): string[] {
+        return [
+            "commandblockoutput",
+            "commandblocksenabled",
+            "dodaylightcycle",
+            "doentitydrops",
+            "dofiretick",
+            "doimmediaterespawn",
+            "doinsomnia",
+            "dolimitedcrafting",
+            "domobloot",
+            "domobspawning",
+            "dotiledrops",
+            "doweathercycle",
+            "drowningdamage",
+            "falldamage",
+            "firedamage",
+            "freezedamage",
+            "functioncommandlimit",
+            "keepinventory",
+            "maxcommandchainlength",
+            "mobgriefing",
+            "naturalregeneration",
+            "playerssleepingpercentage",
+            "playerwaypoints",
+            "projectilescanbreakblocks",
+            "pvp",
+            "randomtickspeed",
+            "recipesunlock",
+            "respawnblocksexplode",
+            "sendcommandfeedback",
+            "showbordereffect",
+            "showcoordinates",
+            "showdaysplayed",
+            "showdeathmessages",
+            "showrecipemessages",
+            "showtags",
+            "spawnradius",
+            "tntexplodes",
+            "tntexplosiondropdecay",
+        ];
+    }
     export function isDocumentedEnumValue(ruleId: string, value: string): boolean {
         if (ruleId == "playerwaypoints") return value == "everyone" || value == "off";
         return true;
