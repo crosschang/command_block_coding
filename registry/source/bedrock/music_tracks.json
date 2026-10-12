@@ -1,32 +1,190 @@
 {
-  "schemaVersion": 1,
-  "platform": "bedrock",
-  "coverage": "starter-subset-not-full",
-  "source": {
-    "kind": "manually-curated-seed",
-    "provider": "Mojang/bedrock-samples",
-    "url": "https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/sounds",
-    "note": "Run tools/update_audio_registry.cmd -Apply to replace with complete fetched catalog."
-  },
-  "notes": [
-    "Starter list only; unknown IDs never hard-block.",
-    "Updater validates official source and changes registry only after explicit -Apply."
-  ],
-  "entries": [
-    {
-      "id": "music.game"
-    },
-    {
-      "id": "music.game.creative"
-    },
-    {
-      "id": "record.13"
-    },
-    {
-      "id": "record.blocks"
-    },
-    {
-      "id": "record.cat"
-    }
-  ]
+    "schemaVersion":  1,
+    "platform":  "bedrock",
+    "coverage":  "mojang-resource-pack-current-at-fetch",
+    "source":  {
+                   "kind":  "music-definitions-events-plus-record-sounds",
+                   "provider":  "Mojang/bedrock-samples",
+                   "urls":  [
+                                "https://raw.githubusercontent.com/Mojang/bedrock-samples/main/resource_pack/sounds/music_definitions.json",
+                                "https://raw.githubusercontent.com/Mojang/bedrock-samples/main/resource_pack/sounds/sound_definitions.json"
+                            ],
+                   "fetchedAtUtc":  "2026-10-12T10:02:02.5500887Z"
+               },
+    "notes":  [
+                  "This file lists content from the upstream sample resource pack, not a guarantee that each ID works in the installed Minecraft Education release.",
+                  "Unknown/custom IDs are kept as authorable Direct Input values.",
+                  "Do not hand-edit generated TypeScript; use the generator.",
+                  "Observed Education IDs not present in upstream remain separately annotated, never relabeled as official Mojang entries."
+              ],
+    "entries":  [
+                    {
+                        "id":  "music.game"
+                    },
+                    {
+                        "id":  "music.game.basalt_deltas"
+                    },
+                    {
+                        "id":  "music.game.creative"
+                    },
+                    {
+                        "id":  "music.game.credits"
+                    },
+                    {
+                        "id":  "music.game.crimson_forest"
+                    },
+                    {
+                        "id":  "music.game.end"
+                    },
+                    {
+                        "id":  "music.game.endboss"
+                    },
+                    {
+                        "id":  "music.game.frozen_peaks"
+                    },
+                    {
+                        "id":  "music.game.meadow"
+                    },
+                    {
+                        "id":  "music.game.nether"
+                    },
+                    {
+                        "id":  "music.game.nether_wastes"
+                    },
+                    {
+                        "id":  "music.game.soulsand_valley"
+                    },
+                    {
+                        "id":  "music.game.swamp_music"
+                    },
+                    {
+                        "id":  "music.game.water"
+                    },
+                    {
+                        "id":  "music.game_and_wild_equal_chance"
+                    },
+                    {
+                        "id":  "music.game_and_wild_favor_game"
+                    },
+                    {
+                        "id":  "music.menu"
+                    },
+                    {
+                        "id":  "music.overworld.bamboo_jungle"
+                    },
+                    {
+                        "id":  "music.overworld.cherry_grove"
+                    },
+                    {
+                        "id":  "music.overworld.deep_dark"
+                    },
+                    {
+                        "id":  "music.overworld.desert"
+                    },
+                    {
+                        "id":  "music.overworld.dripstone_caves"
+                    },
+                    {
+                        "id":  "music.overworld.flower_forest"
+                    },
+                    {
+                        "id":  "music.overworld.forest"
+                    },
+                    {
+                        "id":  "music.overworld.grove"
+                    },
+                    {
+                        "id":  "music.overworld.jagged_peaks"
+                    },
+                    {
+                        "id":  "music.overworld.jungle"
+                    },
+                    {
+                        "id":  "music.overworld.jungle_edge"
+                    },
+                    {
+                        "id":  "music.overworld.lush_caves"
+                    },
+                    {
+                        "id":  "music.overworld.mesa"
+                    },
+                    {
+                        "id":  "music.overworld.old_growth_taiga"
+                    },
+                    {
+                        "id":  "music.overworld.snowy_slopes"
+                    },
+                    {
+                        "id":  "music.overworld.stony_peaks"
+                    },
+                    {
+                        "id":  "music.overworld.sulfur_caves"
+                    },
+                    {
+                        "id":  "record.11"
+                    },
+                    {
+                        "id":  "record.13"
+                    },
+                    {
+                        "id":  "record.5"
+                    },
+                    {
+                        "id":  "record.blocks"
+                    },
+                    {
+                        "id":  "record.bounce"
+                    },
+                    {
+                        "id":  "record.cat"
+                    },
+                    {
+                        "id":  "record.chirp"
+                    },
+                    {
+                        "id":  "record.creator"
+                    },
+                    {
+                        "id":  "record.creator_music_box"
+                    },
+                    {
+                        "id":  "record.far"
+                    },
+                    {
+                        "id":  "record.lava_chicken"
+                    },
+                    {
+                        "id":  "record.mall"
+                    },
+                    {
+                        "id":  "record.mellohi"
+                    },
+                    {
+                        "id":  "record.otherside"
+                    },
+                    {
+                        "id":  "record.pigstep"
+                    },
+                    {
+                        "id":  "record.precipice"
+                    },
+                    {
+                        "id":  "record.relic"
+                    },
+                    {
+                        "id":  "record.stal"
+                    },
+                    {
+                        "id":  "record.strad"
+                    },
+                    {
+                        "id":  "record.tears"
+                    },
+                    {
+                        "id":  "record.wait"
+                    },
+                    {
+                        "id":  "record.ward"
+                    }
+                ]
 }

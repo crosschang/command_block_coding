@@ -235,3 +235,22 @@ custom/unknown owner relation
 
 `spawnRecommended` is not a command-validity whitelist. It is versioned authoring metadata.
 Minecraft Runtime remains the final authority.
+
+
+## 0.0.42 typed Gamerule native enum
+
+Registry source is `registry/source/bedrock/gamerules.json` (Microsoft Creator official Bedrock stable command enum as of 2026-10-12). It contains 32 Boolean, 5 Integer, and 1 special Enum (`playerwaypoints`) entries. The enum is Mojang-owned and *versioned*: `VERSIONED_NATIVE_ENUM`; it is **not** an Add-on Custom ID mechanism. Unknown syntactically valid native names must remain authorable as Direct Input with WARNING for future platform/version support.
+
+Source JSON → `tools/generate_registry.ps1` → `src/libraries/gamerule_library.generated.ts` and `src/registry/gamerule_registry.generated.ts`. To check without rewriting:
+
+```cmd
+tools\generate_registry.cmd -Check
+```
+
+Boolean/Integer/Enum have distinct action reporters; `GAMERULE` is one public statement block, with query/list reporters. Invalid typed values block function registration, but unknown names do not. `playerwaypoints` on Minecraft Education 26.32 remains Runtime **PENDING**; Bedrock official metadata alone does not prove Education support.
+
+For an official Mojang update, preserve the prior Registry snapshot under `registry/versions/`, compare additions/removals and value-kind changes, verify against official Creator source, update current JSON, then regenerate. A fully automated version-migration utility has **not** been implemented here.
+
+### 0.0.41 Sound / Music observations
+
+The starter Sound Registry adds `record.cat` and the starter Music Registry adds `record.11` based on 2026-10-12 Minecraft Education listening reports. These entries carry `verifiedBy` metadata and are **not** labeled as all-version official catalog support. `update_audio_registry.ps1 -Apply` preserves those annotated runtime observations if missing from an upstream download, while the authoritative Mojang catalog is still fetched and validated separately.

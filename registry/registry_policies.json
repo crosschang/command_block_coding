@@ -130,7 +130,8 @@
       "commandUsable": true,
       "addonAuthoringOnly": false,
       "runtimeValidationReliability": "HIGH",
-      "versionedByTarget": true
+      "versionedByTarget": true,
+      "implementationStatus": "TYPED_REGISTRY_AND_COMMAND_0.0.42"
     },
     "enchantments": {
       "customPolicy": "VERSIONED_NATIVE_ENUM",

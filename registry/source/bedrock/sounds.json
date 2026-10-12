@@ -1,56 +1,5574 @@
 {
-  "schemaVersion": 1,
-  "platform": "bedrock",
-  "coverage": "starter-subset-not-full",
-  "source": {
-    "kind": "manually-curated-seed",
-    "provider": "Mojang/bedrock-samples",
-    "url": "https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/sounds",
-    "note": "Run tools/update_audio_registry.cmd -Apply to replace with complete fetched catalog."
-  },
-  "notes": [
-    "Starter list only; unknown IDs never hard-block.",
-    "Updater validates official source and changes registry only after explicit -Apply."
-  ],
-  "entries": [
-    {
-      "id": "block.note_block.pling"
-    },
-    {
-      "id": "mob.villager.no"
-    },
-    {
-      "id": "mob.villager.yes"
-    },
-    {
-      "id": "note.bass"
-    },
-    {
-      "id": "note.harp"
-    },
-    {
-      "id": "note.pling"
-    },
-    {
-      "id": "random.anvil_use"
-    },
-    {
-      "id": "random.chestopen"
-    },
-    {
-      "id": "random.click"
-    },
-    {
-      "id": "random.explode"
-    },
-    {
-      "id": "random.levelup"
-    },
-    {
-      "id": "random.orb"
-    },
-    {
-      "id": "random.pop"
-    }
-  ]
+    "schemaVersion":  1,
+    "platform":  "bedrock",
+    "coverage":  "mojang-resource-pack-current-at-fetch",
+    "source":  {
+                   "kind":  "resource-pack-sound-definitions",
+                   "provider":  "Mojang/bedrock-samples",
+                   "urls":  [
+                                "https://raw.githubusercontent.com/Mojang/bedrock-samples/main/resource_pack/sounds/sound_definitions.json"
+                            ],
+                   "fetchedAtUtc":  "2026-10-12T10:02:02.5240292Z"
+               },
+    "notes":  [
+                  "This file lists content from the upstream sample resource pack, not a guarantee that each ID works in the installed Minecraft Education release.",
+                  "Unknown/custom IDs are kept as authorable Direct Input values.",
+                  "Do not hand-edit generated TypeScript; use the generator.",
+                  "Observed Education IDs not present in upstream remain separately annotated, never relabeled as official Mojang entries."
+              ],
+    "entries":  [
+                    {
+                        "id":  "ambient.basalt_deltas.additions"
+                    },
+                    {
+                        "id":  "ambient.basalt_deltas.loop"
+                    },
+                    {
+                        "id":  "ambient.basalt_deltas.mood"
+                    },
+                    {
+                        "id":  "ambient.candle"
+                    },
+                    {
+                        "id":  "ambient.cave"
+                    },
+                    {
+                        "id":  "ambient.crimson_forest.additions"
+                    },
+                    {
+                        "id":  "ambient.crimson_forest.loop"
+                    },
+                    {
+                        "id":  "ambient.crimson_forest.mood"
+                    },
+                    {
+                        "id":  "ambient.nether_wastes.additions"
+                    },
+                    {
+                        "id":  "ambient.nether_wastes.loop"
+                    },
+                    {
+                        "id":  "ambient.nether_wastes.mood"
+                    },
+                    {
+                        "id":  "ambient.soulsand_valley.additions"
+                    },
+                    {
+                        "id":  "ambient.soulsand_valley.loop"
+                    },
+                    {
+                        "id":  "ambient.soulsand_valley.mood"
+                    },
+                    {
+                        "id":  "ambient.underwater.additions"
+                    },
+                    {
+                        "id":  "ambient.underwater.enter"
+                    },
+                    {
+                        "id":  "ambient.underwater.exit"
+                    },
+                    {
+                        "id":  "ambient.underwater.loop"
+                    },
+                    {
+                        "id":  "ambient.warped_forest.additions"
+                    },
+                    {
+                        "id":  "ambient.warped_forest.loop"
+                    },
+                    {
+                        "id":  "ambient.warped_forest.mood"
+                    },
+                    {
+                        "id":  "ambient.weather.lightning.impact"
+                    },
+                    {
+                        "id":  "ambient.weather.rain"
+                    },
+                    {
+                        "id":  "ambient.weather.the_end_light_flash"
+                    },
+                    {
+                        "id":  "ambient.weather.thunder"
+                    },
+                    {
+                        "id":  "apply_effect.bad_omen"
+                    },
+                    {
+                        "id":  "apply_effect.raid_omen"
+                    },
+                    {
+                        "id":  "apply_effect.trial_omen"
+                    },
+                    {
+                        "id":  "armor.break_wolf"
+                    },
+                    {
+                        "id":  "armor.crack_wolf"
+                    },
+                    {
+                        "id":  "armor.damage_wolf"
+                    },
+                    {
+                        "id":  "armor.equip_chain"
+                    },
+                    {
+                        "id":  "armor.equip_copper"
+                    },
+                    {
+                        "id":  "armor.equip_diamond"
+                    },
+                    {
+                        "id":  "armor.equip_elytra"
+                    },
+                    {
+                        "id":  "armor.equip_generic"
+                    },
+                    {
+                        "id":  "armor.equip_gold"
+                    },
+                    {
+                        "id":  "armor.equip_iron"
+                    },
+                    {
+                        "id":  "armor.equip_leather"
+                    },
+                    {
+                        "id":  "armor.equip_netherite"
+                    },
+                    {
+                        "id":  "armor.equip_wolf"
+                    },
+                    {
+                        "id":  "armor.repair_wolf"
+                    },
+                    {
+                        "id":  "armor.unequip_wolf"
+                    },
+                    {
+                        "id":  "beacon.activate"
+                    },
+                    {
+                        "id":  "beacon.ambient"
+                    },
+                    {
+                        "id":  "beacon.deactivate"
+                    },
+                    {
+                        "id":  "beacon.power"
+                    },
+                    {
+                        "id":  "block.bamboo.break"
+                    },
+                    {
+                        "id":  "block.bamboo.fall"
+                    },
+                    {
+                        "id":  "block.bamboo.hit"
+                    },
+                    {
+                        "id":  "block.bamboo.place"
+                    },
+                    {
+                        "id":  "block.bamboo.step"
+                    },
+                    {
+                        "id":  "block.bamboo_sapling.break"
+                    },
+                    {
+                        "id":  "block.bamboo_sapling.place"
+                    },
+                    {
+                        "id":  "block.barrel.close"
+                    },
+                    {
+                        "id":  "block.barrel.open"
+                    },
+                    {
+                        "id":  "block.beehive.drip"
+                    },
+                    {
+                        "id":  "block.beehive.enter"
+                    },
+                    {
+                        "id":  "block.beehive.exit"
+                    },
+                    {
+                        "id":  "block.beehive.shear"
+                    },
+                    {
+                        "id":  "block.beehive.work"
+                    },
+                    {
+                        "id":  "block.bell.hit"
+                    },
+                    {
+                        "id":  "block.blastfurnace.fire_crackle"
+                    },
+                    {
+                        "id":  "block.bowhit"
+                    },
+                    {
+                        "id":  "block.cactus_flower.break"
+                    },
+                    {
+                        "id":  "block.cactus_flower.place"
+                    },
+                    {
+                        "id":  "block.campfire.crackle"
+                    },
+                    {
+                        "id":  "block.cartography_table.use"
+                    },
+                    {
+                        "id":  "block.cave_vines.place"
+                    },
+                    {
+                        "id":  "block.chorusflower.death"
+                    },
+                    {
+                        "id":  "block.chorusflower.grow"
+                    },
+                    {
+                        "id":  "block.cinnabar.break"
+                    },
+                    {
+                        "id":  "block.cinnabar.fall"
+                    },
+                    {
+                        "id":  "block.cinnabar.hit"
+                    },
+                    {
+                        "id":  "block.cinnabar.place"
+                    },
+                    {
+                        "id":  "block.cinnabar.step"
+                    },
+                    {
+                        "id":  "block.click"
+                    },
+                    {
+                        "id":  "block.composter.empty"
+                    },
+                    {
+                        "id":  "block.composter.fill"
+                    },
+                    {
+                        "id":  "block.composter.fill_success"
+                    },
+                    {
+                        "id":  "block.composter.ready"
+                    },
+                    {
+                        "id":  "block.copper_bulb.turn_off"
+                    },
+                    {
+                        "id":  "block.copper_bulb.turn_on"
+                    },
+                    {
+                        "id":  "block.copper_chest.closed"
+                    },
+                    {
+                        "id":  "block.copper_chest.open"
+                    },
+                    {
+                        "id":  "block.copper_chest.oxidized.closed"
+                    },
+                    {
+                        "id":  "block.copper_chest.oxidized.open"
+                    },
+                    {
+                        "id":  "block.copper_chest.weathered.closed"
+                    },
+                    {
+                        "id":  "block.copper_chest.weathered.open"
+                    },
+                    {
+                        "id":  "block.copper_golem_statue.break"
+                    },
+                    {
+                        "id":  "block.copper_golem_statue.fall"
+                    },
+                    {
+                        "id":  "block.copper_golem_statue.hit"
+                    },
+                    {
+                        "id":  "block.copper_golem_statue.place"
+                    },
+                    {
+                        "id":  "block.copper_golem_statue.step"
+                    },
+                    {
+                        "id":  "block.creaking_heart.ambient"
+                    },
+                    {
+                        "id":  "block.creaking_heart.break"
+                    },
+                    {
+                        "id":  "block.creaking_heart.fall"
+                    },
+                    {
+                        "id":  "block.creaking_heart.hit"
+                    },
+                    {
+                        "id":  "block.creaking_heart.place"
+                    },
+                    {
+                        "id":  "block.creaking_heart.spawn_mob"
+                    },
+                    {
+                        "id":  "block.creaking_heart.step"
+                    },
+                    {
+                        "id":  "block.creaking_heart.trail"
+                    },
+                    {
+                        "id":  "block.deadbush.ambient"
+                    },
+                    {
+                        "id":  "block.decorated_pot.insert"
+                    },
+                    {
+                        "id":  "block.decorated_pot.insert_fail"
+                    },
+                    {
+                        "id":  "block.dried_ghast.ambient"
+                    },
+                    {
+                        "id":  "block.dried_ghast.ambient_water"
+                    },
+                    {
+                        "id":  "block.dried_ghast.break"
+                    },
+                    {
+                        "id":  "block.dried_ghast.fall"
+                    },
+                    {
+                        "id":  "block.dried_ghast.place"
+                    },
+                    {
+                        "id":  "block.dried_ghast.place_in_water"
+                    },
+                    {
+                        "id":  "block.dried_ghast.state_change"
+                    },
+                    {
+                        "id":  "block.dried_ghast.step"
+                    },
+                    {
+                        "id":  "block.dry_grass.ambient.attached"
+                    },
+                    {
+                        "id":  "block.enchanting_table.use"
+                    },
+                    {
+                        "id":  "block.end_portal.spawn"
+                    },
+                    {
+                        "id":  "block.end_portal_frame.fill"
+                    },
+                    {
+                        "id":  "block.eyeblossom.ambient"
+                    },
+                    {
+                        "id":  "block.eyeblossom.close"
+                    },
+                    {
+                        "id":  "block.eyeblossom.close_long"
+                    },
+                    {
+                        "id":  "block.eyeblossom.open"
+                    },
+                    {
+                        "id":  "block.eyeblossom.open_long"
+                    },
+                    {
+                        "id":  "block.false_permissions"
+                    },
+                    {
+                        "id":  "block.firefly_bush.ambient"
+                    },
+                    {
+                        "id":  "block.furnace.lit"
+                    },
+                    {
+                        "id":  "block.grindstone.use"
+                    },
+                    {
+                        "id":  "block.itemframe.add_item"
+                    },
+                    {
+                        "id":  "block.itemframe.break"
+                    },
+                    {
+                        "id":  "block.itemframe.place"
+                    },
+                    {
+                        "id":  "block.itemframe.remove_item"
+                    },
+                    {
+                        "id":  "block.itemframe.rotate_item"
+                    },
+                    {
+                        "id":  "block.lantern.break"
+                    },
+                    {
+                        "id":  "block.lantern.fall"
+                    },
+                    {
+                        "id":  "block.lantern.hit"
+                    },
+                    {
+                        "id":  "block.lantern.place"
+                    },
+                    {
+                        "id":  "block.lantern.step"
+                    },
+                    {
+                        "id":  "block.leaf_litter.break"
+                    },
+                    {
+                        "id":  "block.leaf_litter.place"
+                    },
+                    {
+                        "id":  "block.leaf_litter.step"
+                    },
+                    {
+                        "id":  "block.loom.use"
+                    },
+                    {
+                        "id":  "block.mangrove_roots.break"
+                    },
+                    {
+                        "id":  "block.mangrove_roots.fall"
+                    },
+                    {
+                        "id":  "block.mangrove_roots.hit"
+                    },
+                    {
+                        "id":  "block.mangrove_roots.place"
+                    },
+                    {
+                        "id":  "block.mangrove_roots.step"
+                    },
+                    {
+                        "id":  "block.mob_spawner.break"
+                    },
+                    {
+                        "id":  "block.mob_spawner.place"
+                    },
+                    {
+                        "id":  "block.mob_spawner.step"
+                    },
+                    {
+                        "id":  "block.mud.break"
+                    },
+                    {
+                        "id":  "block.mud.fall"
+                    },
+                    {
+                        "id":  "block.mud.hit"
+                    },
+                    {
+                        "id":  "block.mud.place"
+                    },
+                    {
+                        "id":  "block.mud.step"
+                    },
+                    {
+                        "id":  "block.mud_bricks.break"
+                    },
+                    {
+                        "id":  "block.mud_bricks.fall"
+                    },
+                    {
+                        "id":  "block.mud_bricks.hit"
+                    },
+                    {
+                        "id":  "block.mud_bricks.place"
+                    },
+                    {
+                        "id":  "block.mud_bricks.step"
+                    },
+                    {
+                        "id":  "block.muddy_mangrove_roots.break"
+                    },
+                    {
+                        "id":  "block.muddy_mangrove_roots.fall"
+                    },
+                    {
+                        "id":  "block.muddy_mangrove_roots.hit"
+                    },
+                    {
+                        "id":  "block.muddy_mangrove_roots.place"
+                    },
+                    {
+                        "id":  "block.muddy_mangrove_roots.step"
+                    },
+                    {
+                        "id":  "block.packed_mud.break"
+                    },
+                    {
+                        "id":  "block.packed_mud.fall"
+                    },
+                    {
+                        "id":  "block.packed_mud.hit"
+                    },
+                    {
+                        "id":  "block.packed_mud.place"
+                    },
+                    {
+                        "id":  "block.packed_mud.step"
+                    },
+                    {
+                        "id":  "block.pale_hanging_moss.ambient"
+                    },
+                    {
+                        "id":  "block.poplar_leaves.ambient"
+                    },
+                    {
+                        "id":  "block.poplar_leaves.break"
+                    },
+                    {
+                        "id":  "block.poplar_leaves.fall"
+                    },
+                    {
+                        "id":  "block.poplar_leaves.hit"
+                    },
+                    {
+                        "id":  "block.poplar_leaves.jump"
+                    },
+                    {
+                        "id":  "block.poplar_leaves.land"
+                    },
+                    {
+                        "id":  "block.poplar_leaves.place"
+                    },
+                    {
+                        "id":  "block.poplar_leaves.step"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.ambient"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.break"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.fall"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.geyser_continuous_eruption_active"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.geyser_continuous_eruption_start"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.geyser_eruption_active"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.geyser_eruption_start"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.hit"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.place"
+                    },
+                    {
+                        "id":  "block.potent_sulfur.step"
+                    },
+                    {
+                        "id":  "block.red_shrub.break"
+                    },
+                    {
+                        "id":  "block.red_shrub.place"
+                    },
+                    {
+                        "id":  "block.resin.break"
+                    },
+                    {
+                        "id":  "block.resin.fall"
+                    },
+                    {
+                        "id":  "block.resin.hit"
+                    },
+                    {
+                        "id":  "block.resin.place"
+                    },
+                    {
+                        "id":  "block.resin.step"
+                    },
+                    {
+                        "id":  "block.resin_brick.break"
+                    },
+                    {
+                        "id":  "block.resin_brick.fall"
+                    },
+                    {
+                        "id":  "block.resin_brick.hit"
+                    },
+                    {
+                        "id":  "block.resin_brick.place"
+                    },
+                    {
+                        "id":  "block.resin_brick.step"
+                    },
+                    {
+                        "id":  "block.sand.ambient"
+                    },
+                    {
+                        "id":  "block.scaffolding.break"
+                    },
+                    {
+                        "id":  "block.scaffolding.climb"
+                    },
+                    {
+                        "id":  "block.scaffolding.fall"
+                    },
+                    {
+                        "id":  "block.scaffolding.hit"
+                    },
+                    {
+                        "id":  "block.scaffolding.place"
+                    },
+                    {
+                        "id":  "block.scaffolding.step"
+                    },
+                    {
+                        "id":  "block.shelf.activate"
+                    },
+                    {
+                        "id":  "block.shelf.break"
+                    },
+                    {
+                        "id":  "block.shelf.deactivate"
+                    },
+                    {
+                        "id":  "block.shelf.multi_swap"
+                    },
+                    {
+                        "id":  "block.shelf.open"
+                    },
+                    {
+                        "id":  "block.shelf.place_item"
+                    },
+                    {
+                        "id":  "block.shelf.single_swap"
+                    },
+                    {
+                        "id":  "block.shelf_mushroom.break"
+                    },
+                    {
+                        "id":  "block.shelf_mushroom.fall"
+                    },
+                    {
+                        "id":  "block.shelf_mushroom.land"
+                    },
+                    {
+                        "id":  "block.shelf_mushroom.place"
+                    },
+                    {
+                        "id":  "block.shelf_mushroom.step"
+                    },
+                    {
+                        "id":  "block.sign.waxed_interact_fail"
+                    },
+                    {
+                        "id":  "block.smoker.smoke"
+                    },
+                    {
+                        "id":  "block.sniffer_egg.crack"
+                    },
+                    {
+                        "id":  "block.sniffer_egg.hatch"
+                    },
+                    {
+                        "id":  "block.stonecutter.use"
+                    },
+                    {
+                        "id":  "block.straw_bed.break"
+                    },
+                    {
+                        "id":  "block.straw_bed.break_leave"
+                    },
+                    {
+                        "id":  "block.straw_bed.fall"
+                    },
+                    {
+                        "id":  "block.straw_bed.hit"
+                    },
+                    {
+                        "id":  "block.straw_bed.jump"
+                    },
+                    {
+                        "id":  "block.straw_bed.land"
+                    },
+                    {
+                        "id":  "block.straw_bed.place"
+                    },
+                    {
+                        "id":  "block.straw_bed.step"
+                    },
+                    {
+                        "id":  "block.sulfur.break"
+                    },
+                    {
+                        "id":  "block.sulfur.fall"
+                    },
+                    {
+                        "id":  "block.sulfur.hit"
+                    },
+                    {
+                        "id":  "block.sulfur.place"
+                    },
+                    {
+                        "id":  "block.sulfur.step"
+                    },
+                    {
+                        "id":  "block.sulfur_spike.break"
+                    },
+                    {
+                        "id":  "block.sulfur_spike.fall"
+                    },
+                    {
+                        "id":  "block.sulfur_spike.hit"
+                    },
+                    {
+                        "id":  "block.sulfur_spike.land"
+                    },
+                    {
+                        "id":  "block.sulfur_spike.place"
+                    },
+                    {
+                        "id":  "block.sulfur_spike.step"
+                    },
+                    {
+                        "id":  "block.sweet_berry_bush.break"
+                    },
+                    {
+                        "id":  "block.sweet_berry_bush.hurt"
+                    },
+                    {
+                        "id":  "block.sweet_berry_bush.pick"
+                    },
+                    {
+                        "id":  "block.sweet_berry_bush.place"
+                    },
+                    {
+                        "id":  "block.turtle_egg.break"
+                    },
+                    {
+                        "id":  "block.turtle_egg.crack"
+                    },
+                    {
+                        "id":  "block.turtle_egg.drop"
+                    },
+                    {
+                        "id":  "block.weeping_vines.break"
+                    },
+                    {
+                        "id":  "block.weeping_vines.fall"
+                    },
+                    {
+                        "id":  "block.weeping_vines.hit"
+                    },
+                    {
+                        "id":  "block.weeping_vines.jump"
+                    },
+                    {
+                        "id":  "block.weeping_vines.land"
+                    },
+                    {
+                        "id":  "block.weeping_vines.place"
+                    },
+                    {
+                        "id":  "block.weeping_vines.step"
+                    },
+                    {
+                        "id":  "block.weeping_vines.use"
+                    },
+                    {
+                        "id":  "bloom.sculk_catalyst"
+                    },
+                    {
+                        "id":  "bottle.dragonbreath"
+                    },
+                    {
+                        "id":  "bottle.empty"
+                    },
+                    {
+                        "id":  "bottle.fill"
+                    },
+                    {
+                        "id":  "break.amethyst_block"
+                    },
+                    {
+                        "id":  "break.amethyst_cluster"
+                    },
+                    {
+                        "id":  "break.azalea"
+                    },
+                    {
+                        "id":  "break.bamboo_wood"
+                    },
+                    {
+                        "id":  "break.bamboo_wood_hanging_sign"
+                    },
+                    {
+                        "id":  "break.big_dripleaf"
+                    },
+                    {
+                        "id":  "break.calcite"
+                    },
+                    {
+                        "id":  "break.cherry_leaves"
+                    },
+                    {
+                        "id":  "break.cherry_wood"
+                    },
+                    {
+                        "id":  "break.cherry_wood_hanging_sign"
+                    },
+                    {
+                        "id":  "break.chiseled_bookshelf"
+                    },
+                    {
+                        "id":  "break.copper_bulb"
+                    },
+                    {
+                        "id":  "break.copper_grate"
+                    },
+                    {
+                        "id":  "break.decorated_pot"
+                    },
+                    {
+                        "id":  "break.dirt_with_roots"
+                    },
+                    {
+                        "id":  "break.dripstone_block"
+                    },
+                    {
+                        "id":  "break.frog_spawn"
+                    },
+                    {
+                        "id":  "break.froglight"
+                    },
+                    {
+                        "id":  "break.hanging_roots"
+                    },
+                    {
+                        "id":  "break.hanging_sign"
+                    },
+                    {
+                        "id":  "break.heavy_core"
+                    },
+                    {
+                        "id":  "break.iron"
+                    },
+                    {
+                        "id":  "break.large_amethyst_bud"
+                    },
+                    {
+                        "id":  "break.medium_amethyst_bud"
+                    },
+                    {
+                        "id":  "break.nether_wood"
+                    },
+                    {
+                        "id":  "break.nether_wood_hanging_sign"
+                    },
+                    {
+                        "id":  "break.pink_petals"
+                    },
+                    {
+                        "id":  "break.pointed_dripstone"
+                    },
+                    {
+                        "id":  "break.sculk"
+                    },
+                    {
+                        "id":  "break.sculk_catalyst"
+                    },
+                    {
+                        "id":  "break.sculk_sensor"
+                    },
+                    {
+                        "id":  "break.sculk_shrieker"
+                    },
+                    {
+                        "id":  "break.sculk_vein"
+                    },
+                    {
+                        "id":  "break.small_amethyst_bud"
+                    },
+                    {
+                        "id":  "break.sponge"
+                    },
+                    {
+                        "id":  "break.spore_blossom"
+                    },
+                    {
+                        "id":  "break.suspicious_gravel"
+                    },
+                    {
+                        "id":  "break.suspicious_sand"
+                    },
+                    {
+                        "id":  "break.tuff"
+                    },
+                    {
+                        "id":  "break.web"
+                    },
+                    {
+                        "id":  "break.wet_sponge"
+                    },
+                    {
+                        "id":  "breeze_wind_charge.burst"
+                    },
+                    {
+                        "id":  "brush.generic"
+                    },
+                    {
+                        "id":  "brush.suspicious_gravel"
+                    },
+                    {
+                        "id":  "brush.suspicious_sand"
+                    },
+                    {
+                        "id":  "brush_completed.suspicious_gravel"
+                    },
+                    {
+                        "id":  "brush_completed.suspicious_sand"
+                    },
+                    {
+                        "id":  "bubble.down"
+                    },
+                    {
+                        "id":  "bubble.downinside"
+                    },
+                    {
+                        "id":  "bubble.pop"
+                    },
+                    {
+                        "id":  "bubble.up"
+                    },
+                    {
+                        "id":  "bubble.upinside"
+                    },
+                    {
+                        "id":  "bucket.empty_fish"
+                    },
+                    {
+                        "id":  "bucket.empty_lava"
+                    },
+                    {
+                        "id":  "bucket.empty_powder_snow"
+                    },
+                    {
+                        "id":  "bucket.empty_water"
+                    },
+                    {
+                        "id":  "bucket.fill_fish"
+                    },
+                    {
+                        "id":  "bucket.fill_lava"
+                    },
+                    {
+                        "id":  "bucket.fill_powder_snow"
+                    },
+                    {
+                        "id":  "bucket.fill_water"
+                    },
+                    {
+                        "id":  "bundle.drop_contents"
+                    },
+                    {
+                        "id":  "bundle.insert"
+                    },
+                    {
+                        "id":  "bundle.insert_fail"
+                    },
+                    {
+                        "id":  "bundle.remove_one"
+                    },
+                    {
+                        "id":  "cake.add_candle"
+                    },
+                    {
+                        "id":  "camera.take_picture"
+                    },
+                    {
+                        "id":  "cauldron.adddye"
+                    },
+                    {
+                        "id":  "cauldron.cleanarmor"
+                    },
+                    {
+                        "id":  "cauldron.cleanbanner"
+                    },
+                    {
+                        "id":  "cauldron.dyearmor"
+                    },
+                    {
+                        "id":  "cauldron.explode"
+                    },
+                    {
+                        "id":  "cauldron.fillpotion"
+                    },
+                    {
+                        "id":  "cauldron.fillwater"
+                    },
+                    {
+                        "id":  "cauldron.takepotion"
+                    },
+                    {
+                        "id":  "cauldron.takewater"
+                    },
+                    {
+                        "id":  "cauldron_drip.lava.pointed_dripstone"
+                    },
+                    {
+                        "id":  "cauldron_drip.water.pointed_dripstone"
+                    },
+                    {
+                        "id":  "charge.sculk"
+                    },
+                    {
+                        "id":  "chime.amethyst_block"
+                    },
+                    {
+                        "id":  "click_off.bamboo_wood_button"
+                    },
+                    {
+                        "id":  "click_off.bamboo_wood_pressure_plate"
+                    },
+                    {
+                        "id":  "click_off.cherry_wood_button"
+                    },
+                    {
+                        "id":  "click_off.cherry_wood_pressure_plate"
+                    },
+                    {
+                        "id":  "click_off.metal_pressure_plate"
+                    },
+                    {
+                        "id":  "click_off.nether_wood_button"
+                    },
+                    {
+                        "id":  "click_off.nether_wood_pressure_plate"
+                    },
+                    {
+                        "id":  "click_off.stone_pressure_plate"
+                    },
+                    {
+                        "id":  "click_off.wooden_pressure_plate"
+                    },
+                    {
+                        "id":  "click_on.bamboo_wood_button"
+                    },
+                    {
+                        "id":  "click_on.bamboo_wood_pressure_plate"
+                    },
+                    {
+                        "id":  "click_on.cherry_wood_button"
+                    },
+                    {
+                        "id":  "click_on.cherry_wood_pressure_plate"
+                    },
+                    {
+                        "id":  "click_on.metal_pressure_plate"
+                    },
+                    {
+                        "id":  "click_on.nether_wood_button"
+                    },
+                    {
+                        "id":  "click_on.nether_wood_pressure_plate"
+                    },
+                    {
+                        "id":  "click_on.stone_pressure_plate"
+                    },
+                    {
+                        "id":  "click_on.wooden_pressure_plate"
+                    },
+                    {
+                        "id":  "close.bamboo_wood_door"
+                    },
+                    {
+                        "id":  "close.bamboo_wood_fence_gate"
+                    },
+                    {
+                        "id":  "close.bamboo_wood_trapdoor"
+                    },
+                    {
+                        "id":  "close.cherry_wood_door"
+                    },
+                    {
+                        "id":  "close.cherry_wood_fence_gate"
+                    },
+                    {
+                        "id":  "close.cherry_wood_trapdoor"
+                    },
+                    {
+                        "id":  "close.fence_gate"
+                    },
+                    {
+                        "id":  "close.iron_door"
+                    },
+                    {
+                        "id":  "close.iron_trapdoor"
+                    },
+                    {
+                        "id":  "close.nether_wood_door"
+                    },
+                    {
+                        "id":  "close.nether_wood_fence_gate"
+                    },
+                    {
+                        "id":  "close.nether_wood_trapdoor"
+                    },
+                    {
+                        "id":  "close.wooden_door"
+                    },
+                    {
+                        "id":  "close.wooden_trapdoor"
+                    },
+                    {
+                        "id":  "close_door.copper"
+                    },
+                    {
+                        "id":  "component.jump_to_block"
+                    },
+                    {
+                        "id":  "conduit.activate"
+                    },
+                    {
+                        "id":  "conduit.ambient"
+                    },
+                    {
+                        "id":  "conduit.attack"
+                    },
+                    {
+                        "id":  "conduit.deactivate"
+                    },
+                    {
+                        "id":  "conduit.short"
+                    },
+                    {
+                        "id":  "copper.wax.off"
+                    },
+                    {
+                        "id":  "copper.wax.on"
+                    },
+                    {
+                        "id":  "crafter.craft"
+                    },
+                    {
+                        "id":  "crafter.disable_slot"
+                    },
+                    {
+                        "id":  "crafter.fail"
+                    },
+                    {
+                        "id":  "crossbow.loading.end"
+                    },
+                    {
+                        "id":  "crossbow.loading.middle"
+                    },
+                    {
+                        "id":  "crossbow.loading.start"
+                    },
+                    {
+                        "id":  "crossbow.quick_charge.end"
+                    },
+                    {
+                        "id":  "crossbow.quick_charge.middle"
+                    },
+                    {
+                        "id":  "crossbow.quick_charge.start"
+                    },
+                    {
+                        "id":  "crossbow.shoot"
+                    },
+                    {
+                        "id":  "damage.fallbig"
+                    },
+                    {
+                        "id":  "damage.fallsmall"
+                    },
+                    {
+                        "id":  "damage.thorns"
+                    },
+                    {
+                        "id":  "dig.ancient_debris"
+                    },
+                    {
+                        "id":  "dig.azalea_leaves"
+                    },
+                    {
+                        "id":  "dig.basalt"
+                    },
+                    {
+                        "id":  "dig.bone_block"
+                    },
+                    {
+                        "id":  "dig.candle"
+                    },
+                    {
+                        "id":  "dig.cave_vines"
+                    },
+                    {
+                        "id":  "dig.chain"
+                    },
+                    {
+                        "id":  "dig.cloth"
+                    },
+                    {
+                        "id":  "dig.copper"
+                    },
+                    {
+                        "id":  "dig.coral"
+                    },
+                    {
+                        "id":  "dig.deepslate"
+                    },
+                    {
+                        "id":  "dig.deepslate_bricks"
+                    },
+                    {
+                        "id":  "dig.fungus"
+                    },
+                    {
+                        "id":  "dig.grass"
+                    },
+                    {
+                        "id":  "dig.gravel"
+                    },
+                    {
+                        "id":  "dig.honey_block"
+                    },
+                    {
+                        "id":  "dig.lodestone"
+                    },
+                    {
+                        "id":  "dig.moss"
+                    },
+                    {
+                        "id":  "dig.nether_brick"
+                    },
+                    {
+                        "id":  "dig.nether_gold_ore"
+                    },
+                    {
+                        "id":  "dig.nether_sprouts"
+                    },
+                    {
+                        "id":  "dig.nether_wart"
+                    },
+                    {
+                        "id":  "dig.netherite"
+                    },
+                    {
+                        "id":  "dig.netherrack"
+                    },
+                    {
+                        "id":  "dig.nylium"
+                    },
+                    {
+                        "id":  "dig.powder_snow"
+                    },
+                    {
+                        "id":  "dig.roots"
+                    },
+                    {
+                        "id":  "dig.sand"
+                    },
+                    {
+                        "id":  "dig.shroomlight"
+                    },
+                    {
+                        "id":  "dig.snow"
+                    },
+                    {
+                        "id":  "dig.soul_sand"
+                    },
+                    {
+                        "id":  "dig.soul_soil"
+                    },
+                    {
+                        "id":  "dig.stem"
+                    },
+                    {
+                        "id":  "dig.stone"
+                    },
+                    {
+                        "id":  "dig.vines"
+                    },
+                    {
+                        "id":  "dig.wood"
+                    },
+                    {
+                        "id":  "drip.lava.pointed_dripstone"
+                    },
+                    {
+                        "id":  "drip.water.pointed_dripstone"
+                    },
+                    {
+                        "id":  "elytra.loop"
+                    },
+                    {
+                        "id":  "entity.cushion.break"
+                    },
+                    {
+                        "id":  "entity.cushion.get_up"
+                    },
+                    {
+                        "id":  "entity.cushion.place"
+                    },
+                    {
+                        "id":  "entity.cushion.sit"
+                    },
+                    {
+                        "id":  "entity.fox.teleport"
+                    },
+                    {
+                        "id":  "entity.generic.splash"
+                    },
+                    {
+                        "id":  "entity.player.teleport"
+                    },
+                    {
+                        "id":  "entity.wither_skeleton.ambient"
+                    },
+                    {
+                        "id":  "entity.wither_skeleton.death"
+                    },
+                    {
+                        "id":  "entity.wither_skeleton.hurt"
+                    },
+                    {
+                        "id":  "entity.wither_skeleton.step"
+                    },
+                    {
+                        "id":  "entity.zombie.converted_to_drowned"
+                    },
+                    {
+                        "id":  "extinguish.candle"
+                    },
+                    {
+                        "id":  "fall.amethyst_block"
+                    },
+                    {
+                        "id":  "fall.amethyst_cluster"
+                    },
+                    {
+                        "id":  "fall.ancient_debris"
+                    },
+                    {
+                        "id":  "fall.azalea"
+                    },
+                    {
+                        "id":  "fall.azalea_leaves"
+                    },
+                    {
+                        "id":  "fall.bamboo_wood"
+                    },
+                    {
+                        "id":  "fall.basalt"
+                    },
+                    {
+                        "id":  "fall.big_dripleaf"
+                    },
+                    {
+                        "id":  "fall.bone_block"
+                    },
+                    {
+                        "id":  "fall.calcite"
+                    },
+                    {
+                        "id":  "fall.cave_vines"
+                    },
+                    {
+                        "id":  "fall.chain"
+                    },
+                    {
+                        "id":  "fall.cherry_leaves"
+                    },
+                    {
+                        "id":  "fall.cherry_wood"
+                    },
+                    {
+                        "id":  "fall.cloth"
+                    },
+                    {
+                        "id":  "fall.copper"
+                    },
+                    {
+                        "id":  "fall.copper_bulb"
+                    },
+                    {
+                        "id":  "fall.coral"
+                    },
+                    {
+                        "id":  "fall.deepslate"
+                    },
+                    {
+                        "id":  "fall.deepslate_bricks"
+                    },
+                    {
+                        "id":  "fall.dirt_with_roots"
+                    },
+                    {
+                        "id":  "fall.dripstone_block"
+                    },
+                    {
+                        "id":  "fall.egg"
+                    },
+                    {
+                        "id":  "fall.grass"
+                    },
+                    {
+                        "id":  "fall.gravel"
+                    },
+                    {
+                        "id":  "fall.hanging_roots"
+                    },
+                    {
+                        "id":  "fall.honey_block"
+                    },
+                    {
+                        "id":  "fall.ladder"
+                    },
+                    {
+                        "id":  "fall.moss"
+                    },
+                    {
+                        "id":  "fall.nether_brick"
+                    },
+                    {
+                        "id":  "fall.nether_gold_ore"
+                    },
+                    {
+                        "id":  "fall.nether_sprouts"
+                    },
+                    {
+                        "id":  "fall.nether_wart"
+                    },
+                    {
+                        "id":  "fall.nether_wood"
+                    },
+                    {
+                        "id":  "fall.netherite"
+                    },
+                    {
+                        "id":  "fall.netherrack"
+                    },
+                    {
+                        "id":  "fall.nylium"
+                    },
+                    {
+                        "id":  "fall.pink_petals"
+                    },
+                    {
+                        "id":  "fall.pointed_dripstone"
+                    },
+                    {
+                        "id":  "fall.powder_snow"
+                    },
+                    {
+                        "id":  "fall.roots"
+                    },
+                    {
+                        "id":  "fall.sand"
+                    },
+                    {
+                        "id":  "fall.sculk_sensor"
+                    },
+                    {
+                        "id":  "fall.sculk_shrieker"
+                    },
+                    {
+                        "id":  "fall.shroomlight"
+                    },
+                    {
+                        "id":  "fall.slime"
+                    },
+                    {
+                        "id":  "fall.snow"
+                    },
+                    {
+                        "id":  "fall.soul_sand"
+                    },
+                    {
+                        "id":  "fall.soul_soil"
+                    },
+                    {
+                        "id":  "fall.spore_blossom"
+                    },
+                    {
+                        "id":  "fall.stem"
+                    },
+                    {
+                        "id":  "fall.stone"
+                    },
+                    {
+                        "id":  "fall.tuff"
+                    },
+                    {
+                        "id":  "fall.vines"
+                    },
+                    {
+                        "id":  "fall.wood"
+                    },
+                    {
+                        "id":  "fire.fire"
+                    },
+                    {
+                        "id":  "fire.ignite"
+                    },
+                    {
+                        "id":  "firework.blast"
+                    },
+                    {
+                        "id":  "firework.large_blast"
+                    },
+                    {
+                        "id":  "firework.launch"
+                    },
+                    {
+                        "id":  "firework.shoot"
+                    },
+                    {
+                        "id":  "firework.twinkle"
+                    },
+                    {
+                        "id":  "game.player.attack.critical"
+                    },
+                    {
+                        "id":  "game.player.attack.nodamage"
+                    },
+                    {
+                        "id":  "game.player.attack.strong"
+                    },
+                    {
+                        "id":  "game.player.die"
+                    },
+                    {
+                        "id":  "game.player.hurt"
+                    },
+                    {
+                        "id":  "hatch.frog_spawn"
+                    },
+                    {
+                        "id":  "hit.amethyst_block"
+                    },
+                    {
+                        "id":  "hit.amethyst_cluster"
+                    },
+                    {
+                        "id":  "hit.ancient_debris"
+                    },
+                    {
+                        "id":  "hit.anvil"
+                    },
+                    {
+                        "id":  "hit.azalea"
+                    },
+                    {
+                        "id":  "hit.azalea_leaves"
+                    },
+                    {
+                        "id":  "hit.bamboo_wood"
+                    },
+                    {
+                        "id":  "hit.basalt"
+                    },
+                    {
+                        "id":  "hit.big_dripleaf"
+                    },
+                    {
+                        "id":  "hit.bone_block"
+                    },
+                    {
+                        "id":  "hit.calcite"
+                    },
+                    {
+                        "id":  "hit.candle"
+                    },
+                    {
+                        "id":  "hit.cave_vines"
+                    },
+                    {
+                        "id":  "hit.chain"
+                    },
+                    {
+                        "id":  "hit.cherry_leaves"
+                    },
+                    {
+                        "id":  "hit.cherry_wood"
+                    },
+                    {
+                        "id":  "hit.chiseled_bookshelf"
+                    },
+                    {
+                        "id":  "hit.cloth"
+                    },
+                    {
+                        "id":  "hit.copper"
+                    },
+                    {
+                        "id":  "hit.copper_bulb"
+                    },
+                    {
+                        "id":  "hit.coral"
+                    },
+                    {
+                        "id":  "hit.deepslate"
+                    },
+                    {
+                        "id":  "hit.deepslate_bricks"
+                    },
+                    {
+                        "id":  "hit.dirt_with_roots"
+                    },
+                    {
+                        "id":  "hit.dripstone_block"
+                    },
+                    {
+                        "id":  "hit.grass"
+                    },
+                    {
+                        "id":  "hit.gravel"
+                    },
+                    {
+                        "id":  "hit.hanging_roots"
+                    },
+                    {
+                        "id":  "hit.honey_block"
+                    },
+                    {
+                        "id":  "hit.iron"
+                    },
+                    {
+                        "id":  "hit.ladder"
+                    },
+                    {
+                        "id":  "hit.moss"
+                    },
+                    {
+                        "id":  "hit.nether_brick"
+                    },
+                    {
+                        "id":  "hit.nether_gold_ore"
+                    },
+                    {
+                        "id":  "hit.nether_sprouts"
+                    },
+                    {
+                        "id":  "hit.nether_wart"
+                    },
+                    {
+                        "id":  "hit.nether_wood"
+                    },
+                    {
+                        "id":  "hit.netherite"
+                    },
+                    {
+                        "id":  "hit.netherrack"
+                    },
+                    {
+                        "id":  "hit.nylium"
+                    },
+                    {
+                        "id":  "hit.pink_petals"
+                    },
+                    {
+                        "id":  "hit.pointed_dripstone"
+                    },
+                    {
+                        "id":  "hit.powder_snow"
+                    },
+                    {
+                        "id":  "hit.roots"
+                    },
+                    {
+                        "id":  "hit.sand"
+                    },
+                    {
+                        "id":  "hit.sculk"
+                    },
+                    {
+                        "id":  "hit.sculk_catalyst"
+                    },
+                    {
+                        "id":  "hit.sculk_sensor"
+                    },
+                    {
+                        "id":  "hit.sculk_shrieker"
+                    },
+                    {
+                        "id":  "hit.shroomlight"
+                    },
+                    {
+                        "id":  "hit.slime"
+                    },
+                    {
+                        "id":  "hit.snow"
+                    },
+                    {
+                        "id":  "hit.soul_sand"
+                    },
+                    {
+                        "id":  "hit.soul_soil"
+                    },
+                    {
+                        "id":  "hit.sponge"
+                    },
+                    {
+                        "id":  "hit.spore_blossom"
+                    },
+                    {
+                        "id":  "hit.stem"
+                    },
+                    {
+                        "id":  "hit.stone"
+                    },
+                    {
+                        "id":  "hit.suspicious_gravel"
+                    },
+                    {
+                        "id":  "hit.suspicious_sand"
+                    },
+                    {
+                        "id":  "hit.tuff"
+                    },
+                    {
+                        "id":  "hit.vines"
+                    },
+                    {
+                        "id":  "hit.wet_sponge"
+                    },
+                    {
+                        "id":  "hit.wood"
+                    },
+                    {
+                        "id":  "horn.call.0"
+                    },
+                    {
+                        "id":  "horn.call.1"
+                    },
+                    {
+                        "id":  "horn.call.2"
+                    },
+                    {
+                        "id":  "horn.call.3"
+                    },
+                    {
+                        "id":  "horn.call.4"
+                    },
+                    {
+                        "id":  "horn.call.5"
+                    },
+                    {
+                        "id":  "horn.call.6"
+                    },
+                    {
+                        "id":  "horn.call.7"
+                    },
+                    {
+                        "id":  "hud.bubble.pop"
+                    },
+                    {
+                        "id":  "imitate.fuse"
+                    },
+                    {
+                        "id":  "insert.chiseled_bookshelf"
+                    },
+                    {
+                        "id":  "insert_enchanted.chiseled_bookshelf"
+                    },
+                    {
+                        "id":  "item.bone_meal.use"
+                    },
+                    {
+                        "id":  "item.book.page_turn"
+                    },
+                    {
+                        "id":  "item.book.put"
+                    },
+                    {
+                        "id":  "item.enchant.lunge1"
+                    },
+                    {
+                        "id":  "item.enchant.lunge2"
+                    },
+                    {
+                        "id":  "item.enchant.lunge3"
+                    },
+                    {
+                        "id":  "item.firecharge.use"
+                    },
+                    {
+                        "id":  "item.shield.block"
+                    },
+                    {
+                        "id":  "item.spear.attack_hit"
+                    },
+                    {
+                        "id":  "item.spear.attack_miss"
+                    },
+                    {
+                        "id":  "item.spear.hit"
+                    },
+                    {
+                        "id":  "item.spear.use"
+                    },
+                    {
+                        "id":  "item.spyglass.stop_using"
+                    },
+                    {
+                        "id":  "item.spyglass.use"
+                    },
+                    {
+                        "id":  "item.sulfur_cube.empty"
+                    },
+                    {
+                        "id":  "item.sulfur_cube.fill"
+                    },
+                    {
+                        "id":  "item.trident.hit"
+                    },
+                    {
+                        "id":  "item.trident.hit_ground"
+                    },
+                    {
+                        "id":  "item.trident.return"
+                    },
+                    {
+                        "id":  "item.trident.riptide_1"
+                    },
+                    {
+                        "id":  "item.trident.riptide_2"
+                    },
+                    {
+                        "id":  "item.trident.riptide_3"
+                    },
+                    {
+                        "id":  "item.trident.throw"
+                    },
+                    {
+                        "id":  "item.trident.thunder"
+                    },
+                    {
+                        "id":  "item.wooden_spear.attack_hit"
+                    },
+                    {
+                        "id":  "item.wooden_spear.attack_miss"
+                    },
+                    {
+                        "id":  "item.wooden_spear.hit"
+                    },
+                    {
+                        "id":  "item.wooden_spear.use"
+                    },
+                    {
+                        "id":  "jump.ancient_debris"
+                    },
+                    {
+                        "id":  "jump.azalea"
+                    },
+                    {
+                        "id":  "jump.basalt"
+                    },
+                    {
+                        "id":  "jump.big_dripleaf"
+                    },
+                    {
+                        "id":  "jump.bone_block"
+                    },
+                    {
+                        "id":  "jump.cave_vines"
+                    },
+                    {
+                        "id":  "jump.chain"
+                    },
+                    {
+                        "id":  "jump.cloth"
+                    },
+                    {
+                        "id":  "jump.coral"
+                    },
+                    {
+                        "id":  "jump.deepslate"
+                    },
+                    {
+                        "id":  "jump.deepslate_bricks"
+                    },
+                    {
+                        "id":  "jump.dirt_with_roots"
+                    },
+                    {
+                        "id":  "jump.dripstone_block"
+                    },
+                    {
+                        "id":  "jump.grass"
+                    },
+                    {
+                        "id":  "jump.gravel"
+                    },
+                    {
+                        "id":  "jump.hanging_roots"
+                    },
+                    {
+                        "id":  "jump.honey_block"
+                    },
+                    {
+                        "id":  "jump.moss"
+                    },
+                    {
+                        "id":  "jump.nether_brick"
+                    },
+                    {
+                        "id":  "jump.nether_gold_ore"
+                    },
+                    {
+                        "id":  "jump.nether_sprouts"
+                    },
+                    {
+                        "id":  "jump.nether_wart"
+                    },
+                    {
+                        "id":  "jump.netherite"
+                    },
+                    {
+                        "id":  "jump.netherrack"
+                    },
+                    {
+                        "id":  "jump.nylium"
+                    },
+                    {
+                        "id":  "jump.pointed_dripstone"
+                    },
+                    {
+                        "id":  "jump.roots"
+                    },
+                    {
+                        "id":  "jump.sand"
+                    },
+                    {
+                        "id":  "jump.sculk_sensor"
+                    },
+                    {
+                        "id":  "jump.shroomlight"
+                    },
+                    {
+                        "id":  "jump.slime"
+                    },
+                    {
+                        "id":  "jump.snow"
+                    },
+                    {
+                        "id":  "jump.soul_sand"
+                    },
+                    {
+                        "id":  "jump.soul_soil"
+                    },
+                    {
+                        "id":  "jump.spore_blossom"
+                    },
+                    {
+                        "id":  "jump.stem"
+                    },
+                    {
+                        "id":  "jump.stone"
+                    },
+                    {
+                        "id":  "jump.vines"
+                    },
+                    {
+                        "id":  "jump.wood"
+                    },
+                    {
+                        "id":  "land.ancient_debris"
+                    },
+                    {
+                        "id":  "land.azalea"
+                    },
+                    {
+                        "id":  "land.basalt"
+                    },
+                    {
+                        "id":  "land.big_dripleaf"
+                    },
+                    {
+                        "id":  "land.bone_block"
+                    },
+                    {
+                        "id":  "land.cave_vines"
+                    },
+                    {
+                        "id":  "land.chain"
+                    },
+                    {
+                        "id":  "land.cloth"
+                    },
+                    {
+                        "id":  "land.coral"
+                    },
+                    {
+                        "id":  "land.deepslate"
+                    },
+                    {
+                        "id":  "land.deepslate_bricks"
+                    },
+                    {
+                        "id":  "land.dirt_with_roots"
+                    },
+                    {
+                        "id":  "land.dripstone_block"
+                    },
+                    {
+                        "id":  "land.grass"
+                    },
+                    {
+                        "id":  "land.gravel"
+                    },
+                    {
+                        "id":  "land.hanging_roots"
+                    },
+                    {
+                        "id":  "land.honey_block"
+                    },
+                    {
+                        "id":  "land.moss"
+                    },
+                    {
+                        "id":  "land.nether_brick"
+                    },
+                    {
+                        "id":  "land.nether_gold_ore"
+                    },
+                    {
+                        "id":  "land.nether_sprouts"
+                    },
+                    {
+                        "id":  "land.nether_wart"
+                    },
+                    {
+                        "id":  "land.netherite"
+                    },
+                    {
+                        "id":  "land.netherrack"
+                    },
+                    {
+                        "id":  "land.nylium"
+                    },
+                    {
+                        "id":  "land.pointed_dripstone"
+                    },
+                    {
+                        "id":  "land.roots"
+                    },
+                    {
+                        "id":  "land.sand"
+                    },
+                    {
+                        "id":  "land.sculk_sensor"
+                    },
+                    {
+                        "id":  "land.shroomlight"
+                    },
+                    {
+                        "id":  "land.slime"
+                    },
+                    {
+                        "id":  "land.snow"
+                    },
+                    {
+                        "id":  "land.soul_sand"
+                    },
+                    {
+                        "id":  "land.soul_soil"
+                    },
+                    {
+                        "id":  "land.spore_blossom"
+                    },
+                    {
+                        "id":  "land.stem"
+                    },
+                    {
+                        "id":  "land.stone"
+                    },
+                    {
+                        "id":  "land.vines"
+                    },
+                    {
+                        "id":  "land.wood"
+                    },
+                    {
+                        "id":  "lead.break"
+                    },
+                    {
+                        "id":  "leashknot.break"
+                    },
+                    {
+                        "id":  "leashknot.place"
+                    },
+                    {
+                        "id":  "liquid.lava"
+                    },
+                    {
+                        "id":  "liquid.lavapop"
+                    },
+                    {
+                        "id":  "liquid.water"
+                    },
+                    {
+                        "id":  "lodestone_compass.link_compass_to_lodestone"
+                    },
+                    {
+                        "id":  "mace.heavy_smash_ground"
+                    },
+                    {
+                        "id":  "mace.smash_air"
+                    },
+                    {
+                        "id":  "mace.smash_ground"
+                    },
+                    {
+                        "id":  "minecart.base"
+                    },
+                    {
+                        "id":  "minecart.inside"
+                    },
+                    {
+                        "id":  "mob.agent.spawn"
+                    },
+                    {
+                        "id":  "mob.allay.death"
+                    },
+                    {
+                        "id":  "mob.allay.hurt"
+                    },
+                    {
+                        "id":  "mob.allay.idle"
+                    },
+                    {
+                        "id":  "mob.allay.idle_holding"
+                    },
+                    {
+                        "id":  "mob.allay.item_given"
+                    },
+                    {
+                        "id":  "mob.allay.item_taken"
+                    },
+                    {
+                        "id":  "mob.allay.item_thrown"
+                    },
+                    {
+                        "id":  "mob.armadillo.ambient"
+                    },
+                    {
+                        "id":  "mob.armadillo.brush"
+                    },
+                    {
+                        "id":  "mob.armadillo.death"
+                    },
+                    {
+                        "id":  "mob.armadillo.eat"
+                    },
+                    {
+                        "id":  "mob.armadillo.hurt"
+                    },
+                    {
+                        "id":  "mob.armadillo.hurt_reduced"
+                    },
+                    {
+                        "id":  "mob.armadillo.land"
+                    },
+                    {
+                        "id":  "mob.armadillo.peek"
+                    },
+                    {
+                        "id":  "mob.armadillo.roll"
+                    },
+                    {
+                        "id":  "mob.armadillo.scute_drop"
+                    },
+                    {
+                        "id":  "mob.armadillo.step"
+                    },
+                    {
+                        "id":  "mob.armadillo.unroll_finish"
+                    },
+                    {
+                        "id":  "mob.armadillo.unroll_start"
+                    },
+                    {
+                        "id":  "mob.armor_stand.break"
+                    },
+                    {
+                        "id":  "mob.armor_stand.hit"
+                    },
+                    {
+                        "id":  "mob.armor_stand.land"
+                    },
+                    {
+                        "id":  "mob.armor_stand.place"
+                    },
+                    {
+                        "id":  "mob.axolotl.attack"
+                    },
+                    {
+                        "id":  "mob.axolotl.death"
+                    },
+                    {
+                        "id":  "mob.axolotl.hurt"
+                    },
+                    {
+                        "id":  "mob.axolotl.idle"
+                    },
+                    {
+                        "id":  "mob.axolotl.idle_water"
+                    },
+                    {
+                        "id":  "mob.axolotl.splash"
+                    },
+                    {
+                        "id":  "mob.axolotl.swim"
+                    },
+                    {
+                        "id":  "mob.baby_cat.ambient"
+                    },
+                    {
+                        "id":  "mob.baby_cat.death"
+                    },
+                    {
+                        "id":  "mob.baby_cat.eat"
+                    },
+                    {
+                        "id":  "mob.baby_cat.hurt"
+                    },
+                    {
+                        "id":  "mob.baby_chicken.ambient"
+                    },
+                    {
+                        "id":  "mob.baby_chicken.death"
+                    },
+                    {
+                        "id":  "mob.baby_chicken.hurt"
+                    },
+                    {
+                        "id":  "mob.baby_chicken.step"
+                    },
+                    {
+                        "id":  "mob.baby_horse.ambient"
+                    },
+                    {
+                        "id":  "mob.baby_horse.angry"
+                    },
+                    {
+                        "id":  "mob.baby_horse.breathe"
+                    },
+                    {
+                        "id":  "mob.baby_horse.death"
+                    },
+                    {
+                        "id":  "mob.baby_horse.eat"
+                    },
+                    {
+                        "id":  "mob.baby_horse.hurt"
+                    },
+                    {
+                        "id":  "mob.baby_horse.land"
+                    },
+                    {
+                        "id":  "mob.baby_nautilus.ambient"
+                    },
+                    {
+                        "id":  "mob.baby_nautilus.ambient.in.water"
+                    },
+                    {
+                        "id":  "mob.baby_nautilus.death"
+                    },
+                    {
+                        "id":  "mob.baby_nautilus.death.in.water"
+                    },
+                    {
+                        "id":  "mob.baby_nautilus.eat"
+                    },
+                    {
+                        "id":  "mob.baby_nautilus.hurt"
+                    },
+                    {
+                        "id":  "mob.baby_nautilus.hurt.in.water"
+                    },
+                    {
+                        "id":  "mob.baby_nautilus.swim"
+                    },
+                    {
+                        "id":  "mob.baby_pig.ambient"
+                    },
+                    {
+                        "id":  "mob.baby_pig.death"
+                    },
+                    {
+                        "id":  "mob.baby_pig.eat"
+                    },
+                    {
+                        "id":  "mob.baby_pig.hurt"
+                    },
+                    {
+                        "id":  "mob.baby_pig.step"
+                    },
+                    {
+                        "id":  "mob.baby_wolf.bark"
+                    },
+                    {
+                        "id":  "mob.baby_wolf.death"
+                    },
+                    {
+                        "id":  "mob.baby_wolf.growl"
+                    },
+                    {
+                        "id":  "mob.baby_wolf.hurt"
+                    },
+                    {
+                        "id":  "mob.baby_wolf.panting"
+                    },
+                    {
+                        "id":  "mob.baby_wolf.shake"
+                    },
+                    {
+                        "id":  "mob.baby_wolf.step"
+                    },
+                    {
+                        "id":  "mob.baby_wolf.whine"
+                    },
+                    {
+                        "id":  "mob.bat.death"
+                    },
+                    {
+                        "id":  "mob.bat.hurt"
+                    },
+                    {
+                        "id":  "mob.bat.idle"
+                    },
+                    {
+                        "id":  "mob.bat.takeoff"
+                    },
+                    {
+                        "id":  "mob.bee.aggressive"
+                    },
+                    {
+                        "id":  "mob.bee.death"
+                    },
+                    {
+                        "id":  "mob.bee.hurt"
+                    },
+                    {
+                        "id":  "mob.bee.loop"
+                    },
+                    {
+                        "id":  "mob.bee.pollinate"
+                    },
+                    {
+                        "id":  "mob.bee.sting"
+                    },
+                    {
+                        "id":  "mob.big_pig.death"
+                    },
+                    {
+                        "id":  "mob.big_pig.eat"
+                    },
+                    {
+                        "id":  "mob.big_pig.hurt"
+                    },
+                    {
+                        "id":  "mob.big_pig.say"
+                    },
+                    {
+                        "id":  "mob.blaze.breathe"
+                    },
+                    {
+                        "id":  "mob.blaze.death"
+                    },
+                    {
+                        "id":  "mob.blaze.hit"
+                    },
+                    {
+                        "id":  "mob.blaze.shoot"
+                    },
+                    {
+                        "id":  "mob.bogged.ambient"
+                    },
+                    {
+                        "id":  "mob.bogged.death"
+                    },
+                    {
+                        "id":  "mob.bogged.hurt"
+                    },
+                    {
+                        "id":  "mob.bogged.step"
+                    },
+                    {
+                        "id":  "mob.breeze.charge"
+                    },
+                    {
+                        "id":  "mob.breeze.death"
+                    },
+                    {
+                        "id":  "mob.breeze.deflect"
+                    },
+                    {
+                        "id":  "mob.breeze.hurt"
+                    },
+                    {
+                        "id":  "mob.breeze.idle_air"
+                    },
+                    {
+                        "id":  "mob.breeze.idle_ground"
+                    },
+                    {
+                        "id":  "mob.breeze.inhale"
+                    },
+                    {
+                        "id":  "mob.breeze.jump"
+                    },
+                    {
+                        "id":  "mob.breeze.land"
+                    },
+                    {
+                        "id":  "mob.breeze.shoot"
+                    },
+                    {
+                        "id":  "mob.breeze.slide"
+                    },
+                    {
+                        "id":  "mob.breeze.whirl"
+                    },
+                    {
+                        "id":  "mob.camel.ambient"
+                    },
+                    {
+                        "id":  "mob.camel.dash"
+                    },
+                    {
+                        "id":  "mob.camel.dash_ready"
+                    },
+                    {
+                        "id":  "mob.camel.death"
+                    },
+                    {
+                        "id":  "mob.camel.eat"
+                    },
+                    {
+                        "id":  "mob.camel.hurt"
+                    },
+                    {
+                        "id":  "mob.camel.sit"
+                    },
+                    {
+                        "id":  "mob.camel.stand"
+                    },
+                    {
+                        "id":  "mob.camel.step"
+                    },
+                    {
+                        "id":  "mob.camel.step_sand"
+                    },
+                    {
+                        "id":  "mob.camel_husk.ambient"
+                    },
+                    {
+                        "id":  "mob.camel_husk.dash"
+                    },
+                    {
+                        "id":  "mob.camel_husk.dash_ready"
+                    },
+                    {
+                        "id":  "mob.camel_husk.death"
+                    },
+                    {
+                        "id":  "mob.camel_husk.eat"
+                    },
+                    {
+                        "id":  "mob.camel_husk.hurt"
+                    },
+                    {
+                        "id":  "mob.camel_husk.sit"
+                    },
+                    {
+                        "id":  "mob.camel_husk.stand"
+                    },
+                    {
+                        "id":  "mob.camel_husk.step"
+                    },
+                    {
+                        "id":  "mob.camel_husk.step_sand"
+                    },
+                    {
+                        "id":  "mob.cat.beg"
+                    },
+                    {
+                        "id":  "mob.cat.beg_for_food"
+                    },
+                    {
+                        "id":  "mob.cat.eat"
+                    },
+                    {
+                        "id":  "mob.cat.hiss"
+                    },
+                    {
+                        "id":  "mob.cat.hit"
+                    },
+                    {
+                        "id":  "mob.cat.meow"
+                    },
+                    {
+                        "id":  "mob.cat.purr"
+                    },
+                    {
+                        "id":  "mob.cat.purreow"
+                    },
+                    {
+                        "id":  "mob.cat.straymeow"
+                    },
+                    {
+                        "id":  "mob.chicken.hurt"
+                    },
+                    {
+                        "id":  "mob.chicken.plop"
+                    },
+                    {
+                        "id":  "mob.chicken.say"
+                    },
+                    {
+                        "id":  "mob.chicken.step"
+                    },
+                    {
+                        "id":  "mob.copper_golem.becoming_statue"
+                    },
+                    {
+                        "id":  "mob.copper_golem.chest_interaction.put_item"
+                    },
+                    {
+                        "id":  "mob.copper_golem.chest_interaction.put_item_fail"
+                    },
+                    {
+                        "id":  "mob.copper_golem.chest_interaction.take_item"
+                    },
+                    {
+                        "id":  "mob.copper_golem.chest_interaction.take_item_fail"
+                    },
+                    {
+                        "id":  "mob.copper_golem.death"
+                    },
+                    {
+                        "id":  "mob.copper_golem.hurt"
+                    },
+                    {
+                        "id":  "mob.copper_golem.oxidized.death"
+                    },
+                    {
+                        "id":  "mob.copper_golem.oxidized.hurt"
+                    },
+                    {
+                        "id":  "mob.copper_golem.oxidized.spin"
+                    },
+                    {
+                        "id":  "mob.copper_golem.oxidized.step"
+                    },
+                    {
+                        "id":  "mob.copper_golem.spawn"
+                    },
+                    {
+                        "id":  "mob.copper_golem.spin"
+                    },
+                    {
+                        "id":  "mob.copper_golem.step"
+                    },
+                    {
+                        "id":  "mob.copper_golem.weathered.death"
+                    },
+                    {
+                        "id":  "mob.copper_golem.weathered.hurt"
+                    },
+                    {
+                        "id":  "mob.copper_golem.weathered.spin"
+                    },
+                    {
+                        "id":  "mob.copper_golem.weathered.step"
+                    },
+                    {
+                        "id":  "mob.cow.hurt"
+                    },
+                    {
+                        "id":  "mob.cow.milk"
+                    },
+                    {
+                        "id":  "mob.cow.say"
+                    },
+                    {
+                        "id":  "mob.cow.step"
+                    },
+                    {
+                        "id":  "mob.creaking.activate"
+                    },
+                    {
+                        "id":  "mob.creaking.ambient"
+                    },
+                    {
+                        "id":  "mob.creaking.attack"
+                    },
+                    {
+                        "id":  "mob.creaking.deactivate"
+                    },
+                    {
+                        "id":  "mob.creaking.death"
+                    },
+                    {
+                        "id":  "mob.creaking.freeze"
+                    },
+                    {
+                        "id":  "mob.creaking.spawn"
+                    },
+                    {
+                        "id":  "mob.creaking.step"
+                    },
+                    {
+                        "id":  "mob.creaking.sway"
+                    },
+                    {
+                        "id":  "mob.creaking.twitch"
+                    },
+                    {
+                        "id":  "mob.creaking.unfreeze"
+                    },
+                    {
+                        "id":  "mob.creeper.death"
+                    },
+                    {
+                        "id":  "mob.creeper.say"
+                    },
+                    {
+                        "id":  "mob.dolphin.attack"
+                    },
+                    {
+                        "id":  "mob.dolphin.blowhole"
+                    },
+                    {
+                        "id":  "mob.dolphin.death"
+                    },
+                    {
+                        "id":  "mob.dolphin.eat"
+                    },
+                    {
+                        "id":  "mob.dolphin.hurt"
+                    },
+                    {
+                        "id":  "mob.dolphin.idle"
+                    },
+                    {
+                        "id":  "mob.dolphin.idle_water"
+                    },
+                    {
+                        "id":  "mob.dolphin.jump"
+                    },
+                    {
+                        "id":  "mob.dolphin.play"
+                    },
+                    {
+                        "id":  "mob.dolphin.splash"
+                    },
+                    {
+                        "id":  "mob.dolphin.swim"
+                    },
+                    {
+                        "id":  "mob.drowned.death"
+                    },
+                    {
+                        "id":  "mob.drowned.death_water"
+                    },
+                    {
+                        "id":  "mob.drowned.hurt"
+                    },
+                    {
+                        "id":  "mob.drowned.hurt_water"
+                    },
+                    {
+                        "id":  "mob.drowned.say"
+                    },
+                    {
+                        "id":  "mob.drowned.say_water"
+                    },
+                    {
+                        "id":  "mob.drowned.shoot"
+                    },
+                    {
+                        "id":  "mob.drowned.step"
+                    },
+                    {
+                        "id":  "mob.drowned.swim"
+                    },
+                    {
+                        "id":  "mob.elderguardian.curse"
+                    },
+                    {
+                        "id":  "mob.elderguardian.death"
+                    },
+                    {
+                        "id":  "mob.elderguardian.hit"
+                    },
+                    {
+                        "id":  "mob.elderguardian.idle"
+                    },
+                    {
+                        "id":  "mob.enderdragon.death"
+                    },
+                    {
+                        "id":  "mob.enderdragon.flap"
+                    },
+                    {
+                        "id":  "mob.enderdragon.growl"
+                    },
+                    {
+                        "id":  "mob.enderdragon.hit"
+                    },
+                    {
+                        "id":  "mob.endermen.death"
+                    },
+                    {
+                        "id":  "mob.endermen.hit"
+                    },
+                    {
+                        "id":  "mob.endermen.idle"
+                    },
+                    {
+                        "id":  "mob.endermen.portal"
+                    },
+                    {
+                        "id":  "mob.endermen.scream"
+                    },
+                    {
+                        "id":  "mob.endermen.stare"
+                    },
+                    {
+                        "id":  "mob.endermite.hit"
+                    },
+                    {
+                        "id":  "mob.endermite.kill"
+                    },
+                    {
+                        "id":  "mob.endermite.say"
+                    },
+                    {
+                        "id":  "mob.endermite.step"
+                    },
+                    {
+                        "id":  "mob.evocation_fangs.attack"
+                    },
+                    {
+                        "id":  "mob.evocation_illager.ambient"
+                    },
+                    {
+                        "id":  "mob.evocation_illager.cast_spell"
+                    },
+                    {
+                        "id":  "mob.evocation_illager.celebrate"
+                    },
+                    {
+                        "id":  "mob.evocation_illager.death"
+                    },
+                    {
+                        "id":  "mob.evocation_illager.hurt"
+                    },
+                    {
+                        "id":  "mob.evocation_illager.prepare_attack"
+                    },
+                    {
+                        "id":  "mob.evocation_illager.prepare_summon"
+                    },
+                    {
+                        "id":  "mob.evocation_illager.prepare_wololo"
+                    },
+                    {
+                        "id":  "mob.fish.death"
+                    },
+                    {
+                        "id":  "mob.fish.flop"
+                    },
+                    {
+                        "id":  "mob.fish.hurt"
+                    },
+                    {
+                        "id":  "mob.fish.step"
+                    },
+                    {
+                        "id":  "mob.fox.aggro"
+                    },
+                    {
+                        "id":  "mob.fox.ambient"
+                    },
+                    {
+                        "id":  "mob.fox.bite"
+                    },
+                    {
+                        "id":  "mob.fox.death"
+                    },
+                    {
+                        "id":  "mob.fox.eat"
+                    },
+                    {
+                        "id":  "mob.fox.hurt"
+                    },
+                    {
+                        "id":  "mob.fox.screech"
+                    },
+                    {
+                        "id":  "mob.fox.sleep"
+                    },
+                    {
+                        "id":  "mob.fox.sniff"
+                    },
+                    {
+                        "id":  "mob.fox.spit"
+                    },
+                    {
+                        "id":  "mob.frog.ambient"
+                    },
+                    {
+                        "id":  "mob.frog.death"
+                    },
+                    {
+                        "id":  "mob.frog.eat"
+                    },
+                    {
+                        "id":  "mob.frog.hurt"
+                    },
+                    {
+                        "id":  "mob.frog.jump_to_block"
+                    },
+                    {
+                        "id":  "mob.frog.lay_spawn"
+                    },
+                    {
+                        "id":  "mob.frog.step"
+                    },
+                    {
+                        "id":  "mob.frog.tongue"
+                    },
+                    {
+                        "id":  "mob.ghast.affectionate_scream"
+                    },
+                    {
+                        "id":  "mob.ghast.charge"
+                    },
+                    {
+                        "id":  "mob.ghast.death"
+                    },
+                    {
+                        "id":  "mob.ghast.fireball"
+                    },
+                    {
+                        "id":  "mob.ghast.moan"
+                    },
+                    {
+                        "id":  "mob.ghast.scream"
+                    },
+                    {
+                        "id":  "mob.ghastling.ambient"
+                    },
+                    {
+                        "id":  "mob.ghastling.death"
+                    },
+                    {
+                        "id":  "mob.ghastling.hurt"
+                    },
+                    {
+                        "id":  "mob.ghastling.spawn"
+                    },
+                    {
+                        "id":  "mob.glow_squid.ambient"
+                    },
+                    {
+                        "id":  "mob.glow_squid.death"
+                    },
+                    {
+                        "id":  "mob.glow_squid.hurt"
+                    },
+                    {
+                        "id":  "mob.glow_squid.ink_squirt"
+                    },
+                    {
+                        "id":  "mob.goat.ambient"
+                    },
+                    {
+                        "id":  "mob.goat.ambient.screamer"
+                    },
+                    {
+                        "id":  "mob.goat.death"
+                    },
+                    {
+                        "id":  "mob.goat.death.screamer"
+                    },
+                    {
+                        "id":  "mob.goat.eat"
+                    },
+                    {
+                        "id":  "mob.goat.horn_break"
+                    },
+                    {
+                        "id":  "mob.goat.hurt"
+                    },
+                    {
+                        "id":  "mob.goat.hurt.screamer"
+                    },
+                    {
+                        "id":  "mob.goat.milk.screamer"
+                    },
+                    {
+                        "id":  "mob.goat.prepare_ram"
+                    },
+                    {
+                        "id":  "mob.goat.prepare_ram.screamer"
+                    },
+                    {
+                        "id":  "mob.goat.ram_impact"
+                    },
+                    {
+                        "id":  "mob.goat.ram_impact.screamer"
+                    },
+                    {
+                        "id":  "mob.goat.step"
+                    },
+                    {
+                        "id":  "mob.guardian.ambient"
+                    },
+                    {
+                        "id":  "mob.guardian.attack_loop"
+                    },
+                    {
+                        "id":  "mob.guardian.death"
+                    },
+                    {
+                        "id":  "mob.guardian.flop"
+                    },
+                    {
+                        "id":  "mob.guardian.hit"
+                    },
+                    {
+                        "id":  "mob.guardian.land_death"
+                    },
+                    {
+                        "id":  "mob.guardian.land_hit"
+                    },
+                    {
+                        "id":  "mob.guardian.land_idle"
+                    },
+                    {
+                        "id":  "mob.happy_ghast.ambient"
+                    },
+                    {
+                        "id":  "mob.happy_ghast.death"
+                    },
+                    {
+                        "id":  "mob.happy_ghast.goggles_down"
+                    },
+                    {
+                        "id":  "mob.happy_ghast.goggles_up"
+                    },
+                    {
+                        "id":  "mob.happy_ghast.harness_equip"
+                    },
+                    {
+                        "id":  "mob.happy_ghast.harness_unequip"
+                    },
+                    {
+                        "id":  "mob.happy_ghast.hurt"
+                    },
+                    {
+                        "id":  "mob.happy_ghast.ride"
+                    },
+                    {
+                        "id":  "mob.hoglin.ambient"
+                    },
+                    {
+                        "id":  "mob.hoglin.angry"
+                    },
+                    {
+                        "id":  "mob.hoglin.attack"
+                    },
+                    {
+                        "id":  "mob.hoglin.converted_to_zombified"
+                    },
+                    {
+                        "id":  "mob.hoglin.death"
+                    },
+                    {
+                        "id":  "mob.hoglin.howl"
+                    },
+                    {
+                        "id":  "mob.hoglin.hurt"
+                    },
+                    {
+                        "id":  "mob.hoglin.retreat"
+                    },
+                    {
+                        "id":  "mob.hoglin.step"
+                    },
+                    {
+                        "id":  "mob.horse.angry"
+                    },
+                    {
+                        "id":  "mob.horse.armor"
+                    },
+                    {
+                        "id":  "mob.horse.breathe"
+                    },
+                    {
+                        "id":  "mob.horse.death"
+                    },
+                    {
+                        "id":  "mob.horse.donkey.angry"
+                    },
+                    {
+                        "id":  "mob.horse.donkey.death"
+                    },
+                    {
+                        "id":  "mob.horse.donkey.hit"
+                    },
+                    {
+                        "id":  "mob.horse.donkey.idle"
+                    },
+                    {
+                        "id":  "mob.horse.eat"
+                    },
+                    {
+                        "id":  "mob.horse.gallop"
+                    },
+                    {
+                        "id":  "mob.horse.hit"
+                    },
+                    {
+                        "id":  "mob.horse.horse_armor_unequip"
+                    },
+                    {
+                        "id":  "mob.horse.idle"
+                    },
+                    {
+                        "id":  "mob.horse.jump"
+                    },
+                    {
+                        "id":  "mob.horse.land"
+                    },
+                    {
+                        "id":  "mob.horse.leather"
+                    },
+                    {
+                        "id":  "mob.horse.skeleton.death"
+                    },
+                    {
+                        "id":  "mob.horse.skeleton.hit"
+                    },
+                    {
+                        "id":  "mob.horse.skeleton.idle"
+                    },
+                    {
+                        "id":  "mob.horse.soft"
+                    },
+                    {
+                        "id":  "mob.horse.wood"
+                    },
+                    {
+                        "id":  "mob.horse.zombie.angry"
+                    },
+                    {
+                        "id":  "mob.horse.zombie.death"
+                    },
+                    {
+                        "id":  "mob.horse.zombie.hit"
+                    },
+                    {
+                        "id":  "mob.horse.zombie.idle"
+                    },
+                    {
+                        "id":  "mob.husk.ambient"
+                    },
+                    {
+                        "id":  "mob.husk.convert_to_zombie"
+                    },
+                    {
+                        "id":  "mob.husk.death"
+                    },
+                    {
+                        "id":  "mob.husk.hurt"
+                    },
+                    {
+                        "id":  "mob.husk.step"
+                    },
+                    {
+                        "id":  "mob.imitate.blaze"
+                    },
+                    {
+                        "id":  "mob.imitate.bogged"
+                    },
+                    {
+                        "id":  "mob.imitate.breeze"
+                    },
+                    {
+                        "id":  "mob.imitate.camel_husk"
+                    },
+                    {
+                        "id":  "mob.imitate.creaking"
+                    },
+                    {
+                        "id":  "mob.imitate.drowned"
+                    },
+                    {
+                        "id":  "mob.imitate.elder_guardian"
+                    },
+                    {
+                        "id":  "mob.imitate.enderdragon"
+                    },
+                    {
+                        "id":  "mob.imitate.endermen"
+                    },
+                    {
+                        "id":  "mob.imitate.endermite"
+                    },
+                    {
+                        "id":  "mob.imitate.evocation_illager"
+                    },
+                    {
+                        "id":  "mob.imitate.ghast"
+                    },
+                    {
+                        "id":  "mob.imitate.guardian"
+                    },
+                    {
+                        "id":  "mob.imitate.happy_ghast"
+                    },
+                    {
+                        "id":  "mob.imitate.husk"
+                    },
+                    {
+                        "id":  "mob.imitate.magmacube"
+                    },
+                    {
+                        "id":  "mob.imitate.parched"
+                    },
+                    {
+                        "id":  "mob.imitate.phantom"
+                    },
+                    {
+                        "id":  "mob.imitate.pillager"
+                    },
+                    {
+                        "id":  "mob.imitate.polarbear"
+                    },
+                    {
+                        "id":  "mob.imitate.ravager"
+                    },
+                    {
+                        "id":  "mob.imitate.shulker"
+                    },
+                    {
+                        "id":  "mob.imitate.silverfish"
+                    },
+                    {
+                        "id":  "mob.imitate.skeleton"
+                    },
+                    {
+                        "id":  "mob.imitate.slime"
+                    },
+                    {
+                        "id":  "mob.imitate.spider"
+                    },
+                    {
+                        "id":  "mob.imitate.stray"
+                    },
+                    {
+                        "id":  "mob.imitate.vex"
+                    },
+                    {
+                        "id":  "mob.imitate.vindicator"
+                    },
+                    {
+                        "id":  "mob.imitate.warden"
+                    },
+                    {
+                        "id":  "mob.imitate.witch"
+                    },
+                    {
+                        "id":  "mob.imitate.wither"
+                    },
+                    {
+                        "id":  "mob.imitate.wither_skeleton"
+                    },
+                    {
+                        "id":  "mob.imitate.wolf"
+                    },
+                    {
+                        "id":  "mob.imitate.zoglin"
+                    },
+                    {
+                        "id":  "mob.imitate.zombie"
+                    },
+                    {
+                        "id":  "mob.imitate.zombie_villager"
+                    },
+                    {
+                        "id":  "mob.imitate.zombiepig"
+                    },
+                    {
+                        "id":  "mob.irongolem.crack"
+                    },
+                    {
+                        "id":  "mob.irongolem.death"
+                    },
+                    {
+                        "id":  "mob.irongolem.hit"
+                    },
+                    {
+                        "id":  "mob.irongolem.repair"
+                    },
+                    {
+                        "id":  "mob.irongolem.throw"
+                    },
+                    {
+                        "id":  "mob.irongolem.walk"
+                    },
+                    {
+                        "id":  "mob.llama.angry"
+                    },
+                    {
+                        "id":  "mob.llama.carpet_unequip"
+                    },
+                    {
+                        "id":  "mob.llama.death"
+                    },
+                    {
+                        "id":  "mob.llama.eat"
+                    },
+                    {
+                        "id":  "mob.llama.hurt"
+                    },
+                    {
+                        "id":  "mob.llama.idle"
+                    },
+                    {
+                        "id":  "mob.llama.spit"
+                    },
+                    {
+                        "id":  "mob.llama.step"
+                    },
+                    {
+                        "id":  "mob.llama.swag"
+                    },
+                    {
+                        "id":  "mob.magmacube.big"
+                    },
+                    {
+                        "id":  "mob.magmacube.jump"
+                    },
+                    {
+                        "id":  "mob.magmacube.small"
+                    },
+                    {
+                        "id":  "mob.mini_pig.death"
+                    },
+                    {
+                        "id":  "mob.mini_pig.eat"
+                    },
+                    {
+                        "id":  "mob.mini_pig.hurt"
+                    },
+                    {
+                        "id":  "mob.mini_pig.say"
+                    },
+                    {
+                        "id":  "mob.moody_cow.death"
+                    },
+                    {
+                        "id":  "mob.moody_cow.hurt"
+                    },
+                    {
+                        "id":  "mob.moody_cow.say"
+                    },
+                    {
+                        "id":  "mob.mooshroom.convert"
+                    },
+                    {
+                        "id":  "mob.mooshroom.eat"
+                    },
+                    {
+                        "id":  "mob.mooshroom.suspicious_milk"
+                    },
+                    {
+                        "id":  "mob.nautilus.ambient"
+                    },
+                    {
+                        "id":  "mob.nautilus.ambient.in.water"
+                    },
+                    {
+                        "id":  "mob.nautilus.armor_unequip"
+                    },
+                    {
+                        "id":  "mob.nautilus.dash"
+                    },
+                    {
+                        "id":  "mob.nautilus.dash_ready"
+                    },
+                    {
+                        "id":  "mob.nautilus.death"
+                    },
+                    {
+                        "id":  "mob.nautilus.death.in.water"
+                    },
+                    {
+                        "id":  "mob.nautilus.eat"
+                    },
+                    {
+                        "id":  "mob.nautilus.hurt"
+                    },
+                    {
+                        "id":  "mob.nautilus.hurt.in.water"
+                    },
+                    {
+                        "id":  "mob.nautilus.nautilus_saddle"
+                    },
+                    {
+                        "id":  "mob.nautilus.ride"
+                    },
+                    {
+                        "id":  "mob.nautilus.saddle"
+                    },
+                    {
+                        "id":  "mob.nautilus.saddle_underwater"
+                    },
+                    {
+                        "id":  "mob.nautilus.swim"
+                    },
+                    {
+                        "id":  "mob.ocelot.death"
+                    },
+                    {
+                        "id":  "mob.ocelot.idle"
+                    },
+                    {
+                        "id":  "mob.panda.bite"
+                    },
+                    {
+                        "id":  "mob.panda.cant_breed"
+                    },
+                    {
+                        "id":  "mob.panda.death"
+                    },
+                    {
+                        "id":  "mob.panda.eat"
+                    },
+                    {
+                        "id":  "mob.panda.hurt"
+                    },
+                    {
+                        "id":  "mob.panda.idle"
+                    },
+                    {
+                        "id":  "mob.panda.idle.aggressive"
+                    },
+                    {
+                        "id":  "mob.panda.idle.worried"
+                    },
+                    {
+                        "id":  "mob.panda.presneeze"
+                    },
+                    {
+                        "id":  "mob.panda.sneeze"
+                    },
+                    {
+                        "id":  "mob.panda.step"
+                    },
+                    {
+                        "id":  "mob.panda_baby.idle"
+                    },
+                    {
+                        "id":  "mob.parched.ambient"
+                    },
+                    {
+                        "id":  "mob.parched.death"
+                    },
+                    {
+                        "id":  "mob.parched.hurt"
+                    },
+                    {
+                        "id":  "mob.parched.step"
+                    },
+                    {
+                        "id":  "mob.parrot.death"
+                    },
+                    {
+                        "id":  "mob.parrot.eat"
+                    },
+                    {
+                        "id":  "mob.parrot.fly"
+                    },
+                    {
+                        "id":  "mob.parrot.hurt"
+                    },
+                    {
+                        "id":  "mob.parrot.idle"
+                    },
+                    {
+                        "id":  "mob.parrot.imitate_creaking"
+                    },
+                    {
+                        "id":  "mob.parrot.step"
+                    },
+                    {
+                        "id":  "mob.pause_growth"
+                    },
+                    {
+                        "id":  "mob.phantom.bite"
+                    },
+                    {
+                        "id":  "mob.phantom.death"
+                    },
+                    {
+                        "id":  "mob.phantom.flap"
+                    },
+                    {
+                        "id":  "mob.phantom.hurt"
+                    },
+                    {
+                        "id":  "mob.phantom.idle"
+                    },
+                    {
+                        "id":  "mob.phantom.swoop"
+                    },
+                    {
+                        "id":  "mob.picky_chicken.death"
+                    },
+                    {
+                        "id":  "mob.picky_chicken.hurt"
+                    },
+                    {
+                        "id":  "mob.picky_chicken.say"
+                    },
+                    {
+                        "id":  "mob.pig.boost"
+                    },
+                    {
+                        "id":  "mob.pig.death"
+                    },
+                    {
+                        "id":  "mob.pig.eat"
+                    },
+                    {
+                        "id":  "mob.pig.say"
+                    },
+                    {
+                        "id":  "mob.pig.step"
+                    },
+                    {
+                        "id":  "mob.piglin.admiring_item"
+                    },
+                    {
+                        "id":  "mob.piglin.ambient"
+                    },
+                    {
+                        "id":  "mob.piglin.angry"
+                    },
+                    {
+                        "id":  "mob.piglin.celebrate"
+                    },
+                    {
+                        "id":  "mob.piglin.converted_to_zombified"
+                    },
+                    {
+                        "id":  "mob.piglin.death"
+                    },
+                    {
+                        "id":  "mob.piglin.hurt"
+                    },
+                    {
+                        "id":  "mob.piglin.jealous"
+                    },
+                    {
+                        "id":  "mob.piglin.retreat"
+                    },
+                    {
+                        "id":  "mob.piglin.step"
+                    },
+                    {
+                        "id":  "mob.piglin_brute.ambient"
+                    },
+                    {
+                        "id":  "mob.piglin_brute.angry"
+                    },
+                    {
+                        "id":  "mob.piglin_brute.converted_to_zombified"
+                    },
+                    {
+                        "id":  "mob.piglin_brute.death"
+                    },
+                    {
+                        "id":  "mob.piglin_brute.hurt"
+                    },
+                    {
+                        "id":  "mob.piglin_brute.step"
+                    },
+                    {
+                        "id":  "mob.pillager.celebrate"
+                    },
+                    {
+                        "id":  "mob.pillager.death"
+                    },
+                    {
+                        "id":  "mob.pillager.hurt"
+                    },
+                    {
+                        "id":  "mob.pillager.idle"
+                    },
+                    {
+                        "id":  "mob.player.hurt_drown"
+                    },
+                    {
+                        "id":  "mob.player.hurt_freeze"
+                    },
+                    {
+                        "id":  "mob.player.hurt_on_fire"
+                    },
+                    {
+                        "id":  "mob.polarbear.death"
+                    },
+                    {
+                        "id":  "mob.polarbear.hurt"
+                    },
+                    {
+                        "id":  "mob.polarbear.idle"
+                    },
+                    {
+                        "id":  "mob.polarbear.step"
+                    },
+                    {
+                        "id":  "mob.polarbear.warning"
+                    },
+                    {
+                        "id":  "mob.polarbear_baby.idle"
+                    },
+                    {
+                        "id":  "mob.rabbit.death"
+                    },
+                    {
+                        "id":  "mob.rabbit.hop"
+                    },
+                    {
+                        "id":  "mob.rabbit.hurt"
+                    },
+                    {
+                        "id":  "mob.rabbit.idle"
+                    },
+                    {
+                        "id":  "mob.ravager.ambient"
+                    },
+                    {
+                        "id":  "mob.ravager.bite"
+                    },
+                    {
+                        "id":  "mob.ravager.celebrate"
+                    },
+                    {
+                        "id":  "mob.ravager.death"
+                    },
+                    {
+                        "id":  "mob.ravager.hurt"
+                    },
+                    {
+                        "id":  "mob.ravager.roar"
+                    },
+                    {
+                        "id":  "mob.ravager.step"
+                    },
+                    {
+                        "id":  "mob.ravager.stun"
+                    },
+                    {
+                        "id":  "mob.reset_growth"
+                    },
+                    {
+                        "id":  "mob.royal_cat.ambient"
+                    },
+                    {
+                        "id":  "mob.royal_cat.death"
+                    },
+                    {
+                        "id":  "mob.royal_cat.hurt"
+                    },
+                    {
+                        "id":  "mob.royal_cat.purreow"
+                    },
+                    {
+                        "id":  "mob.sheep.say"
+                    },
+                    {
+                        "id":  "mob.sheep.shear"
+                    },
+                    {
+                        "id":  "mob.sheep.step"
+                    },
+                    {
+                        "id":  "mob.shulker.ambient"
+                    },
+                    {
+                        "id":  "mob.shulker.bullet.hit"
+                    },
+                    {
+                        "id":  "mob.shulker.close"
+                    },
+                    {
+                        "id":  "mob.shulker.close.hurt"
+                    },
+                    {
+                        "id":  "mob.shulker.death"
+                    },
+                    {
+                        "id":  "mob.shulker.hurt"
+                    },
+                    {
+                        "id":  "mob.shulker.open"
+                    },
+                    {
+                        "id":  "mob.shulker.shoot"
+                    },
+                    {
+                        "id":  "mob.shulker.teleport"
+                    },
+                    {
+                        "id":  "mob.silverfish.hit"
+                    },
+                    {
+                        "id":  "mob.silverfish.kill"
+                    },
+                    {
+                        "id":  "mob.silverfish.say"
+                    },
+                    {
+                        "id":  "mob.silverfish.step"
+                    },
+                    {
+                        "id":  "mob.skeleton.convert_to_stray"
+                    },
+                    {
+                        "id":  "mob.skeleton.death"
+                    },
+                    {
+                        "id":  "mob.skeleton.hurt"
+                    },
+                    {
+                        "id":  "mob.skeleton.say"
+                    },
+                    {
+                        "id":  "mob.skeleton.step"
+                    },
+                    {
+                        "id":  "mob.slime.attack"
+                    },
+                    {
+                        "id":  "mob.slime.big"
+                    },
+                    {
+                        "id":  "mob.slime.death"
+                    },
+                    {
+                        "id":  "mob.slime.hurt"
+                    },
+                    {
+                        "id":  "mob.slime.jump"
+                    },
+                    {
+                        "id":  "mob.slime.small"
+                    },
+                    {
+                        "id":  "mob.slime.squish"
+                    },
+                    {
+                        "id":  "mob.sniffer.death"
+                    },
+                    {
+                        "id":  "mob.sniffer.digging"
+                    },
+                    {
+                        "id":  "mob.sniffer.drop_seed"
+                    },
+                    {
+                        "id":  "mob.sniffer.eat"
+                    },
+                    {
+                        "id":  "mob.sniffer.happy"
+                    },
+                    {
+                        "id":  "mob.sniffer.hurt"
+                    },
+                    {
+                        "id":  "mob.sniffer.idle"
+                    },
+                    {
+                        "id":  "mob.sniffer.long_sniff"
+                    },
+                    {
+                        "id":  "mob.sniffer.plop"
+                    },
+                    {
+                        "id":  "mob.sniffer.searching"
+                    },
+                    {
+                        "id":  "mob.sniffer.sniffsniff"
+                    },
+                    {
+                        "id":  "mob.sniffer.stand_up"
+                    },
+                    {
+                        "id":  "mob.sniffer.step"
+                    },
+                    {
+                        "id":  "mob.snowgolem.death"
+                    },
+                    {
+                        "id":  "mob.snowgolem.hurt"
+                    },
+                    {
+                        "id":  "mob.snowgolem.shoot"
+                    },
+                    {
+                        "id":  "mob.spider.death"
+                    },
+                    {
+                        "id":  "mob.spider.say"
+                    },
+                    {
+                        "id":  "mob.spider.step"
+                    },
+                    {
+                        "id":  "mob.squid.ambient"
+                    },
+                    {
+                        "id":  "mob.squid.death"
+                    },
+                    {
+                        "id":  "mob.squid.hurt"
+                    },
+                    {
+                        "id":  "mob.squid.ink_squirt"
+                    },
+                    {
+                        "id":  "mob.stray.ambient"
+                    },
+                    {
+                        "id":  "mob.stray.death"
+                    },
+                    {
+                        "id":  "mob.stray.hurt"
+                    },
+                    {
+                        "id":  "mob.stray.step"
+                    },
+                    {
+                        "id":  "mob.strider.death"
+                    },
+                    {
+                        "id":  "mob.strider.eat"
+                    },
+                    {
+                        "id":  "mob.strider.hurt"
+                    },
+                    {
+                        "id":  "mob.strider.idle"
+                    },
+                    {
+                        "id":  "mob.strider.panic"
+                    },
+                    {
+                        "id":  "mob.strider.step"
+                    },
+                    {
+                        "id":  "mob.strider.step_lava"
+                    },
+                    {
+                        "id":  "mob.strider.tempt"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.absorb"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.bounce"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.bouncy.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.bouncy.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.death"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.eject"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.explosive.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.explosive.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.fast_flat.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.fast_flat.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.fast_sliding.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.fast_sliding.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.high_resistance.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.high_resistance.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.hot.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.hot.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.hurt"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.jump"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.landing"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.light.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.light.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.regular.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.regular.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.slow_bouncy.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.slow_bouncy.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.slow_flat.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.slow_flat.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.slow_sliding.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.slow_sliding.push"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.small.death"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.small.hurt"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.small.jump"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.small.landing"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.sticky.hit"
+                    },
+                    {
+                        "id":  "mob.sulfur_cube.sticky.push"
+                    },
+                    {
+                        "id":  "mob.tadpole.convert_to_frog"
+                    },
+                    {
+                        "id":  "mob.tadpole.death"
+                    },
+                    {
+                        "id":  "mob.tadpole.hurt"
+                    },
+                    {
+                        "id":  "mob.turtle.ambient"
+                    },
+                    {
+                        "id":  "mob.turtle.death"
+                    },
+                    {
+                        "id":  "mob.turtle.hurt"
+                    },
+                    {
+                        "id":  "mob.turtle.step"
+                    },
+                    {
+                        "id":  "mob.turtle.swim"
+                    },
+                    {
+                        "id":  "mob.turtle_baby.born"
+                    },
+                    {
+                        "id":  "mob.turtle_baby.death"
+                    },
+                    {
+                        "id":  "mob.turtle_baby.hurt"
+                    },
+                    {
+                        "id":  "mob.turtle_baby.step"
+                    },
+                    {
+                        "id":  "mob.unsaddle"
+                    },
+                    {
+                        "id":  "mob.vex.ambient"
+                    },
+                    {
+                        "id":  "mob.vex.charge"
+                    },
+                    {
+                        "id":  "mob.vex.death"
+                    },
+                    {
+                        "id":  "mob.vex.hurt"
+                    },
+                    {
+                        "id":  "mob.villager.death"
+                    },
+                    {
+                        "id":  "mob.villager.haggle"
+                    },
+                    {
+                        "id":  "mob.villager.hit"
+                    },
+                    {
+                        "id":  "mob.villager.idle"
+                    },
+                    {
+                        "id":  "mob.villager.no"
+                    },
+                    {
+                        "id":  "mob.villager.yes"
+                    },
+                    {
+                        "id":  "mob.vindicator.celebrate"
+                    },
+                    {
+                        "id":  "mob.vindicator.death"
+                    },
+                    {
+                        "id":  "mob.vindicator.hurt"
+                    },
+                    {
+                        "id":  "mob.vindicator.idle"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.death"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.disappeared"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.drink_milk"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.drink_potion"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.haggle"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.hurt"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.idle"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.no"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.reappeared"
+                    },
+                    {
+                        "id":  "mob.wanderingtrader.yes"
+                    },
+                    {
+                        "id":  "mob.warden.agitated"
+                    },
+                    {
+                        "id":  "mob.warden.angry"
+                    },
+                    {
+                        "id":  "mob.warden.attack"
+                    },
+                    {
+                        "id":  "mob.warden.clicking"
+                    },
+                    {
+                        "id":  "mob.warden.death"
+                    },
+                    {
+                        "id":  "mob.warden.dig"
+                    },
+                    {
+                        "id":  "mob.warden.emerge"
+                    },
+                    {
+                        "id":  "mob.warden.heartbeat"
+                    },
+                    {
+                        "id":  "mob.warden.hurt"
+                    },
+                    {
+                        "id":  "mob.warden.idle"
+                    },
+                    {
+                        "id":  "mob.warden.listening"
+                    },
+                    {
+                        "id":  "mob.warden.listening_angry"
+                    },
+                    {
+                        "id":  "mob.warden.nearby_close"
+                    },
+                    {
+                        "id":  "mob.warden.nearby_closer"
+                    },
+                    {
+                        "id":  "mob.warden.nearby_closest"
+                    },
+                    {
+                        "id":  "mob.warden.roar"
+                    },
+                    {
+                        "id":  "mob.warden.sniff"
+                    },
+                    {
+                        "id":  "mob.warden.sonic_boom"
+                    },
+                    {
+                        "id":  "mob.warden.sonic_charge"
+                    },
+                    {
+                        "id":  "mob.warden.step"
+                    },
+                    {
+                        "id":  "mob.witch.ambient"
+                    },
+                    {
+                        "id":  "mob.witch.celebrate"
+                    },
+                    {
+                        "id":  "mob.witch.death"
+                    },
+                    {
+                        "id":  "mob.witch.drink"
+                    },
+                    {
+                        "id":  "mob.witch.hurt"
+                    },
+                    {
+                        "id":  "mob.witch.throw"
+                    },
+                    {
+                        "id":  "mob.wither.ambient"
+                    },
+                    {
+                        "id":  "mob.wither.break_block"
+                    },
+                    {
+                        "id":  "mob.wither.death"
+                    },
+                    {
+                        "id":  "mob.wither.hurt"
+                    },
+                    {
+                        "id":  "mob.wither.shoot"
+                    },
+                    {
+                        "id":  "mob.wither.spawn"
+                    },
+                    {
+                        "id":  "mob.wolf.bark"
+                    },
+                    {
+                        "id":  "mob.wolf.big.bark"
+                    },
+                    {
+                        "id":  "mob.wolf.big.death"
+                    },
+                    {
+                        "id":  "mob.wolf.big.growl"
+                    },
+                    {
+                        "id":  "mob.wolf.big.hurt"
+                    },
+                    {
+                        "id":  "mob.wolf.big.panting"
+                    },
+                    {
+                        "id":  "mob.wolf.big.whine"
+                    },
+                    {
+                        "id":  "mob.wolf.cute.bark"
+                    },
+                    {
+                        "id":  "mob.wolf.cute.death"
+                    },
+                    {
+                        "id":  "mob.wolf.cute.growl"
+                    },
+                    {
+                        "id":  "mob.wolf.cute.hurt"
+                    },
+                    {
+                        "id":  "mob.wolf.cute.panting"
+                    },
+                    {
+                        "id":  "mob.wolf.cute.whine"
+                    },
+                    {
+                        "id":  "mob.wolf.death"
+                    },
+                    {
+                        "id":  "mob.wolf.growl"
+                    },
+                    {
+                        "id":  "mob.wolf.grumpy.bark"
+                    },
+                    {
+                        "id":  "mob.wolf.grumpy.death"
+                    },
+                    {
+                        "id":  "mob.wolf.grumpy.growl"
+                    },
+                    {
+                        "id":  "mob.wolf.grumpy.hurt"
+                    },
+                    {
+                        "id":  "mob.wolf.grumpy.panting"
+                    },
+                    {
+                        "id":  "mob.wolf.grumpy.whine"
+                    },
+                    {
+                        "id":  "mob.wolf.hurt"
+                    },
+                    {
+                        "id":  "mob.wolf.mad.bark"
+                    },
+                    {
+                        "id":  "mob.wolf.mad.death"
+                    },
+                    {
+                        "id":  "mob.wolf.mad.growl"
+                    },
+                    {
+                        "id":  "mob.wolf.mad.hurt"
+                    },
+                    {
+                        "id":  "mob.wolf.mad.panting"
+                    },
+                    {
+                        "id":  "mob.wolf.mad.whine"
+                    },
+                    {
+                        "id":  "mob.wolf.panting"
+                    },
+                    {
+                        "id":  "mob.wolf.puglin.bark"
+                    },
+                    {
+                        "id":  "mob.wolf.puglin.death"
+                    },
+                    {
+                        "id":  "mob.wolf.puglin.growl"
+                    },
+                    {
+                        "id":  "mob.wolf.puglin.hurt"
+                    },
+                    {
+                        "id":  "mob.wolf.puglin.panting"
+                    },
+                    {
+                        "id":  "mob.wolf.puglin.whine"
+                    },
+                    {
+                        "id":  "mob.wolf.sad.bark"
+                    },
+                    {
+                        "id":  "mob.wolf.sad.death"
+                    },
+                    {
+                        "id":  "mob.wolf.sad.growl"
+                    },
+                    {
+                        "id":  "mob.wolf.sad.hurt"
+                    },
+                    {
+                        "id":  "mob.wolf.sad.panting"
+                    },
+                    {
+                        "id":  "mob.wolf.sad.whine"
+                    },
+                    {
+                        "id":  "mob.wolf.shake"
+                    },
+                    {
+                        "id":  "mob.wolf.step"
+                    },
+                    {
+                        "id":  "mob.wolf.whine"
+                    },
+                    {
+                        "id":  "mob.zoglin.angry"
+                    },
+                    {
+                        "id":  "mob.zoglin.attack"
+                    },
+                    {
+                        "id":  "mob.zoglin.death"
+                    },
+                    {
+                        "id":  "mob.zoglin.hurt"
+                    },
+                    {
+                        "id":  "mob.zoglin.idle"
+                    },
+                    {
+                        "id":  "mob.zoglin.step"
+                    },
+                    {
+                        "id":  "mob.zombie.death"
+                    },
+                    {
+                        "id":  "mob.zombie.hurt"
+                    },
+                    {
+                        "id":  "mob.zombie.remedy"
+                    },
+                    {
+                        "id":  "mob.zombie.say"
+                    },
+                    {
+                        "id":  "mob.zombie.step"
+                    },
+                    {
+                        "id":  "mob.zombie.unfect"
+                    },
+                    {
+                        "id":  "mob.zombie.wood"
+                    },
+                    {
+                        "id":  "mob.zombie.woodbreak"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.ambient"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.ambient.in.water"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.dash"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.dash_ready"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.death"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.death.in.water"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.eat"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.hurt"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.hurt.in.water"
+                    },
+                    {
+                        "id":  "mob.zombie_nautilus.swim"
+                    },
+                    {
+                        "id":  "mob.zombie_villager.death"
+                    },
+                    {
+                        "id":  "mob.zombie_villager.hurt"
+                    },
+                    {
+                        "id":  "mob.zombie_villager.say"
+                    },
+                    {
+                        "id":  "mob.zombiepig.zpig"
+                    },
+                    {
+                        "id":  "mob.zombiepig.zpigangry"
+                    },
+                    {
+                        "id":  "mob.zombiepig.zpigdeath"
+                    },
+                    {
+                        "id":  "mob.zombiepig.zpighurt"
+                    },
+                    {
+                        "id":  "music.game"
+                    },
+                    {
+                        "id":  "music.game.basalt_deltas"
+                    },
+                    {
+                        "id":  "music.game.creative"
+                    },
+                    {
+                        "id":  "music.game.credits"
+                    },
+                    {
+                        "id":  "music.game.crimson_forest"
+                    },
+                    {
+                        "id":  "music.game.deep_dark"
+                    },
+                    {
+                        "id":  "music.game.dripstone_caves"
+                    },
+                    {
+                        "id":  "music.game.end"
+                    },
+                    {
+                        "id":  "music.game.endboss"
+                    },
+                    {
+                        "id":  "music.game.frozen_peaks"
+                    },
+                    {
+                        "id":  "music.game.grove"
+                    },
+                    {
+                        "id":  "music.game.jagged_peaks"
+                    },
+                    {
+                        "id":  "music.game.lush_caves"
+                    },
+                    {
+                        "id":  "music.game.meadow"
+                    },
+                    {
+                        "id":  "music.game.nether"
+                    },
+                    {
+                        "id":  "music.game.nether_wastes"
+                    },
+                    {
+                        "id":  "music.game.snowy_slopes"
+                    },
+                    {
+                        "id":  "music.game.soulsand_valley"
+                    },
+                    {
+                        "id":  "music.game.stony_peaks"
+                    },
+                    {
+                        "id":  "music.game.swamp_music"
+                    },
+                    {
+                        "id":  "music.game.warped_forest"
+                    },
+                    {
+                        "id":  "music.game.water"
+                    },
+                    {
+                        "id":  "music.game_and_wild_equal_chance"
+                    },
+                    {
+                        "id":  "music.game_and_wild_favor_game"
+                    },
+                    {
+                        "id":  "music.menu"
+                    },
+                    {
+                        "id":  "music.overworld.bamboo_jungle"
+                    },
+                    {
+                        "id":  "music.overworld.cherry_grove"
+                    },
+                    {
+                        "id":  "music.overworld.deep_dark"
+                    },
+                    {
+                        "id":  "music.overworld.desert"
+                    },
+                    {
+                        "id":  "music.overworld.dripstone_caves"
+                    },
+                    {
+                        "id":  "music.overworld.flower_forest"
+                    },
+                    {
+                        "id":  "music.overworld.forest"
+                    },
+                    {
+                        "id":  "music.overworld.frozen_peaks"
+                    },
+                    {
+                        "id":  "music.overworld.grove"
+                    },
+                    {
+                        "id":  "music.overworld.jagged_peaks"
+                    },
+                    {
+                        "id":  "music.overworld.jungle"
+                    },
+                    {
+                        "id":  "music.overworld.jungle_edge"
+                    },
+                    {
+                        "id":  "music.overworld.lush_caves"
+                    },
+                    {
+                        "id":  "music.overworld.meadow"
+                    },
+                    {
+                        "id":  "music.overworld.mesa"
+                    },
+                    {
+                        "id":  "music.overworld.old_growth_taiga"
+                    },
+                    {
+                        "id":  "music.overworld.snowy_slopes"
+                    },
+                    {
+                        "id":  "music.overworld.stony_peaks"
+                    },
+                    {
+                        "id":  "music.overworld.sulfur_caves"
+                    },
+                    {
+                        "id":  "music.overworld.swamp_music"
+                    },
+                    {
+                        "id":  "note.banjo"
+                    },
+                    {
+                        "id":  "note.bass"
+                    },
+                    {
+                        "id":  "note.bassattack"
+                    },
+                    {
+                        "id":  "note.bd"
+                    },
+                    {
+                        "id":  "note.bell"
+                    },
+                    {
+                        "id":  "note.bit"
+                    },
+                    {
+                        "id":  "note.chime"
+                    },
+                    {
+                        "id":  "note.cow_bell"
+                    },
+                    {
+                        "id":  "note.creeper"
+                    },
+                    {
+                        "id":  "note.didgeridoo"
+                    },
+                    {
+                        "id":  "note.enderdragon"
+                    },
+                    {
+                        "id":  "note.flute"
+                    },
+                    {
+                        "id":  "note.guitar"
+                    },
+                    {
+                        "id":  "note.harp"
+                    },
+                    {
+                        "id":  "note.hat"
+                    },
+                    {
+                        "id":  "note.iron_xylophone"
+                    },
+                    {
+                        "id":  "note.piglin"
+                    },
+                    {
+                        "id":  "note.pling"
+                    },
+                    {
+                        "id":  "note.skeleton"
+                    },
+                    {
+                        "id":  "note.snare"
+                    },
+                    {
+                        "id":  "note.trumpet"
+                    },
+                    {
+                        "id":  "note.trumpet_exposed"
+                    },
+                    {
+                        "id":  "note.trumpet_oxidized"
+                    },
+                    {
+                        "id":  "note.trumpet_weathered"
+                    },
+                    {
+                        "id":  "note.witherskeleton"
+                    },
+                    {
+                        "id":  "note.xylophone"
+                    },
+                    {
+                        "id":  "note.zombie"
+                    },
+                    {
+                        "id":  "ominous_bottle.end_use"
+                    },
+                    {
+                        "id":  "ominous_item_spawner.about_to_spawn_item"
+                    },
+                    {
+                        "id":  "ominous_item_spawner.spawn_item"
+                    },
+                    {
+                        "id":  "ominous_item_spawner.spawn_item_begin"
+                    },
+                    {
+                        "id":  "open.bamboo_wood_door"
+                    },
+                    {
+                        "id":  "open.bamboo_wood_fence_gate"
+                    },
+                    {
+                        "id":  "open.bamboo_wood_trapdoor"
+                    },
+                    {
+                        "id":  "open.cherry_wood_door"
+                    },
+                    {
+                        "id":  "open.cherry_wood_fence_gate"
+                    },
+                    {
+                        "id":  "open.cherry_wood_trapdoor"
+                    },
+                    {
+                        "id":  "open.fence_gate"
+                    },
+                    {
+                        "id":  "open.iron_door"
+                    },
+                    {
+                        "id":  "open.iron_trapdoor"
+                    },
+                    {
+                        "id":  "open.nether_wood_door"
+                    },
+                    {
+                        "id":  "open.nether_wood_fence_gate"
+                    },
+                    {
+                        "id":  "open.nether_wood_trapdoor"
+                    },
+                    {
+                        "id":  "open.wooden_door"
+                    },
+                    {
+                        "id":  "open.wooden_trapdoor"
+                    },
+                    {
+                        "id":  "open_door.copper"
+                    },
+                    {
+                        "id":  "open_trapdoor.copper"
+                    },
+                    {
+                        "id":  "particle.soul_escape"
+                    },
+                    {
+                        "id":  "pick_berries.cave_vines"
+                    },
+                    {
+                        "id":  "pickup.chiseled_bookshelf"
+                    },
+                    {
+                        "id":  "pickup_enchanted.chiseled_bookshelf"
+                    },
+                    {
+                        "id":  "place.amethyst_block"
+                    },
+                    {
+                        "id":  "place.amethyst_cluster"
+                    },
+                    {
+                        "id":  "place.ancient_debris"
+                    },
+                    {
+                        "id":  "place.azalea"
+                    },
+                    {
+                        "id":  "place.azalea_leaves"
+                    },
+                    {
+                        "id":  "place.bamboo_wood"
+                    },
+                    {
+                        "id":  "place.bamboo_wood_hanging_sign"
+                    },
+                    {
+                        "id":  "place.basalt"
+                    },
+                    {
+                        "id":  "place.big_dripleaf"
+                    },
+                    {
+                        "id":  "place.bone_block"
+                    },
+                    {
+                        "id":  "place.calcite"
+                    },
+                    {
+                        "id":  "place.candle"
+                    },
+                    {
+                        "id":  "place.cave_vines"
+                    },
+                    {
+                        "id":  "place.chain"
+                    },
+                    {
+                        "id":  "place.cherry_leaves"
+                    },
+                    {
+                        "id":  "place.cherry_wood"
+                    },
+                    {
+                        "id":  "place.cherry_wood_hanging_sign"
+                    },
+                    {
+                        "id":  "place.chiseled_bookshelf"
+                    },
+                    {
+                        "id":  "place.cloth"
+                    },
+                    {
+                        "id":  "place.copper"
+                    },
+                    {
+                        "id":  "place.copper_bulb"
+                    },
+                    {
+                        "id":  "place.copper_grate"
+                    },
+                    {
+                        "id":  "place.coral"
+                    },
+                    {
+                        "id":  "place.decorated_pot"
+                    },
+                    {
+                        "id":  "place.deepslate"
+                    },
+                    {
+                        "id":  "place.deepslate_bricks"
+                    },
+                    {
+                        "id":  "place.dirt_with_roots"
+                    },
+                    {
+                        "id":  "place.dripstone_block"
+                    },
+                    {
+                        "id":  "place.frog_spawn"
+                    },
+                    {
+                        "id":  "place.froglight"
+                    },
+                    {
+                        "id":  "place.fungus"
+                    },
+                    {
+                        "id":  "place.grass"
+                    },
+                    {
+                        "id":  "place.gravel"
+                    },
+                    {
+                        "id":  "place.hanging_roots"
+                    },
+                    {
+                        "id":  "place.hanging_sign"
+                    },
+                    {
+                        "id":  "place.heavy_core"
+                    },
+                    {
+                        "id":  "place.honey_block"
+                    },
+                    {
+                        "id":  "place.iron"
+                    },
+                    {
+                        "id":  "place.large_amethyst_bud"
+                    },
+                    {
+                        "id":  "place.lodestone"
+                    },
+                    {
+                        "id":  "place.medium_amethyst_bud"
+                    },
+                    {
+                        "id":  "place.moss"
+                    },
+                    {
+                        "id":  "place.nether_brick"
+                    },
+                    {
+                        "id":  "place.nether_gold_ore"
+                    },
+                    {
+                        "id":  "place.nether_sprouts"
+                    },
+                    {
+                        "id":  "place.nether_wart"
+                    },
+                    {
+                        "id":  "place.nether_wood"
+                    },
+                    {
+                        "id":  "place.nether_wood_hanging_sign"
+                    },
+                    {
+                        "id":  "place.netherite"
+                    },
+                    {
+                        "id":  "place.netherrack"
+                    },
+                    {
+                        "id":  "place.nylium"
+                    },
+                    {
+                        "id":  "place.pink_petals"
+                    },
+                    {
+                        "id":  "place.pointed_dripstone"
+                    },
+                    {
+                        "id":  "place.powder_snow"
+                    },
+                    {
+                        "id":  "place.roots"
+                    },
+                    {
+                        "id":  "place.sand"
+                    },
+                    {
+                        "id":  "place.sculk"
+                    },
+                    {
+                        "id":  "place.sculk_catalyst"
+                    },
+                    {
+                        "id":  "place.sculk_sensor"
+                    },
+                    {
+                        "id":  "place.sculk_shrieker"
+                    },
+                    {
+                        "id":  "place.sculk_vein"
+                    },
+                    {
+                        "id":  "place.shroomlight"
+                    },
+                    {
+                        "id":  "place.slime.big"
+                    },
+                    {
+                        "id":  "place.small_amethyst_bud"
+                    },
+                    {
+                        "id":  "place.snow"
+                    },
+                    {
+                        "id":  "place.soul_sand"
+                    },
+                    {
+                        "id":  "place.soul_soil"
+                    },
+                    {
+                        "id":  "place.sponge"
+                    },
+                    {
+                        "id":  "place.spore_blossom"
+                    },
+                    {
+                        "id":  "place.stem"
+                    },
+                    {
+                        "id":  "place.stone"
+                    },
+                    {
+                        "id":  "place.suspicious_gravel"
+                    },
+                    {
+                        "id":  "place.suspicious_sand"
+                    },
+                    {
+                        "id":  "place.tuff"
+                    },
+                    {
+                        "id":  "place.tuff_bricks"
+                    },
+                    {
+                        "id":  "place.vines"
+                    },
+                    {
+                        "id":  "place.web"
+                    },
+                    {
+                        "id":  "place.wet_sponge"
+                    },
+                    {
+                        "id":  "place.wood"
+                    },
+                    {
+                        "id":  "portal.portal"
+                    },
+                    {
+                        "id":  "portal.travel"
+                    },
+                    {
+                        "id":  "portal.trigger"
+                    },
+                    {
+                        "id":  "power.off.sculk_sensor"
+                    },
+                    {
+                        "id":  "power.on.sculk_sensor"
+                    },
+                    {
+                        "id":  "pumpkin.carve"
+                    },
+                    {
+                        "id":  "raid.horn"
+                    },
+                    {
+                        "id":  "random.anvil_break"
+                    },
+                    {
+                        "id":  "random.anvil_land"
+                    },
+                    {
+                        "id":  "random.anvil_use"
+                    },
+                    {
+                        "id":  "random.bow"
+                    },
+                    {
+                        "id":  "random.bowhit"
+                    },
+                    {
+                        "id":  "random.break"
+                    },
+                    {
+                        "id":  "random.burp"
+                    },
+                    {
+                        "id":  "random.chestclosed"
+                    },
+                    {
+                        "id":  "random.chestopen"
+                    },
+                    {
+                        "id":  "random.click"
+                    },
+                    {
+                        "id":  "random.door_close"
+                    },
+                    {
+                        "id":  "random.door_open"
+                    },
+                    {
+                        "id":  "random.drink"
+                    },
+                    {
+                        "id":  "random.drink_honey"
+                    },
+                    {
+                        "id":  "random.eat"
+                    },
+                    {
+                        "id":  "random.enderchestclosed"
+                    },
+                    {
+                        "id":  "random.enderchestopen"
+                    },
+                    {
+                        "id":  "random.explode"
+                    },
+                    {
+                        "id":  "random.fizz"
+                    },
+                    {
+                        "id":  "random.fuse"
+                    },
+                    {
+                        "id":  "random.glass"
+                    },
+                    {
+                        "id":  "random.hurt"
+                    },
+                    {
+                        "id":  "random.levelup"
+                    },
+                    {
+                        "id":  "random.lever_click"
+                    },
+                    {
+                        "id":  "random.orb"
+                    },
+                    {
+                        "id":  "random.pop"
+                    },
+                    {
+                        "id":  "random.pop2"
+                    },
+                    {
+                        "id":  "random.potion.brewed"
+                    },
+                    {
+                        "id":  "random.screenshot"
+                    },
+                    {
+                        "id":  "random.shulkerboxclosed"
+                    },
+                    {
+                        "id":  "random.shulkerboxopen"
+                    },
+                    {
+                        "id":  "random.splash"
+                    },
+                    {
+                        "id":  "random.stone_click"
+                    },
+                    {
+                        "id":  "random.swim"
+                    },
+                    {
+                        "id":  "random.toast"
+                    },
+                    {
+                        "id":  "random.toast_recipe_unlocking_in"
+                    },
+                    {
+                        "id":  "random.toast_recipe_unlocking_out"
+                    },
+                    {
+                        "id":  "random.totem"
+                    },
+                    {
+                        "id":  "random.wood_click"
+                    },
+                    {
+                        "id":  "record.11"
+                    },
+                    {
+                        "id":  "record.13"
+                    },
+                    {
+                        "id":  "record.5"
+                    },
+                    {
+                        "id":  "record.blocks"
+                    },
+                    {
+                        "id":  "record.bounce"
+                    },
+                    {
+                        "id":  "record.cat"
+                    },
+                    {
+                        "id":  "record.chirp"
+                    },
+                    {
+                        "id":  "record.creator"
+                    },
+                    {
+                        "id":  "record.creator_music_box"
+                    },
+                    {
+                        "id":  "record.far"
+                    },
+                    {
+                        "id":  "record.lava_chicken"
+                    },
+                    {
+                        "id":  "record.mall"
+                    },
+                    {
+                        "id":  "record.mellohi"
+                    },
+                    {
+                        "id":  "record.otherside"
+                    },
+                    {
+                        "id":  "record.pigstep"
+                    },
+                    {
+                        "id":  "record.precipice"
+                    },
+                    {
+                        "id":  "record.relic"
+                    },
+                    {
+                        "id":  "record.stal"
+                    },
+                    {
+                        "id":  "record.strad"
+                    },
+                    {
+                        "id":  "record.tears"
+                    },
+                    {
+                        "id":  "record.wait"
+                    },
+                    {
+                        "id":  "record.ward"
+                    },
+                    {
+                        "id":  "resonate.amethyst_block"
+                    },
+                    {
+                        "id":  "respawn_anchor.ambient"
+                    },
+                    {
+                        "id":  "respawn_anchor.charge"
+                    },
+                    {
+                        "id":  "respawn_anchor.deplete"
+                    },
+                    {
+                        "id":  "respawn_anchor.set_spawn"
+                    },
+                    {
+                        "id":  "scrape"
+                    },
+                    {
+                        "id":  "shatter.decorated_pot"
+                    },
+                    {
+                        "id":  "shriek.sculk_shrieker"
+                    },
+                    {
+                        "id":  "sign.dye.use"
+                    },
+                    {
+                        "id":  "sign.ink_sac.use"
+                    },
+                    {
+                        "id":  "smithing_table.use"
+                    },
+                    {
+                        "id":  "sponge.absorb"
+                    },
+                    {
+                        "id":  "spread.sculk"
+                    },
+                    {
+                        "id":  "step.amethyst_block"
+                    },
+                    {
+                        "id":  "step.amethyst_cluster"
+                    },
+                    {
+                        "id":  "step.ancient_debris"
+                    },
+                    {
+                        "id":  "step.azalea"
+                    },
+                    {
+                        "id":  "step.azalea_leaves"
+                    },
+                    {
+                        "id":  "step.bamboo_wood"
+                    },
+                    {
+                        "id":  "step.bamboo_wood_hanging_sign"
+                    },
+                    {
+                        "id":  "step.basalt"
+                    },
+                    {
+                        "id":  "step.big_dripleaf"
+                    },
+                    {
+                        "id":  "step.bone_block"
+                    },
+                    {
+                        "id":  "step.calcite"
+                    },
+                    {
+                        "id":  "step.candle"
+                    },
+                    {
+                        "id":  "step.cave_vines"
+                    },
+                    {
+                        "id":  "step.chain"
+                    },
+                    {
+                        "id":  "step.cherry_leaves"
+                    },
+                    {
+                        "id":  "step.cherry_wood"
+                    },
+                    {
+                        "id":  "step.cherry_wood_hanging_sign"
+                    },
+                    {
+                        "id":  "step.chiseled_bookshelf"
+                    },
+                    {
+                        "id":  "step.cloth"
+                    },
+                    {
+                        "id":  "step.copper"
+                    },
+                    {
+                        "id":  "step.copper_bulb"
+                    },
+                    {
+                        "id":  "step.copper_grate"
+                    },
+                    {
+                        "id":  "step.coral"
+                    },
+                    {
+                        "id":  "step.decorated_pot"
+                    },
+                    {
+                        "id":  "step.deepslate"
+                    },
+                    {
+                        "id":  "step.deepslate_bricks"
+                    },
+                    {
+                        "id":  "step.dirt_with_roots"
+                    },
+                    {
+                        "id":  "step.dripstone_block"
+                    },
+                    {
+                        "id":  "step.frog_spawn"
+                    },
+                    {
+                        "id":  "step.froglight"
+                    },
+                    {
+                        "id":  "step.grass"
+                    },
+                    {
+                        "id":  "step.gravel"
+                    },
+                    {
+                        "id":  "step.hanging_roots"
+                    },
+                    {
+                        "id":  "step.hanging_sign"
+                    },
+                    {
+                        "id":  "step.heavy_core"
+                    },
+                    {
+                        "id":  "step.honey_block"
+                    },
+                    {
+                        "id":  "step.iron"
+                    },
+                    {
+                        "id":  "step.ladder"
+                    },
+                    {
+                        "id":  "step.moss"
+                    },
+                    {
+                        "id":  "step.nether_brick"
+                    },
+                    {
+                        "id":  "step.nether_gold_ore"
+                    },
+                    {
+                        "id":  "step.nether_sprouts"
+                    },
+                    {
+                        "id":  "step.nether_wart"
+                    },
+                    {
+                        "id":  "step.nether_wood"
+                    },
+                    {
+                        "id":  "step.nether_wood_hanging_sign"
+                    },
+                    {
+                        "id":  "step.netherite"
+                    },
+                    {
+                        "id":  "step.netherrack"
+                    },
+                    {
+                        "id":  "step.nylium"
+                    },
+                    {
+                        "id":  "step.pink_petals"
+                    },
+                    {
+                        "id":  "step.pointed_dripstone"
+                    },
+                    {
+                        "id":  "step.powder_snow"
+                    },
+                    {
+                        "id":  "step.roots"
+                    },
+                    {
+                        "id":  "step.sand"
+                    },
+                    {
+                        "id":  "step.sculk"
+                    },
+                    {
+                        "id":  "step.sculk_catalyst"
+                    },
+                    {
+                        "id":  "step.sculk_sensor"
+                    },
+                    {
+                        "id":  "step.sculk_shrieker"
+                    },
+                    {
+                        "id":  "step.sculk_vein"
+                    },
+                    {
+                        "id":  "step.shroomlight"
+                    },
+                    {
+                        "id":  "step.slime"
+                    },
+                    {
+                        "id":  "step.snow"
+                    },
+                    {
+                        "id":  "step.soul_sand"
+                    },
+                    {
+                        "id":  "step.soul_soil"
+                    },
+                    {
+                        "id":  "step.sponge"
+                    },
+                    {
+                        "id":  "step.spore_blossom"
+                    },
+                    {
+                        "id":  "step.stem"
+                    },
+                    {
+                        "id":  "step.stone"
+                    },
+                    {
+                        "id":  "step.suspicious_gravel"
+                    },
+                    {
+                        "id":  "step.suspicious_sand"
+                    },
+                    {
+                        "id":  "step.tuff"
+                    },
+                    {
+                        "id":  "step.tuff_bricks"
+                    },
+                    {
+                        "id":  "step.vines"
+                    },
+                    {
+                        "id":  "step.web"
+                    },
+                    {
+                        "id":  "step.wet_sponge"
+                    },
+                    {
+                        "id":  "step.wood"
+                    },
+                    {
+                        "id":  "tile.piston.in"
+                    },
+                    {
+                        "id":  "tile.piston.out"
+                    },
+                    {
+                        "id":  "tilt_down.big_dripleaf"
+                    },
+                    {
+                        "id":  "tilt_up.big_dripleaf"
+                    },
+                    {
+                        "id":  "trial_spawner.ambient"
+                    },
+                    {
+                        "id":  "trial_spawner.ambient_ominous"
+                    },
+                    {
+                        "id":  "trial_spawner.break"
+                    },
+                    {
+                        "id":  "trial_spawner.charge_activate"
+                    },
+                    {
+                        "id":  "trial_spawner.close_shutter"
+                    },
+                    {
+                        "id":  "trial_spawner.detect_player"
+                    },
+                    {
+                        "id":  "trial_spawner.eject_item"
+                    },
+                    {
+                        "id":  "trial_spawner.hit"
+                    },
+                    {
+                        "id":  "trial_spawner.open_shutter"
+                    },
+                    {
+                        "id":  "trial_spawner.place"
+                    },
+                    {
+                        "id":  "trial_spawner.spawn_mob"
+                    },
+                    {
+                        "id":  "trial_spawner.step"
+                    },
+                    {
+                        "id":  "ui.cartography_table.take_result"
+                    },
+                    {
+                        "id":  "ui.drawer_close"
+                    },
+                    {
+                        "id":  "ui.drawer_open"
+                    },
+                    {
+                        "id":  "ui.hardcore_disable"
+                    },
+                    {
+                        "id":  "ui.hardcore_enable"
+                    },
+                    {
+                        "id":  "ui.hardcore_toggle_press"
+                    },
+                    {
+                        "id":  "ui.loom.select_pattern"
+                    },
+                    {
+                        "id":  "ui.loom.take_result"
+                    },
+                    {
+                        "id":  "ui.reject"
+                    },
+                    {
+                        "id":  "ui.stonecutter.take_result"
+                    },
+                    {
+                        "id":  "use.ancient_debris"
+                    },
+                    {
+                        "id":  "use.basalt"
+                    },
+                    {
+                        "id":  "use.bone_block"
+                    },
+                    {
+                        "id":  "use.candle"
+                    },
+                    {
+                        "id":  "use.cave_vines"
+                    },
+                    {
+                        "id":  "use.chain"
+                    },
+                    {
+                        "id":  "use.cloth"
+                    },
+                    {
+                        "id":  "use.copper"
+                    },
+                    {
+                        "id":  "use.coral"
+                    },
+                    {
+                        "id":  "use.deepslate"
+                    },
+                    {
+                        "id":  "use.deepslate_bricks"
+                    },
+                    {
+                        "id":  "use.dirt_with_roots"
+                    },
+                    {
+                        "id":  "use.dripstone_block"
+                    },
+                    {
+                        "id":  "use.grass"
+                    },
+                    {
+                        "id":  "use.gravel"
+                    },
+                    {
+                        "id":  "use.hanging_roots"
+                    },
+                    {
+                        "id":  "use.honey_block"
+                    },
+                    {
+                        "id":  "use.ladder"
+                    },
+                    {
+                        "id":  "use.moss"
+                    },
+                    {
+                        "id":  "use.nether_brick"
+                    },
+                    {
+                        "id":  "use.nether_gold_ore"
+                    },
+                    {
+                        "id":  "use.nether_sprouts"
+                    },
+                    {
+                        "id":  "use.nether_wart"
+                    },
+                    {
+                        "id":  "use.netherite"
+                    },
+                    {
+                        "id":  "use.netherrack"
+                    },
+                    {
+                        "id":  "use.nylium"
+                    },
+                    {
+                        "id":  "use.pointed_dripstone"
+                    },
+                    {
+                        "id":  "use.roots"
+                    },
+                    {
+                        "id":  "use.sand"
+                    },
+                    {
+                        "id":  "use.sculk_sensor"
+                    },
+                    {
+                        "id":  "use.shroomlight"
+                    },
+                    {
+                        "id":  "use.slime"
+                    },
+                    {
+                        "id":  "use.snow"
+                    },
+                    {
+                        "id":  "use.soul_sand"
+                    },
+                    {
+                        "id":  "use.soul_soil"
+                    },
+                    {
+                        "id":  "use.spore_blossom"
+                    },
+                    {
+                        "id":  "use.stem"
+                    },
+                    {
+                        "id":  "use.stone"
+                    },
+                    {
+                        "id":  "use.vines"
+                    },
+                    {
+                        "id":  "use.wood"
+                    },
+                    {
+                        "id":  "vault.activate"
+                    },
+                    {
+                        "id":  "vault.ambient"
+                    },
+                    {
+                        "id":  "vault.break"
+                    },
+                    {
+                        "id":  "vault.close_shutter"
+                    },
+                    {
+                        "id":  "vault.deactivate"
+                    },
+                    {
+                        "id":  "vault.eject_item"
+                    },
+                    {
+                        "id":  "vault.hit"
+                    },
+                    {
+                        "id":  "vault.insert_item"
+                    },
+                    {
+                        "id":  "vault.insert_item_fail"
+                    },
+                    {
+                        "id":  "vault.open_shutter"
+                    },
+                    {
+                        "id":  "vault.place"
+                    },
+                    {
+                        "id":  "vault.reject_rewarded_player"
+                    },
+                    {
+                        "id":  "vault.step"
+                    },
+                    {
+                        "id":  "vr.stutterturn"
+                    },
+                    {
+                        "id":  "wind_charge.burst"
+                    }
+                ]
 }

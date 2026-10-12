@@ -22,6 +22,11 @@
         "src/project/tick_file.ts",
         "src/fields/value_input.ts",
         "commands/audio.ts",
+        "commands/gamerule.ts",
+        "src/libraries/gamerule_library.ts",
+        "src/libraries/gamerule_library.generated.ts",
+        "src/registry/gamerule_registry.generated.ts",
+        "src/blocks/gamerule_blocks.ts",
         "src/fields/item_components_field.ts",
         "src/fields/range_field.ts",
         "src/fields/selector_field.ts",
@@ -114,7 +119,9 @@
         "docs/CHANGELOG_MUSIC_UNIFIED_BLOCK_0.0.41.md",
         "docs/CHANGELOG_EXISTING_LIBRARY_POLICY_0.0.37.md",
         "docs/CHANGELOG_EVENT_OWNER_SCOPED_0.0.38.md",
-        "docs/CHANGELOG_SUMMON_NO_ORIENTATION_TAIL_0.0.39.md"
+        "docs/CHANGELOG_SUMMON_NO_ORIENTATION_TAIL_0.0.39.md",
+        "docs/CHANGELOG_AUDIO_RUNTIME_0.0.41_2026-10-12.md",
+        "docs/CHANGELOG_GAMERULE_TYPED_LIBRARY_0.0.42.md"
     ],
     "testFiles": [
         "test.ts"

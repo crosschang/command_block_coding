@@ -211,6 +211,88 @@ namespace MCFunctionValidator {
         return false;
     }
 
+    /** Native gamerule tokens are versioned; unknown names are not automatically invalid. */
+    function isGameRuleIdToken(value: string): boolean {
+        if (!value || value.length == 0) return false;
+        for (let i = 0; i < value.length; i++) {
+            let c = value.charAt(i);
+            if (!((c >= "a" && c <= "z") || (c >= "A" && c <= "Z") ||
+                (c >= "0" && c <= "9") || c == "_")) return false;
+        }
+        return true;
+    }
+
+    export function validateGameRuleCommand(command: MCFunctionAST.GameRuleCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        let action = command.action;
+        if (action != MCFunctionAST.GameRuleAction.List &&
+            action != MCFunctionAST.GameRuleAction.Query &&
+            action != MCFunctionAST.GameRuleAction.SetBoolean &&
+            action != MCFunctionAST.GameRuleAction.SetInteger &&
+            action != MCFunctionAST.GameRuleAction.SetEnum) {
+            addIssue(issues, ValidationLevel.Error, "GAMERULE_ACTION_INVALID", "Invalid gamerule action.");
+            return issues;
+        }
+        if (action == MCFunctionAST.GameRuleAction.List) {
+            if (command.ruleId != undefined || command.booleanValue != undefined ||
+                command.integerValue != undefined || command.enumValue != undefined) {
+                addIssue(issues, ValidationLevel.Error, "GAMERULE_LIST_EXTRA_ARGUMENT", "GAMERULE list accepts no extra arguments.");
+            }
+            return issues;
+        }
+        if (!isGameRuleIdToken(command.ruleId)) {
+            addIssue(issues, ValidationLevel.Error, "GAMERULE_ID_INVALID", "Gamerule name must be a nonempty native command token.");
+            return issues;
+        }
+        let kind = MCFunctionGameruleRegistry.valueKindOf(command.ruleId);
+        if (kind == 0) {
+            addIssue(issues, ValidationLevel.Warning, "GAMERULE_ID_UNKNOWN",
+                "Gamerule " + command.ruleId + " is not in the current Bedrock versioned native Registry. Future/Education-specific rules are preserved; runtime support is unverified.");
+        }
+        if (action == MCFunctionAST.GameRuleAction.Query) {
+            if (command.booleanValue != undefined || command.integerValue != undefined || command.enumValue != undefined) {
+                addIssue(issues, ValidationLevel.Error, "GAMERULE_QUERY_EXTRA_ARGUMENT", "GAMERULE query cannot set a value.");
+            }
+            return issues;
+        }
+        if (action == MCFunctionAST.GameRuleAction.SetBoolean) {
+            if (command.booleanValue == undefined || command.integerValue != undefined || command.enumValue != undefined) {
+                addIssue(issues, ValidationLevel.Error, "GAMERULE_BOOLEAN_VALUE_INVALID", "Boolean gamerule requires exactly one true/false literal.");
+            }
+            if (kind != 0 && kind != 1) {
+                addIssue(issues, ValidationLevel.Error, "GAMERULE_TYPE_MISMATCH", "Known gamerule " + command.ruleId + " is not a Boolean rule.");
+            }
+        } else if (action == MCFunctionAST.GameRuleAction.SetInteger) {
+            let v = command.integerValue;
+            if (v == undefined || !(v - v == 0) || Math.floor(v) != v ||
+                command.booleanValue != undefined || command.enumValue != undefined) {
+                addIssue(issues, ValidationLevel.Error, "GAMERULE_INTEGER_VALUE_INVALID", "Integer gamerule requires exactly one finite whole number.");
+            }
+            if (kind != 0 && kind != 2) {
+                addIssue(issues, ValidationLevel.Error, "GAMERULE_TYPE_MISMATCH", "Known gamerule " + command.ruleId + " is not an Integer rule.");
+            }
+            if (v != undefined && Math.floor(v) == v && v - v == 0 &&
+                MCFunctionGameruleRegistry.outsideDocumentedIntegerRange(command.ruleId, v)) {
+                addIssue(issues, ValidationLevel.Warning, "GAMERULE_INTEGER_TARGET_RANGE",
+                    "Value is outside the documented Bedrock range for " + command.ruleId + "; final version/runtime check required.");
+            }
+        } else if (action == MCFunctionAST.GameRuleAction.SetEnum) {
+            if (!isGameRuleIdToken(command.enumValue) ||
+                command.booleanValue != undefined || command.integerValue != undefined) {
+                addIssue(issues, ValidationLevel.Error, "GAMERULE_ENUM_VALUE_INVALID", "Enum gamerule requires exactly one nonempty enum value.");
+            }
+            if (kind != 0 && kind != 3) {
+                addIssue(issues, ValidationLevel.Error, "GAMERULE_TYPE_MISMATCH", "Known gamerule " + command.ruleId + " is not an Enum rule.");
+            }
+            if (kind == 3 && isGameRuleIdToken(command.enumValue) &&
+                !MCFunctionGameruleRegistry.isDocumentedEnumValue(command.ruleId, command.enumValue)) {
+                addIssue(issues, ValidationLevel.Warning, "GAMERULE_ENUM_UNKNOWN_VALUE",
+                    "Enum value " + command.enumValue + " is not documented for " + command.ruleId + "; preserved for version compatibility.");
+            }
+        }
+        return issues;
+    }
+
     /** Particle effect identifiers: preserve unknown valid IDs but reject broken tokens. */
     function isParticleIdToken(value: string): boolean {
         if (!value || value.length == 0) return false;
@@ -1442,6 +1524,9 @@ namespace MCFunctionValidator {
             }
         }
 
+        if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
+            appendIssues(issues, validateGameRuleCommand(<MCFunctionAST.GameRuleCommand>command));
+        }
         if (command.kind == MCFunctionAST.CommandKind.PlaySound) {
             appendIssues(issues, validatePlaySoundCommand(<MCFunctionAST.PlaySoundCommand>command));
         }

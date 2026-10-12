@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "customPolicy": "VERSIONED_NATIVE_ENUM",
+  "platform": "bedrock",
+  "target": "stable",
+  "source": {
+    "provider": "Microsoft Minecraft Creator Commands",
+    "url": "https://learn.microsoft.com/en-us/minecraft/creator/commands/commands/gamerule?view=minecraft-bedrock-stable",
+    "sourceAsOf": "2026-10-12",
+    "note": "Current Bedrock documentation enum. Not an Education 26.32 runtime support guarantee."
+  },
+  "notes": [
+    "Native game rule IDs are Mojang-versioned; future or older direct values must not be deleted.",
+    "Different version/platform support is independently verified; unknown values produce WARNING, malformed syntax produces ERROR.",
+    "Game rule query readback may be hidden by MakeCode player.execute.",
+    "Only known enum values are offered; future values are preserved as Direct Input."
+  ],
+  "entries": [
+    {
+      "id": "commandblockoutput",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "commandblocksenabled",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "dodaylightcycle",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "doentitydrops",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "dofiretick",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "doimmediaterespawn",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "doinsomnia",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "dolimitedcrafting",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "domobloot",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "domobspawning",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "dotiledrops",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "doweathercycle",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "drowningdamage",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "falldamage",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "firedamage",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "freezedamage",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "functioncommandlimit",
+      "valueKind": "Integer",
+      "minValue": 0,
+      "maxValue": 10000
+    },
+    {
+      "id": "keepinventory",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "maxcommandchainlength",
+      "valueKind": "Integer"
+    },
+    {
+      "id": "mobgriefing",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "naturalregeneration",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "playerssleepingpercentage",
+      "valueKind": "Integer"
+    },
+    {
+      "id": "playerwaypoints",
+      "valueKind": "Enum",
+      "allowedValues": [
+        "everyone",
+        "off"
+      ]
+    },
+    {
+      "id": "projectilescanbreakblocks",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "pvp",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "randomtickspeed",
+      "valueKind": "Integer",
+      "minValue": 0,
+      "maxValue": 4096
+    },
+    {
+      "id": "recipesunlock",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "respawnblocksexplode",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "sendcommandfeedback",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "showbordereffect",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "showcoordinates",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "showdaysplayed",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "showdeathmessages",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "showrecipemessages",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "showtags",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "spawnradius",
+      "valueKind": "Integer",
+      "minValue": 0,
+      "maxValue": 128
+    },
+    {
+      "id": "tntexplodes",
+      "valueKind": "Boolean"
+    },
+    {
+      "id": "tntexplosiondropdecay",
+      "valueKind": "Boolean"
+    }
+  ]
+}

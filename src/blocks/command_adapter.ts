@@ -1,5 +1,12 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    export function createGameRuleCommand(
+        action: MCFunctionAST.GameRuleAction, ruleId?: string,
+        booleanValue?: boolean, integerValue?: number, enumValue?: string
+    ): MCFunctionAST.GameRuleCommand {
+        return MCFunctionAST.createGameRuleCommand(action, ruleId, booleanValue, integerValue, enumValue);
+    }
+
     export function createRawCommand(text: string): MCFunctionAST.RawCommand {
         return MCFunctionAST.createRawCommand(text);
     }

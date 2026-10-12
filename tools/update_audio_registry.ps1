@@ -43,6 +43,29 @@ function Make-Registry([string]$Kind, [string[]]$Ids, [string[]]$Urls, [string]$
     }
 }
 
+function Merge-ObservedRuntimeEntries([string]$ExistingPath, $GeneratedData) {
+    # Official Mojang catalog is primary; preserve separately annotated Education
+    # runtime observations when the downloaded source does not list them.
+    if (-not (Test-Path $ExistingPath)) { return $GeneratedData }
+    $Old = Get-Content -Raw -Encoding UTF8 $ExistingPath | ConvertFrom-Json
+    $Seen = @{}
+    foreach ($Entry in @($GeneratedData.entries)) { $Seen[[string]$Entry.id] = $true }
+    $Merged = New-Object 'System.Collections.Generic.List[object]'
+    foreach ($Entry in @($GeneratedData.entries)) { [void]$Merged.Add($Entry) }
+    foreach ($Entry in @($Old.entries)) {
+        $Id = [string]$Entry.id
+        if (-not ($Entry.PSObject.Properties.Name -contains 'verifiedBy')) { continue }
+        if (-not $Seen.ContainsKey($Id)) {
+            [void]$Merged.Add($Entry)
+            $Seen[$Id] = $true
+            Write-Host "Preserved Education-observed audio ID: $Id"
+        }
+    }
+    $GeneratedData.entries = @($Merged | Sort-Object { [string]$_.id })
+    $GeneratedData.notes += 'Observed Education IDs not present in upstream remain separately annotated, never relabeled as official Mojang entries.'
+    return $GeneratedData
+}
+
 Write-Host 'Fetching Mojang audio definitions...'
 $SoundDefinitions = Get-OfficialJson $SoundsUrl
 $MusicDefinitions = Get-OfficialJson $MusicUrl
@@ -77,6 +100,8 @@ $SoundData = Make-Registry 'sounds' $Sounds @($SoundsUrl) 'resource-pack-sound-d
 $MusicData = Make-Registry 'music_tracks' $Music @($MusicUrl,$SoundsUrl) 'music-definitions-events-plus-record-sounds'
 $SoundPath = Join-Path $SourceDir 'sounds.json'
 $MusicPath = Join-Path $SourceDir 'music_tracks.json'
+$SoundData = Merge-ObservedRuntimeEntries $SoundPath $SoundData
+$MusicData = Merge-ObservedRuntimeEntries $MusicPath $MusicData
 $OldSound = [System.IO.File]::ReadAllText($SoundPath)
 $OldMusic = [System.IO.File]::ReadAllText($MusicPath)
 try {

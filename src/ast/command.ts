@@ -21,7 +21,8 @@ namespace MCFunctionAST {
         Particle = 14,
         PlaySound = 15,
         StopSound = 16,
-        Music = 17
+        Music = 17,
+        Gamerule = 18
     }
 
     export interface CommandNode {

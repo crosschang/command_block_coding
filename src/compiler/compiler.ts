@@ -5,6 +5,9 @@ namespace MCFunctionCompiler {
             case MCFunctionAST.CommandKind.Raw:
                 return compileRaw(<MCFunctionAST.RawCommand>command);
 
+            case MCFunctionAST.CommandKind.Gamerule:
+                return compileGameRule(<MCFunctionAST.GameRuleCommand>command);
+
             case MCFunctionAST.CommandKind.PlaySound:
                 return compilePlaySound(<MCFunctionAST.PlaySoundCommand>command);
 
@@ -114,6 +117,21 @@ namespace MCFunctionCompiler {
         }
         if (command.repeatMode != undefined) {
             result += command.repeatMode == MCFunctionAST.MusicRepeatMode.Loop ? " loop" : " play_once";
+        }
+        return result;
+    }
+
+    function compileGameRule(command: MCFunctionAST.GameRuleCommand): string {
+        if (command.action == MCFunctionAST.GameRuleAction.List) return "gamerule";
+        let result = "gamerule " + command.ruleId;
+        if (command.action == MCFunctionAST.GameRuleAction.SetBoolean) {
+            return result + (command.booleanValue ? " true" : " false");
+        }
+        if (command.action == MCFunctionAST.GameRuleAction.SetInteger) {
+            return result + " " + command.integerValue;
+        }
+        if (command.action == MCFunctionAST.GameRuleAction.SetEnum) {
+            return result + " " + command.enumValue;
         }
         return result;
     }

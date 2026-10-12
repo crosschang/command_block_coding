@@ -1002,6 +1002,113 @@ $BlockStateCountData = Read-BlockStateRegistry
 $Counts['block_states'] = @($BlockStateCountData.States).Count
 $Counts['block_state_reporters'] = $BlockStateLibraryGenerated.Count
 
+# 0.0.42 versioned native Gamerule: source JSON owns the typed catalog.
+function Generate-GameRuleLibrary {
+    $Path = Join-Path $SourceDir 'gamerules.json'
+    $Data = Get-Content -Raw -Encoding UTF8 $Path | ConvertFrom-Json
+    $Entries = @($Data.entries)
+    $Lines = New-Object 'System.Collections.Generic.List[string]'
+    @(
+        '/** AUTO-GENERATED FILE. DO NOT EDIT BY HAND.',
+        ' * Source: registry/source/bedrock/gamerules.json',
+        ' * Generator: tools/generate_registry.ps1 */',
+        'namespace MCFunctionGameruleLibrary {'
+    ) | ForEach-Object { [void]$Lines.Add($_) }
+    $SeenNames = @{}
+    $SeenIds = @{}
+    foreach ($Entry in $Entries) {
+        $Id = [string]$Entry.id
+        if ($SeenIds.ContainsKey($Id)) { throw "Duplicate gamerule ID: $Id" }
+        $SeenIds[$Id] = $true
+        if ($Entry.valueKind -notin @('Boolean','Integer','Enum')) { throw "Unsupported gamerule valueKind: $Id" }
+        $Name = Get-FunctionName $Entry
+        if ($SeenNames.ContainsKey($Name)) { throw "Duplicate gamerule reporter: $Name" }
+        $SeenNames[$Name] = $true
+        $Group = [string]$Entry.valueKind
+        $BlockId = Get-BlockId 'gamerules' $Id
+        @(
+            '    //% group="' + $Group + '"',
+            '    //% blockId=' + $BlockId,
+            '    //% block="gamerule ' + $Id + '"',
+            '    export function ' + $Name + '(): GameRuleRef {',
+            '        return new GameRuleRef("' + $Id + '");',
+            '    }',
+            ''
+        ) | ForEach-Object { [void]$Lines.Add($_) }
+    }
+    [void]$Lines.Add('}')
+    [void]$Lines.Add('')
+    return (($Lines -join "`n") + "`n")
+}
+
+function Generate-GameRuleLookup {
+    $Path = Join-Path $SourceDir 'gamerules.json'
+    $Data = Get-Content -Raw -Encoding UTF8 $Path | ConvertFrom-Json
+    $Entries = @($Data.entries)
+    $Lines = New-Object 'System.Collections.Generic.List[string]'
+    @(
+        '/** AUTO-GENERATED FILE. DO NOT EDIT BY HAND.',
+        ' * Source: registry/source/bedrock/gamerules.json',
+        ' * Generator: tools/generate_registry.ps1 */',
+        'namespace MCFunctionGameruleRegistry {',
+        '    /** 0=unknown, 1=Boolean, 2=Integer, 3=Enum. */',
+        '    export function valueKindOf(ruleId: string): number {',
+        '        if (!ruleId) return 0;'
+    ) | ForEach-Object { [void]$Lines.Add($_) }
+    foreach ($Entry in $Entries) {
+        $KindNum = if ($Entry.valueKind -eq 'Boolean') { 1 } elseif ($Entry.valueKind -eq 'Integer') { 2 } else { 3 }
+        [void]$Lines.Add('        if (ruleId == "' + $Entry.id + '") return ' + $KindNum + ';')
+    }
+    @(
+        '        return 0;',
+        '    }',
+        '    export function isDocumentedEnumValue(ruleId: string, value: string): boolean {'
+    ) | ForEach-Object { [void]$Lines.Add($_) }
+    $EnumEntries = @($Entries | Where-Object { $_.valueKind -eq 'Enum' })
+    foreach ($Entry in $EnumEntries) {
+        $Tests = @($Entry.allowedValues | ForEach-Object { 'value == "' + [string]$_ + '"' }) -join ' || '
+        [void]$Lines.Add('        if (ruleId == "' + $Entry.id + '") return ' + $Tests + ';')
+    }
+    @(
+        '        return true;',
+        '    }',
+        '    export function outsideDocumentedIntegerRange(ruleId: string, value: number): boolean {'
+    ) | ForEach-Object { [void]$Lines.Add($_) }
+    foreach ($Entry in $Entries) {
+        if ($Entry.valueKind -ne 'Integer') { continue }
+        $HasMin = $Entry.PSObject.Properties.Name -contains 'minValue'
+        $HasMax = $Entry.PSObject.Properties.Name -contains 'maxValue'
+        if (-not $HasMin -and -not $HasMax) { continue }
+        $Checks = New-Object 'System.Collections.Generic.List[string]'
+        if ($HasMin) { [void]$Checks.Add('value < ' + [string]$Entry.minValue) }
+        if ($HasMax) { [void]$Checks.Add('value > ' + [string]$Entry.maxValue) }
+        [void]$Lines.Add('        if (ruleId == "' + $Entry.id + '") return ' + ($Checks -join ' || ') + ';')
+    }
+    @(
+        '        return false;',
+        '    }',
+        '}',
+        ''
+    ) | ForEach-Object { [void]$Lines.Add($_) }
+    return (($Lines -join "`n") + "`n")
+}
+
+$GameruleGenerated = Generate-GameRuleLibrary
+$GameruleLibraryPath = Join-Path $OutDir 'gamerule_library.generated.ts'
+$GameruleLibraryActual = if (Test-Path $GameruleLibraryPath) { [System.IO.File]::ReadAllText($GameruleLibraryPath) } else { $null }
+if ($GameruleLibraryActual -ne $GameruleGenerated) {
+    [void]$Changed.Add('src/libraries/gamerule_library.generated.ts')
+    if (-not $Check) { [System.IO.File]::WriteAllText($GameruleLibraryPath, $GameruleGenerated, $Utf8NoBom) }
+}
+$GameruleLookupGenerated = Generate-GameRuleLookup
+$GameruleLookupPath = Join-Path $LookupOutDir 'gamerule_registry.generated.ts'
+$GameruleLookupActual = if (Test-Path $GameruleLookupPath) { [System.IO.File]::ReadAllText($GameruleLookupPath) } else { $null }
+if ($GameruleLookupActual -ne $GameruleLookupGenerated) {
+    [void]$Changed.Add('src/registry/gamerule_registry.generated.ts')
+    if (-not $Check) { [System.IO.File]::WriteAllText($GameruleLookupPath, $GameruleLookupGenerated, $Utf8NoBom) }
+}
+$Counts['gamerules'] = @((Get-Content -Raw -Encoding UTF8 (Join-Path $SourceDir 'gamerules.json') | ConvertFrom-Json).entries).Count
+
 $GroupedSpecs = @(
     [ordered]@{ Kind='entity_events'; Namespace='MCFunctionEntityEventLibrary'; Category='EVENT'; Prefix='event'; BlockIdPrefix='mcfunction_entity_event'; Color='#E67E22'; Weight=83; Icon='\uf0e7'; File='entity_event_library.generated.ts' },
     [ordered]@{ Kind='spawn_events'; Namespace='MCFunctionSpawnEventLibrary'; Category='SPAWN EVENT'; Prefix='spawn event'; BlockIdPrefix='mcfunction_spawn_event'; Color='#D35400'; Weight=82; Icon='\uf1d8'; File='spawn_event_library.generated.ts' }
