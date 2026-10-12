@@ -1026,15 +1026,16 @@ function Generate-GameRuleLibrary {
         $SeenNames[$Name] = $true
         $Group = [string]$Entry.valueKind
         $BlockId = Get-BlockId 'gamerules' $Id
-        @(
-            '    //% group="' + $Group + '"',
-            '    //% blockId=' + $BlockId,
-            '    //% block="gamerule ' + $Id + '"',
-            '    export function ' + $Name + '(): GameRuleRef {',
-            '        return new GameRuleRef("' + $Id + '");',
-            '    }',
-            ''
-        ) | ForEach-Object { [void]$Lines.Add($_) }
+        # IMPORTANT: Add every entry as a separate line. PowerShell's expression
+        # parsing may concatenate the strings in a mixed array expression,
+        # causing `//%` annotations to comment out the entire TS function.
+        [void]$Lines.Add('    //% group="' + $Group + '"')
+        [void]$Lines.Add('    //% blockId=' + $BlockId)
+        [void]$Lines.Add('    //% block="gamerule ' + $Id + '"')
+        [void]$Lines.Add('    export function ' + $Name + '(): GameRuleRef {')
+        [void]$Lines.Add('        return new GameRuleRef("' + $Id + '");')
+        [void]$Lines.Add('    }')
+        [void]$Lines.Add('')
     }
     [void]$Lines.Add('}')
     [void]$Lines.Add('')

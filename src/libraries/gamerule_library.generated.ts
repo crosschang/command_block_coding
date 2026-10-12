@@ -2,43 +2,271 @@
  * Source: registry/source/bedrock/gamerules.json
  * Generator: tools/generate_registry.ps1 */
 namespace MCFunctionGameruleLibrary {
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_commandblockoutput     //% block="gamerule commandblockoutput"     export function commandblockoutput(): GameRuleRef {         return new GameRuleRef("commandblockoutput");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_commandblocksenabled     //% block="gamerule commandblocksenabled"     export function commandblocksenabled(): GameRuleRef {         return new GameRuleRef("commandblocksenabled");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_dodaylightcycle     //% block="gamerule dodaylightcycle"     export function dodaylightcycle(): GameRuleRef {         return new GameRuleRef("dodaylightcycle");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_doentitydrops     //% block="gamerule doentitydrops"     export function doentitydrops(): GameRuleRef {         return new GameRuleRef("doentitydrops");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_dofiretick     //% block="gamerule dofiretick"     export function dofiretick(): GameRuleRef {         return new GameRuleRef("dofiretick");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_doimmediaterespawn     //% block="gamerule doimmediaterespawn"     export function doimmediaterespawn(): GameRuleRef {         return new GameRuleRef("doimmediaterespawn");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_doinsomnia     //% block="gamerule doinsomnia"     export function doinsomnia(): GameRuleRef {         return new GameRuleRef("doinsomnia");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_dolimitedcrafting     //% block="gamerule dolimitedcrafting"     export function dolimitedcrafting(): GameRuleRef {         return new GameRuleRef("dolimitedcrafting");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_domobloot     //% block="gamerule domobloot"     export function domobloot(): GameRuleRef {         return new GameRuleRef("domobloot");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_domobspawning     //% block="gamerule domobspawning"     export function domobspawning(): GameRuleRef {         return new GameRuleRef("domobspawning");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_dotiledrops     //% block="gamerule dotiledrops"     export function dotiledrops(): GameRuleRef {         return new GameRuleRef("dotiledrops");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_doweathercycle     //% block="gamerule doweathercycle"     export function doweathercycle(): GameRuleRef {         return new GameRuleRef("doweathercycle");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_drowningdamage     //% block="gamerule drowningdamage"     export function drowningdamage(): GameRuleRef {         return new GameRuleRef("drowningdamage");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_falldamage     //% block="gamerule falldamage"     export function falldamage(): GameRuleRef {         return new GameRuleRef("falldamage");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_firedamage     //% block="gamerule firedamage"     export function firedamage(): GameRuleRef {         return new GameRuleRef("firedamage");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_freezedamage     //% block="gamerule freezedamage"     export function freezedamage(): GameRuleRef {         return new GameRuleRef("freezedamage");     } 
-    //% group="Integer"     //% blockId=mcfunction_gamerule_registry_functioncommandlimit     //% block="gamerule functioncommandlimit"     export function functioncommandlimit(): GameRuleRef {         return new GameRuleRef("functioncommandlimit");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_keepinventory     //% block="gamerule keepinventory"     export function keepinventory(): GameRuleRef {         return new GameRuleRef("keepinventory");     } 
-    //% group="Integer"     //% blockId=mcfunction_gamerule_registry_maxcommandchainlength     //% block="gamerule maxcommandchainlength"     export function maxcommandchainlength(): GameRuleRef {         return new GameRuleRef("maxcommandchainlength");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_mobgriefing     //% block="gamerule mobgriefing"     export function mobgriefing(): GameRuleRef {         return new GameRuleRef("mobgriefing");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_naturalregeneration     //% block="gamerule naturalregeneration"     export function naturalregeneration(): GameRuleRef {         return new GameRuleRef("naturalregeneration");     } 
-    //% group="Integer"     //% blockId=mcfunction_gamerule_registry_playerssleepingpercentage     //% block="gamerule playerssleepingpercentage"     export function playerssleepingpercentage(): GameRuleRef {         return new GameRuleRef("playerssleepingpercentage");     } 
-    //% group="Enum"     //% blockId=mcfunction_gamerule_registry_playerwaypoints     //% block="gamerule playerwaypoints"     export function playerwaypoints(): GameRuleRef {         return new GameRuleRef("playerwaypoints");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_projectilescanbreakblocks     //% block="gamerule projectilescanbreakblocks"     export function projectilescanbreakblocks(): GameRuleRef {         return new GameRuleRef("projectilescanbreakblocks");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_pvp     //% block="gamerule pvp"     export function pvp(): GameRuleRef {         return new GameRuleRef("pvp");     } 
-    //% group="Integer"     //% blockId=mcfunction_gamerule_registry_randomtickspeed     //% block="gamerule randomtickspeed"     export function randomtickspeed(): GameRuleRef {         return new GameRuleRef("randomtickspeed");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_recipesunlock     //% block="gamerule recipesunlock"     export function recipesunlock(): GameRuleRef {         return new GameRuleRef("recipesunlock");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_respawnblocksexplode     //% block="gamerule respawnblocksexplode"     export function respawnblocksexplode(): GameRuleRef {         return new GameRuleRef("respawnblocksexplode");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_sendcommandfeedback     //% block="gamerule sendcommandfeedback"     export function sendcommandfeedback(): GameRuleRef {         return new GameRuleRef("sendcommandfeedback");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_showbordereffect     //% block="gamerule showbordereffect"     export function showbordereffect(): GameRuleRef {         return new GameRuleRef("showbordereffect");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_showcoordinates     //% block="gamerule showcoordinates"     export function showcoordinates(): GameRuleRef {         return new GameRuleRef("showcoordinates");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_showdaysplayed     //% block="gamerule showdaysplayed"     export function showdaysplayed(): GameRuleRef {         return new GameRuleRef("showdaysplayed");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_showdeathmessages     //% block="gamerule showdeathmessages"     export function showdeathmessages(): GameRuleRef {         return new GameRuleRef("showdeathmessages");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_showrecipemessages     //% block="gamerule showrecipemessages"     export function showrecipemessages(): GameRuleRef {         return new GameRuleRef("showrecipemessages");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_showtags     //% block="gamerule showtags"     export function showtags(): GameRuleRef {         return new GameRuleRef("showtags");     } 
-    //% group="Integer"     //% blockId=mcfunction_gamerule_registry_spawnradius     //% block="gamerule spawnradius"     export function spawnradius(): GameRuleRef {         return new GameRuleRef("spawnradius");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_tntexplodes     //% block="gamerule tntexplodes"     export function tntexplodes(): GameRuleRef {         return new GameRuleRef("tntexplodes");     } 
-    //% group="Boolean"     //% blockId=mcfunction_gamerule_registry_tntexplosiondropdecay     //% block="gamerule tntexplosiondropdecay"     export function tntexplosiondropdecay(): GameRuleRef {         return new GameRuleRef("tntexplosiondropdecay");     } 
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_commandblockoutput
+    //% block="gamerule commandblockoutput"
+    export function commandblockoutput(): GameRuleRef {
+        return new GameRuleRef("commandblockoutput");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_commandblocksenabled
+    //% block="gamerule commandblocksenabled"
+    export function commandblocksenabled(): GameRuleRef {
+        return new GameRuleRef("commandblocksenabled");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_dodaylightcycle
+    //% block="gamerule dodaylightcycle"
+    export function dodaylightcycle(): GameRuleRef {
+        return new GameRuleRef("dodaylightcycle");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_doentitydrops
+    //% block="gamerule doentitydrops"
+    export function doentitydrops(): GameRuleRef {
+        return new GameRuleRef("doentitydrops");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_dofiretick
+    //% block="gamerule dofiretick"
+    export function dofiretick(): GameRuleRef {
+        return new GameRuleRef("dofiretick");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_doimmediaterespawn
+    //% block="gamerule doimmediaterespawn"
+    export function doimmediaterespawn(): GameRuleRef {
+        return new GameRuleRef("doimmediaterespawn");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_doinsomnia
+    //% block="gamerule doinsomnia"
+    export function doinsomnia(): GameRuleRef {
+        return new GameRuleRef("doinsomnia");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_dolimitedcrafting
+    //% block="gamerule dolimitedcrafting"
+    export function dolimitedcrafting(): GameRuleRef {
+        return new GameRuleRef("dolimitedcrafting");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_domobloot
+    //% block="gamerule domobloot"
+    export function domobloot(): GameRuleRef {
+        return new GameRuleRef("domobloot");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_domobspawning
+    //% block="gamerule domobspawning"
+    export function domobspawning(): GameRuleRef {
+        return new GameRuleRef("domobspawning");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_dotiledrops
+    //% block="gamerule dotiledrops"
+    export function dotiledrops(): GameRuleRef {
+        return new GameRuleRef("dotiledrops");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_doweathercycle
+    //% block="gamerule doweathercycle"
+    export function doweathercycle(): GameRuleRef {
+        return new GameRuleRef("doweathercycle");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_drowningdamage
+    //% block="gamerule drowningdamage"
+    export function drowningdamage(): GameRuleRef {
+        return new GameRuleRef("drowningdamage");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_falldamage
+    //% block="gamerule falldamage"
+    export function falldamage(): GameRuleRef {
+        return new GameRuleRef("falldamage");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_firedamage
+    //% block="gamerule firedamage"
+    export function firedamage(): GameRuleRef {
+        return new GameRuleRef("firedamage");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_freezedamage
+    //% block="gamerule freezedamage"
+    export function freezedamage(): GameRuleRef {
+        return new GameRuleRef("freezedamage");
+    }
+
+    //% group="Integer"
+    //% blockId=mcfunction_gamerule_registry_functioncommandlimit
+    //% block="gamerule functioncommandlimit"
+    export function functioncommandlimit(): GameRuleRef {
+        return new GameRuleRef("functioncommandlimit");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_keepinventory
+    //% block="gamerule keepinventory"
+    export function keepinventory(): GameRuleRef {
+        return new GameRuleRef("keepinventory");
+    }
+
+    //% group="Integer"
+    //% blockId=mcfunction_gamerule_registry_maxcommandchainlength
+    //% block="gamerule maxcommandchainlength"
+    export function maxcommandchainlength(): GameRuleRef {
+        return new GameRuleRef("maxcommandchainlength");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_mobgriefing
+    //% block="gamerule mobgriefing"
+    export function mobgriefing(): GameRuleRef {
+        return new GameRuleRef("mobgriefing");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_naturalregeneration
+    //% block="gamerule naturalregeneration"
+    export function naturalregeneration(): GameRuleRef {
+        return new GameRuleRef("naturalregeneration");
+    }
+
+    //% group="Integer"
+    //% blockId=mcfunction_gamerule_registry_playerssleepingpercentage
+    //% block="gamerule playerssleepingpercentage"
+    export function playerssleepingpercentage(): GameRuleRef {
+        return new GameRuleRef("playerssleepingpercentage");
+    }
+
+    //% group="Enum"
+    //% blockId=mcfunction_gamerule_registry_playerwaypoints
+    //% block="gamerule playerwaypoints"
+    export function playerwaypoints(): GameRuleRef {
+        return new GameRuleRef("playerwaypoints");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_projectilescanbreakblocks
+    //% block="gamerule projectilescanbreakblocks"
+    export function projectilescanbreakblocks(): GameRuleRef {
+        return new GameRuleRef("projectilescanbreakblocks");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_pvp
+    //% block="gamerule pvp"
+    export function pvp(): GameRuleRef {
+        return new GameRuleRef("pvp");
+    }
+
+    //% group="Integer"
+    //% blockId=mcfunction_gamerule_registry_randomtickspeed
+    //% block="gamerule randomtickspeed"
+    export function randomtickspeed(): GameRuleRef {
+        return new GameRuleRef("randomtickspeed");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_recipesunlock
+    //% block="gamerule recipesunlock"
+    export function recipesunlock(): GameRuleRef {
+        return new GameRuleRef("recipesunlock");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_respawnblocksexplode
+    //% block="gamerule respawnblocksexplode"
+    export function respawnblocksexplode(): GameRuleRef {
+        return new GameRuleRef("respawnblocksexplode");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_sendcommandfeedback
+    //% block="gamerule sendcommandfeedback"
+    export function sendcommandfeedback(): GameRuleRef {
+        return new GameRuleRef("sendcommandfeedback");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_showbordereffect
+    //% block="gamerule showbordereffect"
+    export function showbordereffect(): GameRuleRef {
+        return new GameRuleRef("showbordereffect");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_showcoordinates
+    //% block="gamerule showcoordinates"
+    export function showcoordinates(): GameRuleRef {
+        return new GameRuleRef("showcoordinates");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_showdaysplayed
+    //% block="gamerule showdaysplayed"
+    export function showdaysplayed(): GameRuleRef {
+        return new GameRuleRef("showdaysplayed");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_showdeathmessages
+    //% block="gamerule showdeathmessages"
+    export function showdeathmessages(): GameRuleRef {
+        return new GameRuleRef("showdeathmessages");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_showrecipemessages
+    //% block="gamerule showrecipemessages"
+    export function showrecipemessages(): GameRuleRef {
+        return new GameRuleRef("showrecipemessages");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_showtags
+    //% block="gamerule showtags"
+    export function showtags(): GameRuleRef {
+        return new GameRuleRef("showtags");
+    }
+
+    //% group="Integer"
+    //% blockId=mcfunction_gamerule_registry_spawnradius
+    //% block="gamerule spawnradius"
+    export function spawnradius(): GameRuleRef {
+        return new GameRuleRef("spawnradius");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_tntexplodes
+    //% block="gamerule tntexplodes"
+    export function tntexplodes(): GameRuleRef {
+        return new GameRuleRef("tntexplodes");
+    }
+
+    //% group="Boolean"
+    //% blockId=mcfunction_gamerule_registry_tntexplosiondropdecay
+    //% block="gamerule tntexplosiondropdecay"
+    export function tntexplosiondropdecay(): GameRuleRef {
+        return new GameRuleRef("tntexplosiondropdecay");
+    }
+
 }
 
