@@ -50,6 +50,9 @@ namespace FunctionFile {
     let definitionActions: (() => void)[] = [];
     let definitionIssues: MCFunctionValidator.ValidationIssue[] = [];
     let definitionStructureError = false;
+    // True only if an actual GAMERULE LIST command was captured by a valid function.
+    // A standalone reporter or a QUERY/SET must not activate the Registry chat viewer.
+    let definitionHasGameruleList = false;
 
     /**
      * Define one mcfunction file.
@@ -70,7 +73,6 @@ namespace FunctionFile {
         // Human-facing diagnostics viewer. Multiple define() calls are safe because
         // the runtime registers this chat command only once per program run.
         MCFunctionDiagnostics.ensureChatRegistered();
-        MCFunctionPreview.ensureGameRuleCatalogChatRegistered();
 
         if (MCFunctionDiagnostics.isReservedChatCommand(name) ||
             MCFunctionPreview.isReservedGameRuleCatalogChatCommand(name)) {
@@ -221,7 +223,8 @@ namespace FunctionFile {
      */
     export function capturePreviewAction(
         issues: MCFunctionValidator.ValidationIssue[],
-        action: () => void
+        action: () => void,
+        command?: MCFunctionAST.CommandNode
     ): boolean {
         if (!collectingDefinitionActions) {
             return false;
@@ -233,6 +236,12 @@ namespace FunctionFile {
 
         if (!MCFunctionValidator.hasError(issues)) {
             definitionActions.push(action);
+            // Metadata follows the captured command AST, not the presence of a
+            // detached reporter or source-code text. No Minecraft state is read.
+            if (command && command.kind == MCFunctionAST.CommandKind.Gamerule &&
+                (<MCFunctionAST.GameRuleCommand>command).action == MCFunctionAST.GameRuleAction.List) {
+                definitionHasGameruleList = true;
+            }
         }
 
         return true;
@@ -268,11 +277,13 @@ namespace FunctionFile {
         let previousActions = definitionActions;
         let previousIssues = definitionIssues;
         let previousStructureError = definitionStructureError;
+        let previousHasGameruleList = definitionHasGameruleList;
 
         collectingDefinitionActions = true;
         definitionActions = [];
         definitionIssues = [];
         definitionStructureError = false;
+        definitionHasGameruleList = false;
 
         functionExecutionDepth++;
         handler();
@@ -281,11 +292,13 @@ namespace FunctionFile {
         let actions = definitionActions;
         let issues = definitionIssues;
         let structureError = definitionStructureError;
+        let hasGameruleList = definitionHasGameruleList;
 
         collectingDefinitionActions = previousCollecting;
         definitionActions = previousActions;
         definitionIssues = previousIssues;
         definitionStructureError = previousStructureError;
+        definitionHasGameruleList = previousHasGameruleList;
 
         let valid = !structureError && !MCFunctionValidator.hasError(issues);
         let preparedHandler = createPreparedHandler(actions);
@@ -296,6 +309,13 @@ namespace FunctionFile {
 
         if (!valid) {
             return;
+        }
+
+        // The optional Registry viewer belongs only to a validated FunctionFile
+        // containing a structured GAMERULE LIST command. Register it once,
+        // before exposing the validated function chat handler.
+        if (hasGameruleList) {
+            MCFunctionPreview.ensureGameRuleCatalogChatRegistered();
         }
 
         // IMPORTANT: registration happens only after Definition Validation PASS.

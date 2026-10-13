@@ -48,7 +48,7 @@ namespace Command {
 
         if (FunctionFile.capturePreviewAction(issues, function () {
             executeValidatedCommandNow(command);
-        })) {
+        }, command)) {
             return;
         }
 
