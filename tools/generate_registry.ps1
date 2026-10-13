@@ -1060,6 +1060,16 @@ function Generate-GameRuleLookup {
     @(
         '        return 0;',
         '    }',
+        '    /** Search/list catalog only. Runtime world values are not available here. */',
+        '    export function knownRuleIds(): string[] {',
+        '        return ['
+    ) | ForEach-Object { [void]$Lines.Add($_) }
+    foreach ($Entry in $Entries) {
+        [void]$Lines.Add('            "' + [string]$Entry.id + '",')
+    }
+    @(
+        '        ];',
+        '    }',
         '    export function isDocumentedEnumValue(ruleId: string, value: string): boolean {'
     ) | ForEach-Object { [void]$Lines.Add($_) }
     $EnumEntries = @($Entries | Where-Object { $_.valueKind -eq 'Enum' })
