@@ -1014,7 +1014,7 @@ namespace Command {
     //% inlineInputMode=external
     //% position.shadow="mcfunction_position_relative"
     //% block.shadow="mcfunction_block_custom_id"
-    //% states.shadow="mcfunction_block_states_add"
+    //% states.shadow="mcfunction_block_states_none"
     //% mode.shadow="mcfunction_setblock_mode"
     export function setblock(
         position: MCFunctionPositionFields.PositionValue,
@@ -1067,7 +1067,7 @@ namespace Command {
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
     //% block.shadow="mcfunction_block_custom_id"
-    //% states.shadow="mcfunction_block_states_add"
+    //% states.shadow="mcfunction_block_states_none"
     export function fillReplaceOnly(
         block: MCFunctionFields.BlockValue,
         states?: MCFunctionBlockStateFields.BlockStatesValue
@@ -1121,7 +1121,7 @@ namespace Command {
     //% from.shadow="mcfunction_position_relative"
     //% to.shadow="mcfunction_position_relative"
     //% block.shadow="mcfunction_block_custom_id"
-    //% states.shadow="mcfunction_block_states_add"
+    //% states.shadow="mcfunction_block_states_none"
     //% handling.shadow="mcfunction_fill_replace"
     export function fill(
         from: MCFunctionPositionFields.PositionValue,
@@ -1194,7 +1194,7 @@ namespace Command {
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
     //% block.shadow="mcfunction_block_custom_id"
-    //% states.shadow="mcfunction_block_states_add"
+    //% states.shadow="mcfunction_block_states_none"
     export function cloneFiltered(
         block: MCFunctionFields.BlockValue,
         states?: MCFunctionBlockStateFields.BlockStatesValue
