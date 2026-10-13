@@ -134,15 +134,6 @@ namespace MCFunctionValidator {
             }
         }
 
-        if (selector.hasItems.length > 1) {
-            addIssue(
-                issues,
-                ValidationLevel.Error,
-                "SELECTOR_HASITEM_V1_LIMIT",
-                "The current compiler supports one hasitem condition."
-            );
-        }
-
         for (let i = 0; i < selector.filters.length; i++) {
             if (selector.filters[i].key == "type") {
                 let entityId = selector.filters[i].value;

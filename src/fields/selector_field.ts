@@ -293,14 +293,15 @@ namespace MCFunctionFields {
                 );
             }
 
-            // HasItem: 현재 V1에서는 하나만 유지
+            // HasItem: keep every condition in chain order (AND semantics).
+            // The AST already contains hasItems[]; do not overwrite the previous item.
             for (
                 let i = 0;
                 i < current.hasItems.length;
                 i++
             ) {
 
-                MCFunctionAST.setSelectorHasItemCondition(
+                MCFunctionAST.addSelectorHasItemCondition(
                     selector,
                     current.hasItems[i]
                 );

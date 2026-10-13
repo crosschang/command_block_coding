@@ -733,46 +733,54 @@ namespace MCFunctionCompiler {
         if (selector.hasItems.length > 0) {
             if (hasPrevious) result = result + ",";
 
-            let hasItem = selector.hasItems[0];
-            result = result + "hasitem={item=" + hasItem.itemId;
+            result = result + "hasitem=";
+            if (selector.hasItems.length > 1) result = result + "[";
 
-            if (hasItem.quantity.hasMin && hasItem.quantity.hasMax) {
-                result = result + ",quantity=";
-                if (hasItem.quantity.min == hasItem.quantity.max) {
-                    result = result + hasItem.quantity.min;
-                } else {
-                    result = result + hasItem.quantity.min + ".." + hasItem.quantity.max;
-                }
-            } else if (hasItem.quantity.hasMin) {
-                result = result + ",quantity=" + hasItem.quantity.min + "..";
-            } else if (hasItem.quantity.hasMax) {
-                result = result + ",quantity=.." + hasItem.quantity.max;
-            }
+            for (let i = 0; i < selector.hasItems.length; i++) {
+                if (i > 0) result = result + ",";
 
-            if (hasItem.hasLocation) {
-                result = result + ",location=" + MCFunctionAST.slotLocationToken(hasItem.location);
-            }
+                let hasItem = selector.hasItems[i];
+                result = result + "{item=" + hasItem.itemId;
 
-            if (hasItem.hasSlot) {
-                result = result + ",slot=";
-                if (hasItem.slot.hasMin && hasItem.slot.hasMax) {
-                    if (hasItem.slot.min == hasItem.slot.max) {
-                        result = result + hasItem.slot.min;
+                if (hasItem.quantity.hasMin && hasItem.quantity.hasMax) {
+                    result = result + ",quantity=";
+                    if (hasItem.quantity.min == hasItem.quantity.max) {
+                        result = result + hasItem.quantity.min;
                     } else {
-                        result = result + hasItem.slot.min + ".." + hasItem.slot.max;
+                        result = result + hasItem.quantity.min + ".." + hasItem.quantity.max;
                     }
-                } else if (hasItem.slot.hasMin) {
-                    result = result + hasItem.slot.min + "..";
-                } else if (hasItem.slot.hasMax) {
-                    result = result + ".." + hasItem.slot.max;
+                } else if (hasItem.quantity.hasMin) {
+                    result = result + ",quantity=" + hasItem.quantity.min + "..";
+                } else if (hasItem.quantity.hasMax) {
+                    result = result + ",quantity=.." + hasItem.quantity.max;
                 }
-            }
 
-            if (hasItem.hasData) {
-                result = result + ",data=" + hasItem.data;
-            }
+                if (hasItem.hasLocation) {
+                    result = result + ",location=" + MCFunctionAST.slotLocationToken(hasItem.location);
+                }
 
-            result = result + "}";
+                if (hasItem.hasSlot) {
+                    result = result + ",slot=";
+                    if (hasItem.slot.hasMin && hasItem.slot.hasMax) {
+                        if (hasItem.slot.min == hasItem.slot.max) {
+                            result = result + hasItem.slot.min;
+                        } else {
+                            result = result + hasItem.slot.min + ".." + hasItem.slot.max;
+                        }
+                    } else if (hasItem.slot.hasMin) {
+                        result = result + hasItem.slot.min + "..";
+                    } else if (hasItem.slot.hasMax) {
+                        result = result + ".." + hasItem.slot.max;
+                    }
+                }
+
+                if (hasItem.hasData) {
+                    result = result + ",data=" + hasItem.data;
+                }
+
+                result = result + "}";
+            }
+            if (selector.hasItems.length > 1) result = result + "]";
         }
 
         result = result + "]";
