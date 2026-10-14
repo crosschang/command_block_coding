@@ -1,5 +1,46 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+/** Structured CAMERASHAKE blocks: reuse the common Selector AST. */
+    export function createCameraShakeAddCommand(
+        target: MCFunctionAST.Selector,
+        intensity?: number,
+        seconds?: number,
+        shakeType?: MCFunctionAST.CameraShakeType
+    ): MCFunctionAST.CameraShakeCommand {
+        return MCFunctionAST.createCameraShakeAddCommand(target, intensity, seconds, shakeType);
+    }
+
+    export function createCameraShakeStopCommand(
+        target?: MCFunctionAST.Selector
+    ): MCFunctionAST.CameraShakeCommand {
+        return MCFunctionAST.createCameraShakeStopCommand(target);
+    }
+
+    /** Simple structured blocks use the common AST and Selector. */
+    export function createTellCommand(target: MCFunctionAST.Selector, message: string): MCFunctionAST.TellCommand {
+        return MCFunctionAST.createTellCommand(target, message);
+    }
+    export function createTimeCommand(action: MCFunctionAST.TimeAction, preset?: MCFunctionAST.TimePreset,
+        ticks?: number): MCFunctionAST.TimeCommand {
+        return MCFunctionAST.createTimeCommand(action, preset, ticks);
+    }
+    export function createWeatherCommand(weather: MCFunctionAST.WeatherType,
+        duration?: number): MCFunctionAST.WeatherCommand {
+        return MCFunctionAST.createWeatherCommand(weather, duration);
+    }
+    export function createDifficultyCommand(difficulty: MCFunctionAST.DifficultyType): MCFunctionAST.DifficultyCommand {
+        return MCFunctionAST.createDifficultyCommand(difficulty);
+    }
+    export function createHudCommand(target: MCFunctionAST.Selector, visibility: MCFunctionAST.HudVisibility,
+        element?: MCFunctionAST.HudElement): MCFunctionAST.HudCommand {
+        return MCFunctionAST.createHudCommand(target, visibility, element);
+    }
+    export function createInputPermissionCommand(target: MCFunctionAST.Selector,
+        permission: MCFunctionAST.InputPermissionType,
+        state: MCFunctionAST.InputPermissionState): MCFunctionAST.InputPermissionCommand {
+        return MCFunctionAST.createInputPermissionCommand(target, permission, state);
+    }
+
     export function createEnchantCommand(
         target: MCFunctionAST.Selector,
         idKind: MCFunctionAST.EnchantmentIdKind,

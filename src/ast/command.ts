@@ -23,7 +23,14 @@ namespace MCFunctionAST {
         StopSound = 16,
         Music = 17,
         Gamerule = 18,
-        Enchant = 19
+        Enchant = 19,
+        CameraShake = 20,
+        Tell = 21,
+        Time = 22,
+        Weather = 23,
+        Difficulty = 24,
+        Hud = 25,
+        InputPermission = 26
     }
 
     export interface CommandNode {

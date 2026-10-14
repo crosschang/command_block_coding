@@ -1548,6 +1548,124 @@ namespace MCFunctionValidator {
     }
 
 
+    /** CAMERASHAKE is player-targeted. Validate without normalizing bad values. */
+    export function validateCameraShakeCommand(
+        command: MCFunctionAST.CameraShakeCommand
+    ): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (command.action != MCFunctionAST.CameraShakeAction.Add &&
+            command.action != MCFunctionAST.CameraShakeAction.Stop) {
+            addIssue(issues, ValidationLevel.Error, "CAMERASHAKE_ACTION_INVALID", "CAMERASHAKE action must be add or stop.");
+            return issues;
+        }
+        if (command.action == MCFunctionAST.CameraShakeAction.Add && !command.target) {
+            addIssue(issues, ValidationLevel.Error, "CAMERASHAKE_TARGET_REQUIRED", "CAMERASHAKE add requires a player target.");
+        }
+        if (command.target) {
+            appendIssues(issues, validateSelector(command.target));
+            if (command.target.base == MCFunctionAST.SelectorBase.AllEntities ||
+                command.target.base == MCFunctionAST.SelectorBase.Initiator) {
+                addIssue(issues, ValidationLevel.Warning, "CAMERASHAKE_PLAYER_TARGET",
+                    "CAMERASHAKE requires players. This selector may select non-player entities or depend on NPC context.");
+            }
+        }
+        if (command.action == MCFunctionAST.CameraShakeAction.Stop) {
+            if (command.intensity != undefined || command.seconds != undefined || command.shakeType != undefined) {
+                addIssue(issues, ValidationLevel.Error, "CAMERASHAKE_STOP_EXTRA_ARGS",
+                    "CAMERASHAKE stop cannot include intensity, seconds, or shake type.");
+            }
+            return issues;
+        }
+        if (command.intensity != undefined &&
+            (!(command.intensity - command.intensity == 0) || command.intensity < 0 || command.intensity > 4)) {
+            addIssue(issues, ValidationLevel.Error, "CAMERASHAKE_INTENSITY_RANGE",
+                "CAMERASHAKE intensity must be a finite number from 0 to 4.");
+        }
+        if (command.seconds != undefined &&
+            (!(command.seconds - command.seconds == 0) || command.seconds < 0.01)) {
+            addIssue(issues, ValidationLevel.Error, "CAMERASHAKE_SECONDS_RANGE",
+                "CAMERASHAKE duration must be a finite number of at least 0.01 seconds.");
+        }
+        if (command.shakeType != undefined &&
+            command.shakeType != MCFunctionAST.CameraShakeType.Positional &&
+            command.shakeType != MCFunctionAST.CameraShakeType.Rotational) {
+            addIssue(issues, ValidationLevel.Error, "CAMERASHAKE_TYPE_INVALID",
+                "CAMERASHAKE type must be positional or rotational.");
+        }
+        return issues;
+    }
+
+    function simpleFiniteInteger(value: number): boolean {
+        return value != undefined && value - value == 0 && value == Math.floor(value);
+    }
+    function validatePlayerTarget(target: MCFunctionAST.Selector, name: string, issues: ValidationIssue[]): void {
+        if (!target) {
+            addIssue(issues, ValidationLevel.Error, name + "_TARGET_REQUIRED", name + " requires a target.");
+            return;
+        }
+        appendIssues(issues, validateSelector(target));
+        if (target.base == MCFunctionAST.SelectorBase.AllEntities ||
+            target.base == MCFunctionAST.SelectorBase.Initiator) {
+            addIssue(issues, ValidationLevel.Warning, name + "_PLAYER_SELECTOR",
+                name + " expects a player target; chosen selector may include nonplayers or require special context.");
+        }
+    }
+    export function validateTellCommand(command: MCFunctionAST.TellCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        validatePlayerTarget(command.target, "TELL", issues);
+        if (!command.message || command.message.length == 0 || command.message.indexOf("\n") >= 0 ||
+            command.message.indexOf("\r") >= 0) {
+            addIssue(issues, ValidationLevel.Error, "TELL_MESSAGE_INVALID", "TELL message must be one nonempty line.");
+        }
+        return issues;
+    }
+    export function validateTimeCommand(command: MCFunctionAST.TimeCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (command.action == MCFunctionAST.TimeAction.SetPreset) {
+            if (command.preset == undefined || command.preset < 0 || command.preset > 5 ||
+                command.preset != Math.floor(command.preset))
+                addIssue(issues, ValidationLevel.Error, "TIME_PRESET_INVALID", "Invalid time preset.");
+        } else if (command.action == MCFunctionAST.TimeAction.SetTicks || command.action == MCFunctionAST.TimeAction.AddTicks) {
+            if (!simpleFiniteInteger(command.ticks))
+                addIssue(issues, ValidationLevel.Error, "TIME_TICKS_INTEGER", "Time ticks must be an integer.");
+        } else addIssue(issues, ValidationLevel.Error, "TIME_ACTION_INVALID", "Invalid time action.");
+        return issues;
+    }
+    export function validateWeatherCommand(command: MCFunctionAST.WeatherCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (command.weather < 0 || command.weather > 2 || command.weather != Math.floor(command.weather))
+            addIssue(issues, ValidationLevel.Error, "WEATHER_TYPE_INVALID", "Invalid weather type.");
+        if (command.duration != undefined && (!simpleFiniteInteger(command.duration) || command.duration < 0))
+            addIssue(issues, ValidationLevel.Error, "WEATHER_DURATION_INVALID", "Weather duration must be a nonnegative integer in seconds.");
+        return issues;
+    }
+    export function validateDifficultyCommand(command: MCFunctionAST.DifficultyCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (command.difficulty < 0 || command.difficulty > 3 || command.difficulty != Math.floor(command.difficulty))
+            addIssue(issues, ValidationLevel.Error, "DIFFICULTY_INVALID", "Invalid difficulty enum.");
+        return issues;
+    }
+    export function validateHudCommand(command: MCFunctionAST.HudCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        validatePlayerTarget(command.target, "HUD", issues);
+        if (command.visibility != MCFunctionAST.HudVisibility.Hide && command.visibility != MCFunctionAST.HudVisibility.Reset)
+            addIssue(issues, ValidationLevel.Error, "HUD_VISIBILITY_INVALID", "Invalid HUD visibility.");
+        if (command.element != undefined && (command.element < 0 || command.element > 13 ||
+            command.element != Math.floor(command.element)))
+            addIssue(issues, ValidationLevel.Error, "HUD_ELEMENT_INVALID", "Invalid HUD element.");
+        return issues;
+    }
+    export function validateInputPermissionCommand(command: MCFunctionAST.InputPermissionCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        validatePlayerTarget(command.target, "INPUTPERMISSION", issues);
+        if (command.permission < 0 || command.permission > 10 || command.permission != Math.floor(command.permission))
+            addIssue(issues, ValidationLevel.Error, "INPUTPERMISSION_TYPE_INVALID", "Invalid permission.");
+        if (command.state != MCFunctionAST.InputPermissionState.Enabled &&
+            command.state != MCFunctionAST.InputPermissionState.Disabled)
+            addIssue(issues, ValidationLevel.Error, "INPUTPERMISSION_STATE_INVALID", "Invalid state.");
+        return issues;
+    }
+
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
 
@@ -1574,6 +1692,27 @@ namespace MCFunctionValidator {
 
         if (command.kind == MCFunctionAST.CommandKind.Enchant) {
             appendIssues(issues, validateEnchantCommand(<MCFunctionAST.EnchantCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.CameraShake) {
+            appendIssues(issues, validateCameraShakeCommand(<MCFunctionAST.CameraShakeCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Tell) {
+            appendIssues(issues, validateTellCommand(<MCFunctionAST.TellCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Time) {
+            appendIssues(issues, validateTimeCommand(<MCFunctionAST.TimeCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Weather) {
+            appendIssues(issues, validateWeatherCommand(<MCFunctionAST.WeatherCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Difficulty) {
+            appendIssues(issues, validateDifficultyCommand(<MCFunctionAST.DifficultyCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Hud) {
+            appendIssues(issues, validateHudCommand(<MCFunctionAST.HudCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.InputPermission) {
+            appendIssues(issues, validateInputPermissionCommand(<MCFunctionAST.InputPermissionCommand>command));
         }
         if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
             appendIssues(issues, validateGameRuleCommand(<MCFunctionAST.GameRuleCommand>command));

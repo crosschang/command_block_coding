@@ -8,6 +8,22 @@ namespace MCFunctionCompiler {
             case MCFunctionAST.CommandKind.Enchant:
                 return compileEnchant(<MCFunctionAST.EnchantCommand>command);
 
+            case MCFunctionAST.CommandKind.CameraShake:
+                return compileCameraShake(<MCFunctionAST.CameraShakeCommand>command);
+
+            case MCFunctionAST.CommandKind.Tell:
+                return compileTell(<MCFunctionAST.TellCommand>command);
+            case MCFunctionAST.CommandKind.Time:
+                return compileTime(<MCFunctionAST.TimeCommand>command);
+            case MCFunctionAST.CommandKind.Weather:
+                return compileWeather(<MCFunctionAST.WeatherCommand>command);
+            case MCFunctionAST.CommandKind.Difficulty:
+                return compileDifficulty(<MCFunctionAST.DifficultyCommand>command);
+            case MCFunctionAST.CommandKind.Hud:
+                return compileHud(<MCFunctionAST.HudCommand>command);
+            case MCFunctionAST.CommandKind.InputPermission:
+                return compileInputPermission(<MCFunctionAST.InputPermissionCommand>command);
+
             case MCFunctionAST.CommandKind.Gamerule:
                 return compileGameRule(<MCFunctionAST.GameRuleCommand>command);
 
@@ -65,6 +81,55 @@ namespace MCFunctionCompiler {
             default:
                 return "";
         }
+    }
+
+    /** Canonical Bedrock syntax; optional args are emitted only as required. */
+    function compileCameraShake(command: MCFunctionAST.CameraShakeCommand): string {
+        if (command.action == MCFunctionAST.CameraShakeAction.Stop) {
+            return "camerashake stop" + (command.target ? " " + compileSelector(command.target) : "");
+        }
+        let result = "camerashake add " + compileSelector(command.target);
+        if (command.intensity != undefined || command.seconds != undefined || command.shakeType != undefined) {
+            result += " " + (command.intensity == undefined ? "0.5" : command.intensity);
+        }
+        if (command.seconds != undefined || command.shakeType != undefined) {
+            result += " " + (command.seconds == undefined ? "1" : command.seconds);
+        }
+        if (command.shakeType != undefined) {
+            result += command.shakeType == MCFunctionAST.CameraShakeType.Rotational ? " rotational" : " positional";
+        }
+        return result;
+    }
+
+    function compileTell(command: MCFunctionAST.TellCommand): string {
+        return "tell " + compileSelector(command.target) + " " + command.message;
+    }
+    function compileTime(command: MCFunctionAST.TimeCommand): string {
+        if (command.action == MCFunctionAST.TimeAction.AddTicks) return "time add " + command.ticks;
+        if (command.action == MCFunctionAST.TimeAction.SetTicks) return "time set " + command.ticks;
+        let names = ["day", "sunrise", "noon", "sunset", "night", "midnight"];
+        return "time set " + names[command.preset];
+    }
+    function compileWeather(command: MCFunctionAST.WeatherCommand): string {
+        let names = ["clear", "rain", "thunder"];
+        return "weather " + names[command.weather] + (command.duration == undefined ? "" : " " + command.duration);
+    }
+    function compileDifficulty(command: MCFunctionAST.DifficultyCommand): string {
+        let names = ["peaceful", "easy", "normal", "hard"];
+        return "difficulty " + names[command.difficulty];
+    }
+    function compileHud(command: MCFunctionAST.HudCommand): string {
+        let names = ["all", "hotbar", "health", "hunger", "armor", "crosshair", "paperdoll",
+            "tooltips", "air_bubbles", "progress_bar", "horse_health", "touch_controls", "status_effects", "item_text"];
+        return "hud " + compileSelector(command.target) + " " +
+            (command.visibility == MCFunctionAST.HudVisibility.Hide ? "hide" : "reset") +
+            (command.element == undefined ? "" : " " + names[command.element]);
+    }
+    function compileInputPermission(command: MCFunctionAST.InputPermissionCommand): string {
+        let names = ["movement", "camera", "jump", "lateral_movement", "sneak", "dismount",
+            "mount", "move_backward", "move_forward", "move_left", "move_right"];
+        return "inputpermission set " + compileSelector(command.target) + " " + names[command.permission] +
+            (command.state == MCFunctionAST.InputPermissionState.Enabled ? " enabled" : " disabled");
     }
 
     function compileRaw(command: MCFunctionAST.RawCommand): string {

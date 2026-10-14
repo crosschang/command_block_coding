@@ -127,7 +127,12 @@
         "src/libraries/enchantment_library.generated.ts",
         "src/registry/enchantment_registry.generated.ts",
         "src/blocks/enchant_blocks.ts",
-        "docs/CHANGELOG_ENCHANT_NATIVE_ENUM_0.0.43.md"
+        "docs/CHANGELOG_ENCHANT_NATIVE_ENUM_0.0.43.md",
+        "commands/camerashake.ts",
+        "src/blocks/camerashake_blocks.ts",
+        "commands/simple_commands.ts",
+        "src/blocks/simple_command_blocks.ts",
+        "docs/CHANGELOG_SIMPLE_BATCH_0.0.48_2026-10-14.md"
     ],
     "testFiles": [
         "test.ts"
