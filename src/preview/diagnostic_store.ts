@@ -242,6 +242,27 @@ namespace MCFunctionDiagnostics {
     }
 
     /**
+     * Batch diagnostic lines into the fewest practical tellraw calls.
+     * One functionName? request typically becomes exactly one message.
+     * Longer whole-project reports are split at line boundaries to avoid
+     * oversized commands and to preserve readable output order.
+     */
+    function showLines(lines: string[]): void {
+        let content = "";
+        const maxLength = 700;
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            if (content.length > 0 && content.length + 1 + line.length > maxLength) {
+                MCFunctionPreview.previewSay(content);
+                content = "";
+            }
+            if (content.length > 0) content = content + "\n";
+            content = content + line;
+        }
+        if (content.length > 0) MCFunctionPreview.previewSay(content);
+    }
+
+    /**
      * Explicit "functionName?" read-only diagnostic viewer.
      * Works for valid/invalid/no-issue functions and NEVER runs commands.
      */
@@ -257,18 +278,20 @@ namespace MCFunctionDiagnostics {
             return;
         }
 
-        MCFunctionPreview.previewSay(
+        let lines: string[] = [];
+        lines.push(
             "mcfunction " + functionName + ": " + errors + " error(s), " +
             warnings + " warning(s), " + info + " info. Diagnostic only; not executed."
         );
         for (let i = 0; i < records.length; i++) {
             let current = records[i];
             if (current.functionName != functionName) continue;
-            MCFunctionPreview.previewSay(
+            lines.push(
                 levelText(current.level) + " " + current.code +
                 " " + sourceText(current.source) + ": " + current.message
             );
         }
+        showLines(lines);
     }
 
     /** Final summary only, called once by Preview.ready() after definitions. */
@@ -297,26 +320,25 @@ namespace MCFunctionDiagnostics {
             return;
         }
 
-        MCFunctionPreview.previewSay(
+        let lines: string[] = [];
+        lines.push(
             "Diagnostics: " + knownFunctionNames.length + " files, errors " +
             errorCount + " warnings " + warningCount + " info " + infoCount + "."
         );
-
         for (let f = 0; f < knownFunctionNames.length; f++) {
             let functionName = knownFunctionNames[f];
             if (functionIssueCount(functionName) == 0) continue;
-
-            MCFunctionPreview.previewSay("mcfunction " + functionName + ":");
-
+            lines.push("mcfunction " + functionName + ":");
             for (let i = 0; i < records.length; i++) {
                 let current = records[i];
                 if (current.functionName != functionName) continue;
-
-                MCFunctionPreview.previewSay(
+                lines.push(
                     levelText(current.level) + " " + current.code +
                     " " + sourceText(current.source) + ": " + current.message
                 );
             }
         }
+        showLines(lines);
     }
+
 }
