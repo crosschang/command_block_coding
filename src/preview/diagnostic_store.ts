@@ -251,18 +251,16 @@ namespace MCFunctionDiagnostics {
      * oversized commands and to preserve readable output order.
      */
     function showLines(lines: string[]): void {
-        let content = "";
-        const maxLength = 700;
+        player.say("SHOWLINES START");
+
+        let total = 0;
         for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-            if (content.length > 0 && content.length + 1 + line.length > maxLength) {
-                MCFunctionPreview.previewSay(content);
-                content = "";
-            }
-            if (content.length > 0) content = content + "\n";
-            content = content + line;
+            total += lines[i].length;
         }
-        if (content.length > 0) MCFunctionPreview.previewSay(content);
+
+        player.say("LINES COUNT " + lines.length);
+        player.say("TOTAL CHARS " + total);
+        player.say("SHOWLINES END");
     }
 
     /**
