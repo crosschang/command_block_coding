@@ -1552,7 +1552,7 @@ namespace MCFunctionValidator {
     function isCameraPresetId(value: string): boolean {
         if (!value) return false;
         let colon = value.indexOf(":");
-        if (colon <= 0 || colon == value.length - 1 || colon != value.lastIndexOf(":")) return false;
+        if (colon <= 0 || colon == value.length - 1) return false;
         for (let i = 0; i < value.length; i++) {
             let c = value.charAt(i);
             if (i == colon) continue;
