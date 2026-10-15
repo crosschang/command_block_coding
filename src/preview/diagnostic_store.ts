@@ -4,7 +4,8 @@
  * Purpose:
  * - keep detailed validation diagnostics out of the normal chat flow
  * - preserve one current diagnostic set per FunctionFile
- * - expose a single human-readable chat command: cbi_diag
+ * - keep cbi_diag for the whole-project viewer; invalid function names show
+ *   their own errors through diagnostic-only chat handlers
  *
  * This is derived Preview/editor state. It is NOT Minecraft Command AST data and
  * must never be emitted into .mcfunction output.
@@ -162,6 +163,38 @@ namespace MCFunctionDiagnostics {
         if (source == DiagnosticSource.Preview) return "PREVIEW";
         if (source == DiagnosticSource.Runtime) return "RUNTIME";
         return "DEFINITION";
+    }
+
+    /**
+     * Show only one FunctionFile's actual stored issues when the user types its
+     * invalid function name. This never invokes the function's command plan.
+     */
+    export function showFunction(functionName: string): void {
+        let errors = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Error);
+        let warnings = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Warning);
+        let info = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Info);
+
+        MCFunctionPreview.previewSay(
+            "mcfunction " + functionName + ": execution blocked; " +
+            errors + " error(s), " + warnings + " warning(s), " + info + " info."
+        );
+
+        let found = false;
+        for (let i = 0; i < records.length; i++) {
+            let current = records[i];
+            if (current.functionName != functionName) continue;
+            found = true;
+            MCFunctionPreview.previewSay(
+                levelText(current.level) + " " + current.code +
+                " " + sourceText(current.source) + ": " + current.message
+            );
+        }
+        if (!found) {
+            MCFunctionPreview.previewSay(
+                "No stored diagnostic details for " + functionName +
+                ". Use " + chatCommandName() + " for project diagnostics."
+            );
+        }
     }
 
     /** Detailed viewer, shown only when the user types cbi_diag. */

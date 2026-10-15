@@ -16,7 +16,8 @@
  * Minecraft Education runtime preview:
  *   - define() first captures the function body without changing the world.
  *   - Definition Validation runs before any chat command is registered.
- *   - Only a valid FunctionFile receives a chat preview command.
+ *   - Valid FunctionFiles receive runnable chat commands.
+ *   - Invalid FunctionFiles receive diagnostic-only chat handlers; no command executes.
  *   - The validated action plan is replayed later when chat/function/tick invokes it.
  *   - Runtime world state (selectors, scores, tags, blocks, etc.) is still evaluated
  *     when the validated plan actually executes.
@@ -32,6 +33,7 @@ namespace FunctionFile {
     let functionNames: string[] = [];
     let functionHandlers: (() => void)[] = [];
     let functionValid: boolean[] = [];
+    let registeredChatFunctionNames: string[] = [];
 
     // Project-level representation of functions/tick.json.
     // Keep declaration order because Minecraft executes the listed functions in order.
@@ -60,7 +62,8 @@ namespace FunctionFile {
      *
      * Runtime Preview performs Definition Validation immediately. Invalid functions
      * are kept in the internal registry so function/tick references cannot fall back
-     * accidentally, but NO chat command is registered for them.
+     * accidentally. An error-only chat handler displays their diagnostics instead
+     * of executing any captured action.
      */
     //% blockId=function_file_define
     //% group="FUNCTION FILE" weight=100
@@ -307,22 +310,16 @@ namespace FunctionFile {
         MCFunctionDiagnostics.replaceDefinitionIssues(name, issues);
         reportDefinitionComplete(name, issues, structureError);
 
-        if (!valid) {
-            return;
-        }
-
-        // The optional Registry viewer belongs only to a validated FunctionFile
-        // containing a structured GAMERULE LIST command. Register it once,
-        // before exposing the validated function chat handler.
-        if (hasGameruleList) {
+        // A valid definition can expose the optional Gamerule Registry viewer.
+        // An invalid one must never make cbi_rules available by accident.
+        if (valid && hasGameruleList) {
             MCFunctionPreview.ensureGameRuleCatalogChatRegistered();
         }
 
-        // IMPORTANT: registration happens only after Definition Validation PASS.
-        // The Validation Gate itself remains invisible in the MakeCode workspace.
-        player.onChat(name, function () {
-            runPreview(name);
-        });
+        // One dispatcher per non-reserved function name. On validation failure,
+        // typing that same name shows diagnostics, NOT the prepared actions.
+        // This registration is Preview-only and does not change .mcfunction AST.
+        ensureFunctionChatRegistered(name);
     }
 
     function createPreparedHandler(actions: (() => void)[]): () => void {
@@ -386,10 +383,17 @@ namespace FunctionFile {
         summary = summary + ".";
 
         if (!valid) {
-            summary = summary + " Not registered.";
+            if (MCFunctionDiagnostics.isReservedChatCommand(name) ||
+                MCFunctionPreview.isReservedGameRuleCatalogChatCommand(name)) {
+                summary = summary + " Execution blocked. Details: " +
+                    MCFunctionDiagnostics.chatCommandName();
+            } else {
+                summary = summary + " Execution blocked. Type " + name +
+                    " to see why.";
+            }
+        } else {
+            summary = summary + " Details: " + MCFunctionDiagnostics.chatCommandName();
         }
-
-        summary = summary + " Details: " + MCFunctionDiagnostics.chatCommandName();
         MCFunctionPreview.previewSay(summary);
     }
 
@@ -422,6 +426,34 @@ namespace FunctionFile {
         functionExecutionDepth++;
         handler();
         functionExecutionDepth--;
+    }
+
+    /**
+     * Register one direct chat dispatcher per function name. Invalid names may
+     * be inspected on every explicit chat invocation, while internal runPreview()
+     * calls retain the existing one-time error throttle for tick/function loops.
+     */
+    function ensureFunctionChatRegistered(name: string): void {
+        if (!name || name.length == 0) return;
+        // These names belong to existing internal viewers. Never shadow them.
+        if (MCFunctionDiagnostics.isReservedChatCommand(name) ||
+            MCFunctionPreview.isReservedGameRuleCatalogChatCommand(name)) return;
+
+        for (let i = 0; i < registeredChatFunctionNames.length; i++) {
+            if (registeredChatFunctionNames[i] == name) return;
+        }
+        registeredChatFunctionNames.push(name);
+        player.onChat(name, function () {
+            for (let i = 0; i < functionNames.length; i++) {
+                if (functionNames[i] != name) continue;
+                if (!functionValid[i]) {
+                    MCFunctionDiagnostics.showFunction(name);
+                    return;
+                }
+                runPreview(name);
+                return;
+            }
+        });
     }
 
     function register(name: string, handler: () => void, valid: boolean): void {
