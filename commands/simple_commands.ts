@@ -8,16 +8,18 @@ namespace MCFunctionAST {
     export function createTellCommand(target: Selector, message: string): TellCommand {
         return {kind: CommandKind.Tell, target: target, message: message};
     }
-    export enum TimeAction { SetPreset = 0, SetTicks = 1, AddTicks = 2 }
+    export enum TimeAction { SetPreset = 0, SetTicks = 1, AddTicks = 2, Query = 3 }
+    export enum TimeQueryKind { DayTime = 0, GameTime = 1, Day = 2 }
     export enum TimePreset { Day = 0, Sunrise = 1, Noon = 2, Sunset = 3, Night = 4, Midnight = 5 }
     export interface TimeCommand extends CommandNode {
         kind: CommandKind;
         action: TimeAction;
         preset?: TimePreset;
         ticks?: number;
+        queryKind?: TimeQueryKind;
     }
-    export function createTimeCommand(action: TimeAction, preset?: TimePreset, ticks?: number): TimeCommand {
-        return {kind: CommandKind.Time, action: action, preset: preset, ticks: ticks};
+    export function createTimeCommand(action: TimeAction, preset?: TimePreset, ticks?: number, queryKind?: TimeQueryKind): TimeCommand {
+        return {kind: CommandKind.Time, action: action, preset: preset, ticks: ticks, queryKind: queryKind};
     }
     export enum WeatherType { Clear = 0, Rain = 1, Thunder = 2 }
     export interface WeatherCommand extends CommandNode {

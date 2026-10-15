@@ -30,7 +30,8 @@ namespace MCFunctionAST {
         Weather = 23,
         Difficulty = 24,
         Hud = 25,
-        InputPermission = 26
+        InputPermission = 26,
+        Camera = 27
     }
 
     export interface CommandNode {

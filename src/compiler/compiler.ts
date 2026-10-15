@@ -8,6 +8,9 @@ namespace MCFunctionCompiler {
             case MCFunctionAST.CommandKind.Enchant:
                 return compileEnchant(<MCFunctionAST.EnchantCommand>command);
 
+            case MCFunctionAST.CommandKind.Camera:
+                return compileCamera(<MCFunctionAST.CameraCommand>command);
+
             case MCFunctionAST.CommandKind.CameraShake:
                 return compileCameraShake(<MCFunctionAST.CameraShakeCommand>command);
 
@@ -83,6 +86,13 @@ namespace MCFunctionCompiler {
         }
     }
 
+    /** Base camera syntax; advanced options are added in a later structured phase. */
+    function compileCamera(command: MCFunctionAST.CameraCommand): string {
+        let result = "camera " + compileSelector(command.target);
+        if (command.action == MCFunctionAST.CameraAction.Clear) return result + " clear";
+        return result + " set " + command.presetId;
+    }
+
     /** Canonical Bedrock syntax; optional args are emitted only as required. */
     function compileCameraShake(command: MCFunctionAST.CameraShakeCommand): string {
         if (command.action == MCFunctionAST.CameraShakeAction.Stop) {
@@ -105,6 +115,10 @@ namespace MCFunctionCompiler {
         return "tell " + compileSelector(command.target) + " " + command.message;
     }
     function compileTime(command: MCFunctionAST.TimeCommand): string {
+        if (command.action == MCFunctionAST.TimeAction.Query) {
+            let queryNames = ["daytime", "gametime", "day"];
+            return "time query " + queryNames[command.queryKind];
+        }
         if (command.action == MCFunctionAST.TimeAction.AddTicks) return "time add " + command.ticks;
         if (command.action == MCFunctionAST.TimeAction.SetTicks) return "time set " + command.ticks;
         let names = ["day", "sunrise", "noon", "sunset", "night", "midnight"];

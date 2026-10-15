@@ -14,6 +14,14 @@ namespace Command {
         //% block="midnight"
         Midnight = 5
     }
+    export enum TimeQueryChoice {
+        //% block="daytime (0-23999)"
+        DayTime = 0,
+        //% block="gametime (total ticks)"
+        GameTime = 1,
+        //% block="day (world day)"
+        Day = 2
+    }
     export enum WeatherChoice {
         //% block="clear"
         Clear = 0,
@@ -144,6 +152,14 @@ namespace Command {
     //% block="TIME add ticks $ticks" ticks.defl=1000
     export function timeAddTicks(ticks: number): void {
         executeAudioCommand(MCFunctionBlocks.createTimeCommand(MCFunctionAST.TimeAction.AddTicks, undefined, ticks));
+    }
+    //% blockId=command_time_query
+    //% group="TIME" weight=97
+    //% block="TIME query $query"
+    export function timeQuery(query: TimeQueryChoice): void {
+        executeAudioCommand(MCFunctionBlocks.createTimeCommand(
+            MCFunctionAST.TimeAction.Query, undefined, undefined,
+            <MCFunctionAST.TimeQueryKind><number>query));
     }
     //% blockId=command_weather_set
     //% group="WEATHER" weight=100

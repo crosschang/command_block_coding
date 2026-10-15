@@ -1,5 +1,18 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    /** CAMERA blocks reuse the common Selector and canonical AST. */
+    export function createCameraSetCommand(
+        target: MCFunctionAST.Selector, presetId: string
+    ): MCFunctionAST.CameraCommand {
+        return MCFunctionAST.createCameraSetCommand(target, presetId);
+    }
+
+    export function createCameraClearCommand(
+        target: MCFunctionAST.Selector
+    ): MCFunctionAST.CameraCommand {
+        return MCFunctionAST.createCameraClearCommand(target);
+    }
+
 /** Structured CAMERASHAKE blocks: reuse the common Selector AST. */
     export function createCameraShakeAddCommand(
         target: MCFunctionAST.Selector,
@@ -21,8 +34,8 @@ namespace MCFunctionBlocks {
         return MCFunctionAST.createTellCommand(target, message);
     }
     export function createTimeCommand(action: MCFunctionAST.TimeAction, preset?: MCFunctionAST.TimePreset,
-        ticks?: number): MCFunctionAST.TimeCommand {
-        return MCFunctionAST.createTimeCommand(action, preset, ticks);
+        ticks?: number, queryKind?: MCFunctionAST.TimeQueryKind): MCFunctionAST.TimeCommand {
+        return MCFunctionAST.createTimeCommand(action, preset, ticks, queryKind);
     }
     export function createWeatherCommand(weather: MCFunctionAST.WeatherType,
         duration?: number): MCFunctionAST.WeatherCommand {

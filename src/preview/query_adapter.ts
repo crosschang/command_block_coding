@@ -125,6 +125,10 @@ namespace MCFunctionPreview {
     export function tryHandleQuery(
         command: MCFunctionAST.CommandNode
     ): QueryResult {
+        if (command.kind == MCFunctionAST.CommandKind.Time) {
+            let time = <MCFunctionAST.TimeCommand>command;
+            if (time.action == MCFunctionAST.TimeAction.Query) return handleTimeQueryPreview(time);
+        }
         if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
             return handleGameRulePreview(<MCFunctionAST.GameRuleCommand>command);
         }
@@ -138,6 +142,33 @@ namespace MCFunctionPreview {
         }
 
         return executeTagListQuery(tagCommand);
+    }
+
+    /**
+     * Preview-only LIVE number read, not a cached/session estimate.
+     * Education 26.32 user comparison confirmed these three MakeCode values.
+     * Keep canonical `time query ...` unchanged for .mcfunction export.
+     */
+    function handleTimeQueryPreview(command: MCFunctionAST.TimeCommand): QueryResult {
+        let value = 0;
+        let label = "";
+        let suffix = " ticks";
+        if (command.queryKind == MCFunctionAST.TimeQueryKind.DayTime) {
+            value = gameplay.timeQuery(TimeQuery.DayTime);
+            label = "daytime";
+        } else if (command.queryKind == MCFunctionAST.TimeQueryKind.GameTime) {
+            value = gameplay.timeQuery(TimeQuery.GameTime);
+            label = "gametime";
+        } else if (command.queryKind == MCFunctionAST.TimeQueryKind.Day) {
+            value = gameplay.timeQuery(TimeQuery.Day);
+            label = "day";
+            suffix = "";
+        } else {
+            // Definition Validation blocks this route. Never display an invented value.
+            return unhandledQuery();
+        }
+        previewSay("TIME QUERY " + label + ": " + value + suffix);
+        return handledQuery(QueryConfidence.Exact, "live MakeCode game time query");
     }
 
     /**

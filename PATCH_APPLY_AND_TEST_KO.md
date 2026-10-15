@@ -1,91 +1,49 @@
-# Minecraft MakeCode Command IDE — 첫 묶음 7종 통합 패치
+# 0.0.49 CAMERA BASIC + TIME QUERY 통합 패치 적용 가이드
 
-- 기준 파일: `command_block_coding(20261014-052934).zip` (사용자 제공)
-- 기준 `pxt.json.version`: **0.0.48** (변경하지 않음)
-- 날짜: 2026-10-14
-- 작업 방식: 기존 전체 코드가 아닌 **수정/추가 파일만 패치**
-- 상태: 일반 TypeScript 정적 검사/로컬 Preview 시뮬레이션 PASS, **MakeCode 실제 편집기 및 Education 26.32 게임 검증은 사용자 실행 대기**
+## 기준과 충돌 방지
 
-## 1. 패치 적용
+- 기준 원본: `command_block_coding(20261014-062303).zip` (`pxt.json.version = 0.0.49`)
+- **기존 CAMERA BASIC 패치(동일 날짜)를 반영했든 안 했든 이 ZIP 하나로 통합 적용**할 수 있도록 CAMERA 변경까지 포함합니다.
+- 복수 HASITEM, SCORES, 첫 번째 7종 명령은 수정하지 않습니다. 원본에 포함된 구현을 유지합니다.
+- 사용자가 위 기준 ZIP 이후 다른 소스 파일을 수동 수정했다면 먼저 원본 전체 ZIP을 올려 비교한 뒤 적용하세요.
+- 버전 숫자를 임의로 올리지 않았습니다.
 
-1. 최신 전체 프로젝트 폴더를 별도 백업합니다.
-2. 패치 ZIP 파일을 **`pxt.json`이 위치한 프로젝트 최상위 폴더**에 압축 해제합니다.
-3. ZIP 안의 `src/ast/...`, `src/compiler/...`, `src/validator/...`, `src/blocks/...`, `commands/...` 경로 그대로 덮어씁니다. `src/` 없이 `compiler/`에 복사하면 안 됩니다.
-4. `pxt.json.version`은 **0.0.48 유지**입니다. 임의 버전 변경하지 않습니다.
-5. `main.ts` / `test.ts`는 패치 ZIP에 포함하지 않았습니다. 테스트할 때만 `tests/SIMPLE_BATCH_0.0.48_PUBLIC_API_MAIN.ts`의 내용을 임시 `main.ts`로 복사합니다.
-6. MakeCode 확장 소스를 다시 불러오고 컴파일 후 **JavaScript → Blocks** 전환이 정상인지 확인합니다.
-7. 테스트가 끝나면 `main.ts`를 원래대로 복원합니다.
+## 적용
 
-## 2. 추가한 명령
+1. 전체 프로젝트를 백업합니다.
+2. 패치 ZIP의 파일을 `pxt.json`이 있는 **프로젝트 루트에 직접** 압축 해제하고 같은 상대경로의 파일을 덮어씁니다.
+3. `commands/camera.ts`, `src/blocks/camera_blocks.ts` 확인. TIME QUERY는 기존 `commands/simple_commands.ts`, `src/blocks/simple_command_blocks.ts`, `src/preview/query_adapter.ts` 등에 병합돼 있습니다.
+4. `pxt.json` 버전은 `0.0.49`이며 등록 파일 누락이 없어야 합니다.
+5. `tests/TIME_QUERY_0.0.49_PUBLIC_API_MAIN.ts` 내용을 임시 `main.ts`에 **전체 복사**합니다. `test.ts`는 변경하지 않습니다.
+6. JavaScript → Blocks 전환 후 Education에서 실행합니다.
 
-| 블록 API | 출력 예 | 검증 범위 |
-|---|---|---|
-| `Command.tell()` | `tell @s Hello!` | 플레이어 대상, 비어 있는 메시지 ERROR |
-| `Command.timeSetPreset()` | `time set noon` | day/sunrise/noon/sunset/night/midnight |
-| `Command.timeSetTicks()` | `time set 6000` | 정수만 |
-| `Command.timeAddTicks()` | `time add 1000` | 정수만 |
-| `Command.weatherSet()` | `weather rain 300` | clear/rain/thunder, 선택 지속시간(초) |
-| `Command.difficultySet()` | `difficulty normal` | peaceful/easy/normal/hard |
-| `Command.cameraShakeAdd()` | `camerashake add @s 0.5 2 positional` | 강도/지속시간/종류 |
-| `Command.cameraShakeStop()` | `camerashake stop @s` | 대상 지정 혹은 생략 |
-| `Command.hudSet()` | `hud @s hide hotbar` | hide/reset, 선택 HUD 요소 |
-| `Command.inputPermissionSet()` | `inputpermission set @s camera disabled` | permission / enabled/disabled |
+## 테스트 (채팅 함수는 슬래시 없이)
 
-`time query`, `weather query`, `inputpermission query`는 이번 1차 범위에서 제외했습니다. 실제 Query 결과가 Preview에서 보장된다고 주장하지 않습니다.
+**1. DayTime**
+```
+/time set 6000
+/daylock true
+```
+채팅: `tq49_daytime`
+기대: `[Preview] TIME QUERY daytime: 6000 ticks` (기존 `tellraw`로 출력)
+직접 비교: `/time query daytime`
 
-## 3. Minecraft Education 26.32 순차 테스트
+**2. GameTime**
+채팅: `tq49_gametime`
+직접 비교: `/time query gametime`
+기대: 두 값이 시간 경과만큼 조금 차이 나는 누적 틱 숫자로 출력
 
-**게임 테스트 전에 반드시 MakeCode JavaScript ↔ Blocks 변환부터 확인하세요.** 게임 채팅에서 아래 함수 이름을 **슬래시 없이** 실행합니다.
+**3. Day**
+채팅: `tq49_day`
+직접 비교: `/time query day`
+기대: 두 값이 동일한 정수 날짜
 
-| 순서 | 함수 이름 | 예상 관찰 | 상태 |
-|---|---|---|---|
-| 1 | `sb48_tell` | 자신에게 메시지 | USER RUNTIME PENDING |
-| 2 | `sb48_day` | 낮 | USER RUNTIME PENDING |
-| 3 | `sb48_noon` | 정오 | USER RUNTIME PENDING |
-| 4 | `sb48_set6000` | 6000틱으로 시간 설정 | USER RUNTIME PENDING |
-| 5 | `sb48_add1000` | 1000틱 추가 | USER RUNTIME PENDING |
-| 6 | `sb48_rain` | 비/눈 (생물군계 의존) | USER RUNTIME PENDING |
-| 7 | `sb48_clear` | 맑아짐 | USER RUNTIME PENDING |
-| 8 | `sb48_normal` | 월드 난이도 보통 | USER RUNTIME PENDING |
-| 9 | `sb48_cs_pos` | 2초 화면 위치 흔들림 | USER RUNTIME PENDING |
-| 10 | `sb48_cs_rot` | 2초 화면 회전 흔들림 | USER RUNTIME PENDING |
-| 11 | `sb48_cs_stop` | 흔들림 즉시 중지 | USER RUNTIME PENDING |
-| 12 | `sb48_hud_hide` | 핫바 숨김 | USER RUNTIME PENDING |
-| 13 | `sb48_hud_reset` | 핫바 복원 | USER RUNTIME PENDING |
-| 14 | `sb48_input_off` | 시점 조작 제한 | USER RUNTIME PENDING |
-| 15 | `sb48_input_on` | 시점 조작 복원 | USER RUNTIME PENDING |
-| 오류 | `sb48_bad_shake` | ERROR, 함수 미등록 | USER RUNTIME PENDING |
-| 오류 | `sb48_bad_weather` | ERROR, 함수 미등록 | USER RUNTIME PENDING |
+**4. 복원**
+`/daylock false`로 시간 흐름 재개 (원래 월드 설정에 맞춰 선택적으로 시행).
 
-- CAMERASHAKE는 **설정 → Allow Camera Shake**를 켜야 보입니다.
-- HUD·INPUTPERMISSION은 **Bedrock 공식 명령 참조 기준 코드**이며 Minecraft Education 26.32의 세부 요소별 지원은 테스트로 확인해야 합니다.
-- 입력 제어를 제한하면 게임 진행이 어려워질 수 있습니다. 테스트용 월드를 권장합니다. `sb48_input_on`을 먼저 확보하고, 만일 블록으로 복구되지 않으면 게임 채팅에서 직접 `/inputpermission set @s camera enabled`로 복구합니다. **이동 제한 기능은 이번 기본 테스트에 넣지 않았습니다.**
-- `sb48_hud_hide` 후 문제가 있으면 `/hud @s reset hotbar`로 복원할 수 있습니다.
-- 난이도/시간/날씨 명령은 월드 설정을 바꿉니다. 테스트 전 원래 값을 확인하고 나중에 복원하세요.
+## 주의
 
-## 4. 테스트 증거 수준
-
-- ZIP 검사: 파일 누락 없음, 무결성 PASS (릴리스 패키징 시 검증)
-- TypeScript 정적 검사: `tsc --target ES5 --noImplicitAny true`, PXT 런타임 이름에 대해 테스트 전용 스텁 사용. **실제 PXT 컴파일 PASS 아님**
-- 명령 문자열/Validation/Adapter 로컬 시뮬레이션: 35 cases PASS
-- FunctionFile 등록/ERROR 게이트 시뮬레이션: 유효 15개 등록, 무효 2개 차단, 대표 Preview 9개 명령 일치
-- 실제 MakeCode JS→Blocks 및 Education 26.32 Runtime: **미실행**
-
-## 5. 소스 보존
-
-- 기존 Selector/SCORES/multi-HASITEM 구현 파일 `src/ast/selector.ts`, `src/fields/selector_field.ts` 수정 없음.
-- 기존 Registry Generator / generated 파일 수정 없음.
-- 기존 `main.ts`, `main.blocks`, `test.ts` 수정 없음.
-- 기존 AST 0~19 번호 유지, 20~26 추가.
-- `RawCommand` fallback 보존. 양방향 .mcfunction Parser는 이후 작업.
-- 단일 `camerashake` 구버전 패치는 **추가 적용하지 마세요**. 이 통합 ZIP이 해당 기능을 포함합니다.
-
-## 공식 Bedrock 참조
-
-- https://learn.microsoft.com/en-us/minecraft/creator/commands/commands/tell?view=minecraft-bedrock-stable
-- https://learn.microsoft.com/en-us/minecraft/creator/commands/commands/time?view=minecraft-bedrock-stable
-- https://learn.microsoft.com/en-us/minecraft/creator/commands/commands/weather?view=minecraft-bedrock-stable
-- https://learn.microsoft.com/en-us/minecraft/creator/commands/commands/difficulty?view=minecraft-bedrock-stable
-- https://learn.microsoft.com/en-us/minecraft/creator/commands/commands/camerashake?view=minecraft-bedrock-stable
-- https://learn.microsoft.com/en-us/minecraft/creator/commands/commands/hud?view=minecraft-bedrock-stable
-- https://learn.microsoft.com/en-us/minecraft/creator/commands/commands/inputpermission?view=minecraft-bedrock-stable
+- Preview 출력은 기존 `MCFunctionPreview.previewSay()`가 `tellraw` JSON 텍스트로 보냅니다. `player.say("[...]")`로 출력하지 않습니다.
+- `.mcfunction` Compiler 결과는 `time query ...`이며 `[Preview]` 메시지를 파일에 넣지 않습니다.
+- 현재 MakeCode Extension 통합 패치는 **로컬 26개 테스트 및 TypeScript 정적 검사 PASS**, 실제 Education/PXT 결과는 사용자 실측이 나오기 전까지 미검증입니다.
+- `TIME QUERY`는 명령형 블록으로 이번에 도입합니다. 결과를 다른 수식의 숫자 입력에 연결하는 독립 Reporter API는 추후 설계 대상입니다.

@@ -132,7 +132,9 @@
         "src/blocks/camerashake_blocks.ts",
         "commands/simple_commands.ts",
         "src/blocks/simple_command_blocks.ts",
-        "docs/CHANGELOG_SIMPLE_BATCH_0.0.48_2026-10-14.md"
+        "docs/CHANGELOG_SIMPLE_BATCH_0.0.48_2026-10-14.md",
+        "commands/camera.ts",
+        "src/blocks/camera_blocks.ts"
     ],
     "testFiles": [
         "test.ts"

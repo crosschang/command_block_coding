@@ -1548,6 +1548,50 @@ namespace MCFunctionValidator {
     }
 
 
+    /** Camera preset IDs are namespaced resource locations; never sanitize silently. */
+    function isCameraPresetId(value: string): boolean {
+        if (!value) return false;
+        let colon = value.indexOf(":");
+        if (colon <= 0 || colon == value.length - 1 || colon != value.lastIndexOf(":")) return false;
+        for (let i = 0; i < value.length; i++) {
+            let c = value.charAt(i);
+            if (i == colon) continue;
+            let allowed = (c >= "a" && c <= "z") || (c >= "0" && c <= "9") ||
+                c == "_" || c == "." || c == "-" || (i > colon && c == "/");
+            if (!allowed) return false;
+        }
+        return true;
+    }
+
+    /** CAMERA basic: player target, set/clear action, one safe namespaced preset token. */
+    export function validateCameraCommand(command: MCFunctionAST.CameraCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        validatePlayerTarget(command.target, "CAMERA", issues);
+        if (command.action != MCFunctionAST.CameraAction.Set &&
+            command.action != MCFunctionAST.CameraAction.Clear) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_ACTION_INVALID", "CAMERA action must be set or clear.");
+            return issues;
+        }
+        if (command.action == MCFunctionAST.CameraAction.Clear) {
+            if (command.presetId != undefined) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_CLEAR_EXTRA_PRESET",
+                    "CAMERA clear cannot include a preset ID.");
+            }
+            return issues;
+        }
+        if (!isCameraPresetId(command.presetId)) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_PRESET_ID_INVALID",
+                "CAMERA preset must be one safe lowercase namespaced ID such as minecraft:free or example:sky.");
+        } else if (command.presetId != "minecraft:first_person" &&
+            command.presetId != "minecraft:third_person" &&
+            command.presetId != "minecraft:third_person_front" &&
+            command.presetId != "minecraft:free") {
+            addIssue(issues, ValidationLevel.Info, "CAMERA_PRESET_CUSTOM",
+                "Custom or version-dependent camera preset; confirm it exists in this world.");
+        }
+        return issues;
+    }
+
     /** CAMERASHAKE is player-targeted. Validate without normalizing bad values. */
     export function validateCameraShakeCommand(
         command: MCFunctionAST.CameraShakeCommand
@@ -1628,6 +1672,11 @@ namespace MCFunctionValidator {
         } else if (command.action == MCFunctionAST.TimeAction.SetTicks || command.action == MCFunctionAST.TimeAction.AddTicks) {
             if (!simpleFiniteInteger(command.ticks))
                 addIssue(issues, ValidationLevel.Error, "TIME_TICKS_INTEGER", "Time ticks must be an integer.");
+        } else if (command.action == MCFunctionAST.TimeAction.Query) {
+            if (command.queryKind == undefined || command.queryKind < 0 || command.queryKind > 2 ||
+                command.queryKind != Math.floor(command.queryKind)) {
+                addIssue(issues, ValidationLevel.Error, "TIME_QUERY_KIND_INVALID", "TIME QUERY requires daytime, gametime or day.");
+            }
         } else addIssue(issues, ValidationLevel.Error, "TIME_ACTION_INVALID", "Invalid time action.");
         return issues;
     }
@@ -1692,6 +1741,9 @@ namespace MCFunctionValidator {
 
         if (command.kind == MCFunctionAST.CommandKind.Enchant) {
             appendIssues(issues, validateEnchantCommand(<MCFunctionAST.EnchantCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Camera) {
+            appendIssues(issues, validateCameraCommand(<MCFunctionAST.CameraCommand>command));
         }
         if (command.kind == MCFunctionAST.CommandKind.CameraShake) {
             appendIssues(issues, validateCameraShakeCommand(<MCFunctionAST.CameraShakeCommand>command));
