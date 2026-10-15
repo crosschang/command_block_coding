@@ -34,6 +34,7 @@ namespace FunctionFile {
     let functionHandlers: (() => void)[] = [];
     let functionValid: boolean[] = [];
     let registeredChatFunctionNames: string[] = [];
+    let registeredChatDiagnosticNames: string[] = [];
 
     // Project-level representation of functions/tick.json.
     // Keep declaration order because Minecraft executes the listed functions in order.
@@ -82,8 +83,10 @@ namespace FunctionFile {
             let reservedIssues: MCFunctionValidator.ValidationIssue[] = [{
                 level: MCFunctionValidator.ValidationLevel.Error,
                 code: "FUNCTION_NAME_RESERVED",
-                message: name == MCFunctionDiagnostics.chatCommandName()
-                    ? "mcfunction name cbi_diag is reserved for the diagnostic viewer."
+                message: name == MCFunctionDiagnostics.allDiagnosticsChatCommandName()
+                    ? "mcfunction name ? is reserved for the project diagnostic viewer."
+                    : name == MCFunctionDiagnostics.chatCommandName()
+                    ? "mcfunction name cbi_diag is reserved for the legacy diagnostic viewer."
                     : "mcfunction name cbi_rules is reserved for the Gamerule Registry viewer."
             }];
 
@@ -382,17 +385,12 @@ namespace FunctionFile {
         }
         summary = summary + ".";
 
+        // Keep each definition line short. The once-only Preview.ready() guide
+        // explains ? and name? after all definitions are registered.
         if (!valid) {
-            if (MCFunctionDiagnostics.isReservedChatCommand(name) ||
-                MCFunctionPreview.isReservedGameRuleCatalogChatCommand(name)) {
-                summary = summary + " Execution blocked. Details: " +
-                    MCFunctionDiagnostics.chatCommandName();
-            } else {
-                summary = summary + " Execution blocked. Type " + name +
-                    " to see why.";
-            }
+            summary = summary + " Execution blocked.";
         } else {
-            summary = summary + " Details: " + MCFunctionDiagnostics.chatCommandName();
+            summary = summary + " Execution allowed.";
         }
         MCFunctionPreview.previewSay(summary);
     }
@@ -450,9 +448,27 @@ namespace FunctionFile {
                     MCFunctionDiagnostics.showFunction(name);
                     return;
                 }
+                // Only a direct user chat invocation displays non-blocking
+                // WARNING/INFO details. Internal function and tick calls use
+                // runPreview() directly and must not flood the chat.
+                MCFunctionDiagnostics.showRunnableIssues(name);
                 runPreview(name);
                 return;
             }
+        });
+
+        // PXT treats whitespace-separated chat tokens as arguments. Register the
+        // exact command "name?" as a separate 0-argument handler instead of
+        // requiring "name ?". Never invoke the stored command plan here.
+        // Minecraft function IDs should not contain spaces or a question mark.
+        if (name.indexOf("?") >= 0 || name.indexOf(" ") >= 0) return;
+        let queryName = name + "?";
+        for (let i = 0; i < registeredChatDiagnosticNames.length; i++) {
+            if (registeredChatDiagnosticNames[i] == queryName) return;
+        }
+        registeredChatDiagnosticNames.push(queryName);
+        player.onChat(queryName, function () {
+            MCFunctionDiagnostics.showFunctionDetailsOnly(name);
         });
     }
 
@@ -519,10 +535,18 @@ namespace FunctionFile {
  */
 //% color="#00A67E" weight=96 icon="\uf144" block="PREVIEW"
 namespace Preview {
+    let diagnosticGuideShown = false;
+
     //% blockId=mcfunction_preview_ready
     //% block="▶ PREVIEW READY"
     //% weight=100
     export function ready(): void {
         Command.say("MCFunction Preview Ready")
+        // Show the guidance once, after top-level FunctionFile.define calls.
+        // This is Preview metadata; it is never part of .mcfunction output.
+        if (!diagnosticGuideShown) {
+            diagnosticGuideShown = true;
+            MCFunctionDiagnostics.showReadyGuide();
+        }
     }
 }

@@ -4,7 +4,7 @@
  * Purpose:
  * - keep detailed validation diagnostics out of the normal chat flow
  * - preserve one current diagnostic set per FunctionFile
- * - keep cbi_diag for the whole-project viewer; invalid function names show
+ * - provide ? for whole-project diagnostics (cbi_diag remains an alias); bad names show
  *   their own errors through diagnostic-only chat handlers
  *
  * This is derived Preview/editor state. It is NOT Minecraft Command AST data and
@@ -30,13 +30,18 @@ namespace MCFunctionDiagnostics {
     let knownFunctionNames: string[] = [];
     let chatRegistered = false;
 
-    /** Human-facing internal tool command. Intentionally readable. */
+    /** Legacy alias preserved for existing tests and projects. */
     export function chatCommandName(): string {
         return "cbi_diag";
     }
 
+    /** Short user-facing command for the whole-project diagnostic viewer. */
+    export function allDiagnosticsChatCommandName(): string {
+        return "?";
+    }
+
     export function isReservedChatCommand(name: string): boolean {
-        return name == chatCommandName();
+        return name == chatCommandName() || name == allDiagnosticsChatCommandName();
     }
 
     /**
@@ -47,6 +52,11 @@ namespace MCFunctionDiagnostics {
         if (chatRegistered) return;
         chatRegistered = true;
 
+        // Register the new short command, but retain the old name as an alias.
+        // Both invoke the same read-only project diagnostic viewer.
+        player.onChat(allDiagnosticsChatCommandName(), function () {
+            showAll();
+        });
         player.onChat(chatCommandName(), function () {
             showAll();
         });
@@ -192,12 +202,88 @@ namespace MCFunctionDiagnostics {
         if (!found) {
             MCFunctionPreview.previewSay(
                 "No stored diagnostic details for " + functionName +
-                ". Use " + chatCommandName() + " for project diagnostics."
+                ". Use " + allDiagnosticsChatCommandName() + " for project diagnostics."
             );
         }
     }
 
-    /** Detailed viewer, shown only when the user types cbi_diag. */
+    /**
+     * Show WARNING / INFO details for a valid FunctionFile on explicit chat
+     * invocation only. Its caller must still run the prepared handler afterward.
+     *
+     * Do not use this from FunctionFile.runPreview(): nested function and
+     * tick.json calls must not generate repeated user-facing diagnostics.
+     */
+    export function showRunnableIssues(functionName: string): void {
+        let warnings = countFunctionLevel(
+            functionName, MCFunctionValidator.ValidationLevel.Warning
+        );
+        let info = countFunctionLevel(
+            functionName, MCFunctionValidator.ValidationLevel.Info
+        );
+        if (warnings == 0 && info == 0) return;
+
+        MCFunctionPreview.previewSay(
+            "mcfunction " + functionName + ": " + warnings +
+            " warning(s), " + info + " info; execution allowed."
+        );
+
+        for (let i = 0; i < records.length; i++) {
+            let current = records[i];
+            if (current.functionName != functionName) continue;
+            if (current.level != MCFunctionValidator.ValidationLevel.Warning &&
+                current.level != MCFunctionValidator.ValidationLevel.Info) continue;
+
+            MCFunctionPreview.previewSay(
+                levelText(current.level) + " " + current.code +
+                " " + sourceText(current.source) + ": " + current.message
+            );
+        }
+    }
+
+    /**
+     * Explicit "functionName?" read-only diagnostic viewer.
+     * Works for valid/invalid/no-issue functions and NEVER runs commands.
+     */
+    export function showFunctionDetailsOnly(functionName: string): void {
+        let errors = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Error);
+        let warnings = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Warning);
+        let info = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Info);
+
+        if (errors + warnings + info == 0) {
+            MCFunctionPreview.previewSay(
+                "mcfunction " + functionName + ": OK. Diagnostic only; not executed."
+            );
+            return;
+        }
+
+        MCFunctionPreview.previewSay(
+            "mcfunction " + functionName + ": " + errors + " error(s), " +
+            warnings + " warning(s), " + info + " info. Diagnostic only; not executed."
+        );
+        for (let i = 0; i < records.length; i++) {
+            let current = records[i];
+            if (current.functionName != functionName) continue;
+            MCFunctionPreview.previewSay(
+                levelText(current.level) + " " + current.code +
+                " " + sourceText(current.source) + ": " + current.message
+            );
+        }
+    }
+
+    /** Final summary only, called once by Preview.ready() after definitions. */
+    export function showReadyGuide(): void {
+        let errors = countLevel(MCFunctionValidator.ValidationLevel.Error);
+        let warnings = countLevel(MCFunctionValidator.ValidationLevel.Warning);
+        let info = countLevel(MCFunctionValidator.ValidationLevel.Info);
+        if (errors + warnings + info == 0) return;
+        MCFunctionPreview.previewSay(
+            "Diagnostics: " + errors + " error(s), " + warnings +
+            " warning(s), " + info + " info. All: ?. One: functionName? (no space)."
+        );
+    }
+
+    /** Detailed project viewer: ? (and backward-compatible cbi_diag). */
     export function showAll(): void {
         let errorCount = countLevel(MCFunctionValidator.ValidationLevel.Error);
         let warningCount = countLevel(MCFunctionValidator.ValidationLevel.Warning);
