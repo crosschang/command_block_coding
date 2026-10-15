@@ -251,16 +251,23 @@ namespace MCFunctionDiagnostics {
      * oversized commands and to preserve readable output order.
      */
     function showLines(lines: string[]): void {
-        player.say("SHOWLINES START");
+        player.say("PROBE A");
 
-        let total = 0;
+        // 1. 짧은 tellraw
+        MCFunctionPreview.previewSay("SHORT TEST");
+        player.say("PROBE B");
+
+        // 2. 진단 내용 결합 (줄바꿈 없음)
+        let content = "";
         for (let i = 0; i < lines.length; i++) {
-            total += lines[i].length;
+            if (content.length > 0) {
+                content += " | ";
+            }
+            content += lines[i];
         }
 
-        player.say("LINES COUNT " + lines.length);
-        player.say("TOTAL CHARS " + total);
-        player.say("SHOWLINES END");
+        MCFunctionPreview.previewSay(content);
+        player.say("PROBE C");
     }
 
     /**
