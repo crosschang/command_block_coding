@@ -52,11 +52,14 @@ namespace MCFunctionDiagnostics {
         if (chatRegistered) return;
         chatRegistered = true;
 
-        // Register the new short command, but retain the old name as an alias.
-        // Both invoke the same read-only project diagnostic viewer.
+        // 전체 진단 ? 명령
         player.onChat(allDiagnosticsChatCommandName(), function () {
+            player.say("DIAG START");
             showAll();
+            player.say("DIAG END");
         });
+
+        // 기존 cbi_diag 명령 유지
         player.onChat(chatCommandName(), function () {
             showAll();
         });
