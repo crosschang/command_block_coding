@@ -427,9 +427,10 @@ namespace FunctionFile {
     }
 
     /**
-     * Register one direct chat dispatcher per function name. Invalid names may
-     * be inspected on every explicit chat invocation, while internal runPreview()
-     * calls retain the existing one-time error throttle for tick/function loops.
+     * Register one direct chat dispatcher per function name. Normal execution
+     * does not echo stored diagnostics; invalid functions show only a blocked
+     * hint. Detailed inspection uses functionName? without executing commands.
+     * Internal runPreview() retains the one-time error throttle for loops.
      */
     function ensureFunctionChatRegistered(name: string): void {
         if (!name || name.length == 0) return;
@@ -445,13 +446,19 @@ namespace FunctionFile {
             for (let i = 0; i < functionNames.length; i++) {
                 if (functionNames[i] != name) continue;
                 if (!functionValid[i]) {
-                    MCFunctionDiagnostics.showFunction(name);
+                    // Running an invalid function remains forbidden. Keep chat
+                    // output minimal; detailed causes belong to the explicit
+                    // read-only diagnostic command (functionName?).
+                    MCFunctionPreview.previewSay(
+                        "mcfunction " + name + ": execution blocked. " +
+                        "Type " + name + "? for details."
+                    );
                     return;
                 }
-                // Only a direct user chat invocation displays non-blocking
-                // WARNING/INFO details. Internal function and tick calls use
-                // runPreview() directly and must not flood the chat.
-                MCFunctionDiagnostics.showRunnableIssues(name);
+                // Normal execution must be quiet about stored WARNING/INFO.
+                // Only functionName? and ? (or cbi_diag) show diagnostics.
+                // This avoids delayed tellraw lines interleaving with the
+                // actual function output, without changing Validator policy.
                 runPreview(name);
                 return;
             }

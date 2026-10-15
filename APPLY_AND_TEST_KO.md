@@ -1,53 +1,45 @@
-# 0.0.49 FunctionFile 함수명별 오류 안내 패치
+# 0.0.52 함수 실행 시 진단 표시 최소화 패치
 
-## 목적
-`cbi_diag`을 입력하지 않아도, 정의 단계에서 ERROR가 발견된 `FunctionFile.define("foo", ...)`를 채팅에서 `foo`라고 입력하면 정확한 오류 코드/메시지를 출력합니다.
+## 기준
+- 기준 ZIP: `command_block_coding(20261015-094146).zip`
+- `pxt.json.version`: **0.0.52 유지**
+- 교체 파일: **`function_file.ts` 1개**
+- 변경하지 않음: `src/preview/diagnostic_store.ts`, Validator, AST, Compiler, Registry, Generator, `main.ts`, `test.ts`, `pxt.json`.
 
-- 정상 함수: 기존대로 실제 실행
-- ERROR 함수: **명령 실행 차단 유지**, 동일한 채팅 이름은 **진단 전용**으로 등록
-- WARNING/INFO만 있는 함수: 기존처럼 실행 가능
-- `cbi_diag`: 전체 원장 조회 도구로 유지
-- `cbi_rules`: 정상적인 GAMERULE LIST 정의가 있을 때만 등록
-- 내부 FunctionFile/tick 경유 오류: 기존 1회 출력 제한 유지
-- `.mcfunction` Compiler, AST, Registry, Selector/HASITEM/SCORES, CAMERA, TIME QUERY 미수정
+## 의도된 정책
+| 채팅 입력 | 결과 |
+|---|---|
+| `diag52_ok` | 함수 내용만 실행 (진단 자동 표시 없음) |
+| `diag52_warn` | WARNING 세부 진단 없이 함수 내용 실행 |
+| `diag52_info` | INFO 세부 진단 없이 함수 내용 실행 |
+| `diag52_error` | 실행 차단. `diag52_error?`로 확인하라는 짧은 메시지만 표시 |
+| `diag52_warn?` | WARNING 세부 진단 조회만, 함수 실행하지 않음 |
+| `diag52_info?` | INFO 세부 진단 조회만, 함수 실행하지 않음 |
+| `diag52_error?` | ERROR 세부 진단 조회만, 함수 실행하지 않음 |
+| `?` 또는 `cbi_diag` | 전체 진단 조회만, 함수 실행하지 않음 |
 
-## 버전과 적용 경로
-기준: 사용자가 제공한 `command_block_coding(20261014-062303).zip`의 **0.0.49**. 2026-10-15 CAMERA+TIME QUERY 통합 패치 파일 목록과 비교하여 두 수정 대상과 겹치지 않는 것을 확인했습니다.
+`Preview.ready()`의 **초기 등록 결과 및 전체 진단 사용법 안내는 그대로 유지**됩니다. 즉, 이번 수정은 **사용자가 실제 함수명을 입력해서 실행할 때 자동으로 표시되던 진단만 줄입니다.**
 
-패치 ZIP은 프로젝트 루트(`pxt.json`이 있는 위치)에 압축 해제합니다. **아래 두 파일만 덮어씁니다.**
+## 적용
+1. 사용 중인 0.0.52 전체 프로젝트를 백업합니다.
+2. 패치 ZIP의 `function_file.ts`를 `pxt.json`이 있는 프로젝트 **루트**의 동일 파일에 덮어씁니다.
+3. MakeCode Extension 새로고침 후 TypeScript 컴파일과 JavaScript ↔ Blocks 전환을 확인합니다.
+4. 기존 `DIAGNOSTIC_QUERY_0.0.52_TEST_MAIN.ts`를 임시 `main.ts`에 넣어 사용합니다. `player.onChat("?")` 임시 테스트 핸들러가 있다면 제거합니다.
 
-- `function_file.ts`
-- `src/preview/diagnostic_store.ts`
+## 게임 검증
+슬래시 없이 실행:
 
-`pxt.json`은 수정하지 않습니다. 적용 전 위 두 파일을 백업하세요.
+1. `diag52_warn` → **WARNING/상세 설명 없이** `WARNING_TEST_EXECUTED` 표시
+2. `diag52_warn?` → 경고 상세 출력, `WARNING_TEST_EXECUTED` **출력되지 않음**
+3. `diag52_info` → **INFO/상세 설명 없이** `INFO_TEST_EXECUTED` 표시 (카메라 프리셋 명령 자체는 월드에 해당 프리셋이 없으면 별도로 실패할 수 있음)
+4. `diag52_info?` → INFO 상세 출력, `INFO_TEST_EXECUTED` **출력되지 않음**
+5. `diag52_error` → 함수 본문 미실행, `diag52_error?` 안내만 표시
+6. `diag52_error?` → 상세 오류 출력, 본문 실행 안 함
+7. `?` → 전체 오류/경고/정보 조회
+8. `diag52_parent` → WARNING/INFO 안내 중복 없이 기존 내부 함수 실행 유지
 
-## 사용자 환경 테스트
-기존 CAMERA + TIME QUERY 통합 테스트용 `main.ts` 코드를 그대로 사용할 수 있습니다.
-
-1. MakeCode에서 오류 0건으로 컴파일되는지, JavaScript → Blocks 변환이 되는지 확인
-2. 게임에서 `cam49_bad_id`를 슬래시 없이 실행
-3. `[Preview] mcfunction cam49_bad_id: execution blocked...` 다음 줄에 `CAMERA_PRESET_ID_INVALID`와 상세 메시지가 표시되는지 확인
-4. 동일한 `cam49_bad_id`를 다시 입력해도 원인이 재출력되는지 확인
-5. 정상 함수인 `cam49_third`를 실행해 3인칭 후방 카메라가 적용되는지 확인; 이후 `cam49_clear`로 초기화
-6. `cbi_diag`를 입력해 전체 오류가 계속 표시되는지 확인
-
-예상 화면 (정확한 영어 메시지는 Validator 구현값에 따름):
-
-```text
-<nl15> cam49_bad_id
-[Preview] mcfunction cam49_bad_id: execution blocked; 1 error(s), 0 warning(s), 0 info.
-[Preview] ERROR CAMERA_PRESET_ID_INVALID DEFINITION: CAMERA preset must be one safe lowercase namespaced ID ...
-```
-
-**주의:** `[Preview]`는 출력 포맷 예시이며, 실제 코드는 기존 `MCFunctionPreview.previewSay()` → `tellraw` 출력을 재사용합니다.
-
-예외: 예약된 `cbi_diag` / `cbi_rules`를 함수 이름으로 정의하면 예약 이름 자체에는 새로운 핸들러를 등록할 수 없으며, 기존 `cbi_diag`에서 오류를 확인합니다.
-
-## 검증 경계
-- 로컬 TS 컴파일(대체 MakeCode API 선언 사용): PASS
-- 모의 채팅 등록, 오류 출력, 오류 시 실행 차단, 정상 실행, 중복 등록, 예약어, 내부 호출 오류 반복 제한: **14/14 PASS**
-- Minecraft MakeCode/PXT 빌드: 미실행
-- Minecraft Education 26.32 실제 채팅 실행: 미실행
-- Behavior Pack `.mcfunction` 실행/왕복: 미실행
-
-버전 번호를 임의로 변경하지 않았습니다.
+## 검증 범위와 주의
+- 최신 실제 소스에서 추출한 `function_file.ts`와 `diagnostic_store.ts`를 사용한 **18/18 JavaScript 런타임 모의 검사 PASS**.
+- Minecraft MakeCode에서의 PXT 컴파일과 Education 26.32 실제 실행은 **아직 확인 전**.
+- 기존 `?`/`함수명?`은 세부 진단을 여러 `tellraw`로 출력합니다. 이번 패치는 **함수 실행 시 불필요한 진단 출력**을 제거한 최소 수정이며, 조회 메시지 자체의 비동기 출력 타이밍을 해결했다고 단정하지 않습니다.
+- 사용자 정의 함수명이 `?`로 끝나는 경우의 예약 문자 충돌은 별도 후속 과제입니다.
