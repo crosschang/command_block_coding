@@ -341,7 +341,12 @@ namespace MCFunctionDiagnostics {
                 );
             }
         }
+
+        player.say("BEFORE LINES");
+
         showLines(lines);
+
+        player.say("AFTER LINES");
     }
 
 }
