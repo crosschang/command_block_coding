@@ -384,6 +384,40 @@ namespace MCFunctionDiagnostics {
         );
     }
 
+    // 0.0.62 TEMPORARY REAL-CACHE PERFORMANCE PROBES.
+    // These only read already-prepared Preview diagnostics. They do not trigger
+    // validation, alter stored data, or affect .mcfunction generation.
+    // Remove after the Minecraft Education runtime investigation.
+
+    /** Perform precisely the real name-lookup loop, without chat output. */
+    export function probeFindDetailIndex(functionName: string): number {
+        for (let i = 0; i < cachedDetailNames.length; i++) {
+            if (cachedDetailNames[i] != functionName) continue;
+            return i;
+        }
+        return -1;
+    }
+
+    /** Traverse actual cached detail lines without calling player.say/tellraw. */
+    export function probeWalkDetailCharsAt(index: number): number {
+        if (index < 0 || index >= cachedDetailLines.length) return -1;
+        let prepared = cachedDetailLines[index];
+        let chars = 0;
+        for (let i = 0; i < prepared.length; i++) {
+            chars += prepared[i].length;
+        }
+        return chars;
+    }
+
+    /** Output actual cached lines, with the original adapter but NO name search. */
+    export function probeEmitDetailAt(index: number): void {
+        if (index < 0 || index >= cachedDetailLines.length) return;
+        let prepared = cachedDetailLines[index];
+        for (let i = 0; i < prepared.length; i++) {
+            emitCompactLine(prepared[i]);
+        }
+    }
+
     /** Prefer one short SAY call; preserve literal []/@/JSON via existing tellraw. */
     function emitCompactLine(line: string): void {
         const maxCompactChars = 145; // Conservative probe threshold, not a protocol limit.
