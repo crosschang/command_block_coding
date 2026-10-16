@@ -30,6 +30,14 @@ namespace MCFunctionDiagnostics {
     let knownFunctionNames: string[] = [];
     let chatRegistered = false;
 
+    // Derived PREVIEW presentation cache. The original DiagnosticRecords remain
+    // authoritative; cache values never enter the AST or the .mcfunction output.
+    // Rebuilt when diagnostics change, NOT when the player types ? or name?.
+    let cachedPageTexts: string[] = [];
+    let cachedDetailNames: string[] = [];
+    let cachedDetailLines: string[][] = [];
+    let cachedSeverity: string[] = [];
+
     /** Legacy alias preserved for existing tests and projects. */
     export function chatCommandName(): string {
         return "cbi_diag";
@@ -102,6 +110,9 @@ namespace MCFunctionDiagnostics {
                 source: DiagnosticSource.Definition
             });
         }
+        // All affected display strings are prepared during definition update.
+        refreshFunctionDisplayCache(functionName);
+        rebuildPageCache();
     }
 
     /** Future Preview/Runtime adapters may append non-definition diagnostics here. */
@@ -134,6 +145,8 @@ namespace MCFunctionDiagnostics {
             message: message,
             source: source
         });
+        refreshFunctionDisplayCache(functionName);
+        rebuildPageCache();
     }
 
     export function countLevel(level: MCFunctionValidator.ValidationLevel): number {
@@ -351,33 +364,24 @@ namespace MCFunctionDiagnostics {
     }
 
     /**
-     * Fast read-only diagnostic detail viewer. Typical one-issue queries become
-     * one compact output instead of a separate heading and issue line.
-     * Longer/multiple issues retain all their text through bounded output.
-     * Do not execute the FunctionFile command plan from this viewer.
+     * Fast read-only detail viewer: no diagnostic scans or string assembly at
+     * chat time. Validator message text and error codes remain unmodified.
      */
     export function showFunctionDetailsOnly(functionName: string): void {
-        let errors = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Error);
-        let warnings = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Warning);
-        let info = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Info);
-
-        let header = uiText("diagTitle") + " " + functionName + " E" + errors + " W" + warnings + " I" + info + ".";
-        if (errors + warnings + info == 0) {
-            emitCompactLine(header + " " + uiText("noProblems") + " " + uiText("notExecuted"));
+        for (let i = 0; i < cachedDetailNames.length; i++) {
+            if (cachedDetailNames[i] != functionName) continue;
+            let prepared = cachedDetailLines[i];
+            for (let j = 0; j < prepared.length; j++) {
+                emitCompactLine(prepared[j]);
+            }
             return;
         }
-
-        let lines: string[] = [];
-        for (let i = 0; i < records.length; i++) {
-            let current = records[i];
-            if (current.functionName != functionName) continue;
-            lines.push(
-                levelText(current.level) + " " + current.code + " " +
-                sourceText(current.source) + ": " + current.message
-            );
-        }
-        // A single ordinary issue will normally fit one safe output call.
-        emitCompactIssues(header + " " + uiText("notExecuted"), lines);
+        // Unknown names are not registered as name? handlers, but preserve the
+        // previous helper behavior for direct calls in other code.
+        emitCompactLine(
+            uiText("diagTitle") + " " + functionName + " E0 W0 I0. " +
+            uiText("noProblems") + " " + uiText("notExecuted")
+        );
     }
 
     /** Prefer one short SAY call; preserve literal []/@/JSON via existing tellraw. */
@@ -392,77 +396,141 @@ namespace MCFunctionDiagnostics {
         }
     }
 
-    /** Combine adjacent issues only while they safely fit one bounded message. */
-    function emitCompactIssues(header: string, issues: string[]): void {
+    /**
+     * Prepare complete display messages (including compact issue groups) BEFORE
+     * chat query time. 145 is still only a conservative probe threshold.
+     */
+    function prepareCompactIssues(header: string, issues: string[]): string[] {
         const maxCompactChars = 145;
+        let result: string[] = [];
         let pending = header;
         for (let i = 0; i < issues.length; i++) {
             let addition = " | " + issues[i];
             if (pending.length + addition.length <= maxCompactChars) {
                 pending = pending + addition;
             } else {
-                emitCompactLine(pending);
+                if (pending.length > 0) result.push(pending);
                 pending = issues[i];
             }
         }
-        if (pending.length > 0) emitCompactLine(pending);
+        if (pending.length > 0) result.push(pending);
+        return result;
     }
 
-    /** Highest severity per function for a concise project index. */
-    function functionSeverity(functionName: string): string {
-        if (countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Error) > 0) return "E";
-        if (countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Warning) > 0) return "W";
-        if (countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Info) > 0) return "I";
-        return "";
-    }
-
-    /** Total functions having one or more stored diagnostic records. */
-    function affectedFunctionCount(): number {
-        let count = 0;
-        for (let i = 0; i < knownFunctionNames.length; i++) {
-            if (functionIssueCount(knownFunctionNames[i]) > 0) count++;
+    /**
+     * Cache a single function's detail strings after a diagnostic mutation.
+     * This scans records once; it does not rebuild every other function's details.
+     */
+    function refreshFunctionDisplayCache(functionName: string): void {
+        let errors = 0;
+        let warnings = 0;
+        let info = 0;
+        let issueLines: string[] = [];
+        for (let r = 0; r < records.length; r++) {
+            let current = records[r];
+            if (current.functionName != functionName) continue;
+            if (current.level == MCFunctionValidator.ValidationLevel.Error) errors++;
+            else if (current.level == MCFunctionValidator.ValidationLevel.Warning) warnings++;
+            else if (current.level == MCFunctionValidator.ValidationLevel.Info) info++;
+            issueLines.push(
+                levelText(current.level) + " " + current.code + " " +
+                sourceText(current.source) + ": " + current.message
+            );
         }
-        return count;
+
+        let detailHeader = uiText("diagTitle") + " " + functionName +
+            " E" + errors + " W" + warnings + " I" + info + ".";
+        let prepared: string[] = [];
+        if (issueLines.length == 0) {
+            prepared.push(
+                detailHeader + " " + uiText("noProblems") + " " + uiText("notExecuted")
+            );
+        } else {
+            prepared = prepareCompactIssues(
+                detailHeader + " " + uiText("notExecuted"), issueLines
+            );
+        }
+
+        let index = -1;
+        for (let i = 0; i < cachedDetailNames.length; i++) {
+            if (cachedDetailNames[i] == functionName) {
+                index = i;
+                break;
+            }
+        }
+        if (index < 0) {
+            index = cachedDetailNames.length;
+            cachedDetailNames.push(functionName);
+            cachedDetailLines.push(prepared);
+            cachedSeverity.push("");
+        } else {
+            cachedDetailLines[index] = prepared;
+        }
+
+        if (errors > 0) cachedSeverity[index] = "E";
+        else if (warnings > 0) cachedSeverity[index] = "W";
+        else if (info > 0) cachedSeverity[index] = "I";
+        else cachedSeverity[index] = "";
     }
 
-    /** A small named index page, not the full Validator messages. */
-    export function showPage(page: number): void {
+    /**
+     * Prepare whole-project page strings when records change, not on chat.
+     * Per-definition rebuild cost is proportional to stored data, rather than
+     * rescanning every record once per function on every definition update.
+     */
+    function rebuildPageCache(): void {
+        let errors = 0;
+        let warnings = 0;
+        let info = 0;
+        for (let r = 0; r < records.length; r++) {
+            if (records[r].level == MCFunctionValidator.ValidationLevel.Error) errors++;
+            else if (records[r].level == MCFunctionValidator.ValidationLevel.Warning) warnings++;
+            else if (records[r].level == MCFunctionValidator.ValidationLevel.Info) info++;
+        }
+        let summary = uiText("diagTitle") + " E" + errors + " W" + warnings + " I" + info;
+        let affectedNames: string[] = [];
+        let affectedLevels: string[] = [];
+        for (let f = 0; f < cachedDetailNames.length; f++) {
+            if (cachedSeverity[f].length == 0) continue;
+            affectedNames.push(cachedDetailNames[f]);
+            affectedLevels.push(cachedSeverity[f]);
+        }
+        cachedPageTexts = [];
+        if (affectedNames.length == 0) {
+            cachedPageTexts.push(summary + ". " + uiText("noProblems"));
+            return;
+        }
+
         const pageSize = 3;
-        let errors = countLevel(MCFunctionValidator.ValidationLevel.Error);
-        let warnings = countLevel(MCFunctionValidator.ValidationLevel.Warning);
-        let info = countLevel(MCFunctionValidator.ValidationLevel.Info);
-        let affected = affectedFunctionCount();
-        let pages = Math.floor((affected + pageSize - 1) / pageSize);
-        if (pages < 1) pages = 1;
+        let pages = Math.floor((affectedNames.length + pageSize - 1) / pageSize);
+        for (let p = 1; p <= pages; p++) {
+            let out = summary + " " + uiText("pageTitle") + " " + p + "/" + pages + ": ";
+            let start = (p - 1) * pageSize;
+            let end = start + pageSize;
+            if (end > affectedNames.length) end = affectedNames.length;
+            for (let i = start; i < end; i++) {
+                if (i > start) out += "; ";
+                out += affectedNames[i] + " " + affectedLevels[i];
+            }
+            if (p < pages) out += ". " + uiText("nextPage") + (p + 1);
+            else out += ". " + uiText("detailsHint");
+            cachedPageTexts.push(out);
+        }
+    }
+
+    /** Page reads are O(1) apart from a bounded display adapter call. */
+    export function showPage(page: number): void {
+        let pages = cachedPageTexts.length;
+        if (pages < 1) {
+            // No FunctionFile has been defined yet.
+            emitCompactLine(uiText("diagTitle") + " E0 W0 I0. " + uiText("noProblems"));
+            return;
+        }
         if (page < 1 || page > pages || page != Math.floor(page)) {
             emitCompactLine(uiText("diagTitle") + " " + uiText("invalidPage") + pages + " via cbi_page N.");
             return;
         }
-
-        let summary = uiText("diagTitle") + " E" + errors + " W" + warnings + " I" + info;
-        if (affected == 0) {
-            emitCompactLine(summary + ". " + uiText("noProblems"));
-            return;
-        }
-
-        let out = summary + " " + uiText("pageTitle") + " " + page + "/" + pages + ": ";
-        let visited = 0;
-        let included = 0;
-        let start = (page - 1) * pageSize;
-        for (let f = 0; f < knownFunctionNames.length; f++) {
-            let functionName = knownFunctionNames[f];
-            if (functionIssueCount(functionName) == 0) continue;
-            if (visited >= start && included < pageSize) {
-                if (included > 0) out = out + "; ";
-                out = out + functionName + " " + functionSeverity(functionName);
-                included++;
-            }
-            visited++;
-            if (included == pageSize) break;
-        }
-        if (page < pages) out = out + ". " + uiText("nextPage") + (page + 1);
-        else out = out + ". " + uiText("detailsHint");
-        emitCompactLine(out);
+        emitCompactLine(cachedPageTexts[page - 1]);
     }
 
     /** Final summary only, called once by Preview.ready() after definitions. */
