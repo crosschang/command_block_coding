@@ -41,7 +41,7 @@ namespace MCFunctionDiagnostics {
     }
 
     export function isReservedChatCommand(name: string): boolean {
-        return name == chatCommandName() || name == allDiagnosticsChatCommandName();
+        return name == chatCommandName() || name == allDiagnosticsChatCommandName() || name == "cbi_page";
     }
 
     /**
@@ -59,6 +59,10 @@ namespace MCFunctionDiagnostics {
         });
         player.onChat(chatCommandName(), function () {
             showAll();
+        });
+        // Extra pages use one numeric-argument handler, not many chat handlers.
+        player.onChat("cbi_page", function (page: number) {
+            showPage(page);
         });
     }
 
@@ -187,6 +191,11 @@ namespace MCFunctionDiagnostics {
         if (key == "noProblems") return "no problems found.";
         if (key == "useAll") return "for project diagnostics.";
         if (key == "allHint") return "All: ?. One: functionName? (no space).";
+        if (key == "diagTitle") return "DIAG";
+        if (key == "pageTitle") return "page";
+        if (key == "nextPage") return "Next: cbi_page ";
+        if (key == "detailsHint") return "Details: functionName?";
+        if (key == "invalidPage") return "Invalid page. Choose 1..";
         return key;
     }
 
@@ -342,33 +351,118 @@ namespace MCFunctionDiagnostics {
     }
 
     /**
-     * Explicit "functionName?" read-only diagnostic viewer.
-     * Works for valid/invalid/no-issue functions and NEVER runs commands.
+     * Fast read-only diagnostic detail viewer. Typical one-issue queries become
+     * one compact output instead of a separate heading and issue line.
+     * Longer/multiple issues retain all their text through bounded output.
+     * Do not execute the FunctionFile command plan from this viewer.
      */
     export function showFunctionDetailsOnly(functionName: string): void {
         let errors = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Error);
         let warnings = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Warning);
         let info = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Info);
 
+        let header = uiText("diagTitle") + " " + functionName + " E" + errors + " W" + warnings + " I" + info + ".";
         if (errors + warnings + info == 0) {
-            showLines(["mcfunction " + functionName + ": OK. " + uiText("notExecuted")]);
+            emitCompactLine(header + " " + uiText("noProblems") + " " + uiText("notExecuted"));
             return;
         }
 
         let lines: string[] = [];
-        lines.push(
-            "mcfunction " + functionName + ": " + errors + " error(s), " +
-            warnings + " warning(s), " + info + " info. " + uiText("notExecuted")
-        );
         for (let i = 0; i < records.length; i++) {
             let current = records[i];
             if (current.functionName != functionName) continue;
             lines.push(
-                levelText(current.level) + " " + current.code +
-                " " + sourceText(current.source) + ": " + current.message
+                levelText(current.level) + " " + current.code + " " +
+                sourceText(current.source) + ": " + current.message
             );
         }
-        showLines(lines);
+        // A single ordinary issue will normally fit one safe output call.
+        emitCompactIssues(header + " " + uiText("notExecuted"), lines);
+    }
+
+    /** Prefer one short SAY call; preserve literal []/@/JSON via existing tellraw. */
+    function emitCompactLine(line: string): void {
+        const maxCompactChars = 145; // Conservative probe threshold, not a protocol limit.
+        if (line.length <= maxCompactChars) {
+            if (needsLiteralOutput(line)) MCFunctionPreview.previewSay(line);
+            else player.say(line);
+        } else {
+            // Preserve ALL characters rather than truncating long translated text.
+            emitDiagnosticLine(line);
+        }
+    }
+
+    /** Combine adjacent issues only while they safely fit one bounded message. */
+    function emitCompactIssues(header: string, issues: string[]): void {
+        const maxCompactChars = 145;
+        let pending = header;
+        for (let i = 0; i < issues.length; i++) {
+            let addition = " | " + issues[i];
+            if (pending.length + addition.length <= maxCompactChars) {
+                pending = pending + addition;
+            } else {
+                emitCompactLine(pending);
+                pending = issues[i];
+            }
+        }
+        if (pending.length > 0) emitCompactLine(pending);
+    }
+
+    /** Highest severity per function for a concise project index. */
+    function functionSeverity(functionName: string): string {
+        if (countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Error) > 0) return "E";
+        if (countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Warning) > 0) return "W";
+        if (countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Info) > 0) return "I";
+        return "";
+    }
+
+    /** Total functions having one or more stored diagnostic records. */
+    function affectedFunctionCount(): number {
+        let count = 0;
+        for (let i = 0; i < knownFunctionNames.length; i++) {
+            if (functionIssueCount(knownFunctionNames[i]) > 0) count++;
+        }
+        return count;
+    }
+
+    /** A small named index page, not the full Validator messages. */
+    export function showPage(page: number): void {
+        const pageSize = 3;
+        let errors = countLevel(MCFunctionValidator.ValidationLevel.Error);
+        let warnings = countLevel(MCFunctionValidator.ValidationLevel.Warning);
+        let info = countLevel(MCFunctionValidator.ValidationLevel.Info);
+        let affected = affectedFunctionCount();
+        let pages = Math.floor((affected + pageSize - 1) / pageSize);
+        if (pages < 1) pages = 1;
+        if (page < 1 || page > pages || page != Math.floor(page)) {
+            emitCompactLine(uiText("diagTitle") + " " + uiText("invalidPage") + pages + " via cbi_page N.");
+            return;
+        }
+
+        let summary = uiText("diagTitle") + " E" + errors + " W" + warnings + " I" + info;
+        if (affected == 0) {
+            emitCompactLine(summary + ". " + uiText("noProblems"));
+            return;
+        }
+
+        let out = summary + " " + uiText("pageTitle") + " " + page + "/" + pages + ": ";
+        let visited = 0;
+        let included = 0;
+        let start = (page - 1) * pageSize;
+        for (let f = 0; f < knownFunctionNames.length; f++) {
+            let functionName = knownFunctionNames[f];
+            if (functionIssueCount(functionName) == 0) continue;
+            if (visited >= start && included < pageSize) {
+                if (included > 0) out = out + "; ";
+                out = out + functionName + " " + functionSeverity(functionName);
+                included++;
+            }
+            visited++;
+            if (included == pageSize) break;
+        }
+        if (page < pages) out = out + ". " + uiText("nextPage") + (page + 1);
+        else out = out + ". " + uiText("detailsHint");
+        emitCompactLine(out);
     }
 
     /** Final summary only, called once by Preview.ready() after definitions. */
@@ -383,39 +477,9 @@ namespace MCFunctionDiagnostics {
         ]);
     }
 
-    /** Detailed project viewer: ? (and backward-compatible cbi_diag). */
+    /** Short project summary. ? and cbi_diag are exact aliases of page 1. */
     export function showAll(): void {
-        let errorCount = countLevel(MCFunctionValidator.ValidationLevel.Error);
-        let warningCount = countLevel(MCFunctionValidator.ValidationLevel.Warning);
-        let infoCount = countLevel(MCFunctionValidator.ValidationLevel.Info);
-
-        if (records.length == 0) {
-            showLines([
-                "Diagnostics: " + knownFunctionNames.length +
-                " mcfunction files, " + uiText("noProblems")
-            ]);
-            return;
-        }
-
-        let lines: string[] = [];
-        lines.push(
-            "Diagnostics: " + knownFunctionNames.length + " files, errors " +
-            errorCount + " warnings " + warningCount + " info " + infoCount + "."
-        );
-        for (let f = 0; f < knownFunctionNames.length; f++) {
-            let functionName = knownFunctionNames[f];
-            if (functionIssueCount(functionName) == 0) continue;
-            lines.push("mcfunction " + functionName + ":");
-            for (let i = 0; i < records.length; i++) {
-                let current = records[i];
-                if (current.functionName != functionName) continue;
-                lines.push(
-                    levelText(current.level) + " " + current.code +
-                    " " + sourceText(current.source) + ": " + current.message
-                );
-            }
-        }
-        showLines(lines);
+        showPage(1);
     }
 
 }

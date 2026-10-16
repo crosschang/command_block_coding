@@ -87,6 +87,8 @@ namespace FunctionFile {
                     ? "mcfunction name ? is reserved for the project diagnostic viewer."
                     : name == MCFunctionDiagnostics.chatCommandName()
                     ? "mcfunction name cbi_diag is reserved for the legacy diagnostic viewer."
+                    : name == "cbi_page"
+                    ? "mcfunction name cbi_page is reserved for the paged diagnostic viewer."
                     : "mcfunction name cbi_rules is reserved for the Gamerule Registry viewer."
             }];
 

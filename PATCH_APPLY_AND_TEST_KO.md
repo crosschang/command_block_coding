@@ -1,49 +1,57 @@
-# 0.0.49 CAMERA BASIC + TIME QUERY 통합 패치 적용 가이드
+# 0.0.60 진단 요약·개별 조회 최적화 — 적용 및 검증
 
-## 기준과 충돌 방지
+## 기준 원본
 
-- 기준 원본: `command_block_coding(20261014-062303).zip` (`pxt.json.version = 0.0.49`)
-- **기존 CAMERA BASIC 패치(동일 날짜)를 반영했든 안 했든 이 ZIP 하나로 통합 적용**할 수 있도록 CAMERA 변경까지 포함합니다.
-- 복수 HASITEM, SCORES, 첫 번째 7종 명령은 수정하지 않습니다. 원본에 포함된 구현을 유지합니다.
-- 사용자가 위 기준 ZIP 이후 다른 소스 파일을 수동 수정했다면 먼저 원본 전체 ZIP을 올려 비교한 뒤 적용하세요.
-- 버전 숫자를 임의로 올리지 않았습니다.
+- `command_block_coding(20261016-045742).zip`
+- SHA-256 `13abdad0d766f5242591a2d2886405effb09c150a3b92f2d35e03f4103847375`
+- `pxt.json.version = 0.0.60` **변경하지 않음**
 
 ## 적용
 
-1. 전체 프로젝트를 백업합니다.
-2. 패치 ZIP의 파일을 `pxt.json`이 있는 **프로젝트 루트에 직접** 압축 해제하고 같은 상대경로의 파일을 덮어씁니다.
-3. `commands/camera.ts`, `src/blocks/camera_blocks.ts` 확인. TIME QUERY는 기존 `commands/simple_commands.ts`, `src/blocks/simple_command_blocks.ts`, `src/preview/query_adapter.ts` 등에 병합돼 있습니다.
-4. `pxt.json` 버전은 `0.0.49`이며 등록 파일 누락이 없어야 합니다.
-5. `tests/TIME_QUERY_0.0.49_PUBLIC_API_MAIN.ts` 내용을 임시 `main.ts`에 **전체 복사**합니다. `test.ts`는 변경하지 않습니다.
-6. JavaScript → Blocks 전환 후 Education에서 실행합니다.
+1. 현재 GitHub 프로젝트 전체를 백업한다. 특히 `function_file.ts`, `src/preview/diagnostic_store.ts` 원본을 보관한다.
+2. 패치 ZIP을 `pxt.json`이 있는 프로젝트 루트에 적용한다. 두 파일만 동일 경로에 덮어쓴다.
+3. 디버깅 중 임시로 작성한 `DIAG START`, `BEFORE LINES`, `SHOWLINES START`, `PROBE A/B/C` 코드는 배포 소스/테스트 `main.ts`에서 삭제한다. 본 패치의 수정 파일에는 해당 디버깅 문구가 없다.
+4. GitHub에 반영하고 사용자 방식대로 새로운 테스트 릴리스로 빌드한다. 버전 변경은 사용자가 결정한다.
+5. `DIAG_0.0.60_COMPACT_OUTPUT_TEST_MAIN.ts`를 **임시** `main.ts`로 붙여 넣는다. `test.ts`는 비워 둔다. 해당 `main.ts`는 `?`, `cbi_diag`, `cbi_page`를 직접 등록하지 않는다.
+6. MakeCode JavaScript ↔ Blocks 변환과 오류 검사 결과를 확인한다.
 
-## 테스트 (채팅 함수는 슬래시 없이)
+## 달라지는 사용자 명령어
 
-**1. DayTime**
-```
-/time set 6000
-/daylock true
-```
-채팅: `tq49_daytime`
-기대: `[Preview] TIME QUERY daytime: 6000 ticks` (기존 `tellraw`로 출력)
-직접 비교: `/time query daytime`
+| 채팅 입력 (슬래시 없이) | 기대 동작 |
+|---|---|
+| `?` | 요약 첫 페이지. 전체 진단 수 + 문제가 있는 함수 최대 3개만 출력 |
+| `cbi_diag` | `?`와 동일한 요약(기존 명령 호환) |
+| `cbi_page 2` | 문제가 있는 함수의 두 번째 페이지 |
+| `diag60_warn?` | WARNING 상세 원문 조회, 함수는 실행하지 않음 |
+| `diag60_warn` | 실제 실행, WARNING 상세 자동출력 없음. 뒤 SAY 확인 |
+| `diag60_error?` | ERROR 상세 원문 조회, 실행하지 않음 |
+| `diag60_error` | ERROR 차단, `diag60_error?` 안내 |
+| `diag60_ok` | 정상 실행 |
 
-**2. GameTime**
-채팅: `tq49_gametime`
-직접 비교: `/time query gametime`
-기대: 두 값이 시간 경과만큼 조금 차이 나는 누적 틱 숫자로 출력
+## 성능 확인 순서
 
-**3. Day**
-채팅: `tq49_day`
-직접 비교: `/time query day`
-기대: 두 값이 동일한 정수 날짜
+1. `?` → 첫 화면에서 진단 4개(E1 W2 I1), `page 1/2` 확인.
+2. `diag60_warn?` → 경고 상세 코드 및 설명 표시, `WARNING_TEST_EXECUTED` 미출력 확인.
+3. `diag60_info?` → INFO 상세 표시, 명령 실행 없음.
+4. `?` → 두 번째 요약이 **즉시 나오는지**, 이전 메시지가 뒤늦게 섞이지 않는지 확인.
+5. `cbi_page 2` → 네 번째 문제 함수 `diag60_warn2`를 표시하는지 확인.
+6. `diag60_warn` → 경고를 출력하지 않고 `WARNING_TEST_EXECUTED`가 표시되는지 확인.
+7. `diag60_error` → 본문 미실행, `diag60_error?` 안내되는지 확인.
+8. `cbi_diag` → `?`와 같은 요약인지 확인.
 
-**4. 복원**
-`/daylock false`로 시간 흐름 재개 (원래 월드 설정에 맞춰 선택적으로 시행).
+반복 실행 시 **몇 초 후 출력되는지**와 누락/중단 여부를 기록한다. 특히 기존처럼 5초 이상 또는 1분 이상 지연된다면 해결 완료로 판정하지 않는다.
 
-## 주의
+## 패치 정책 및 한계
 
-- Preview 출력은 기존 `MCFunctionPreview.previewSay()`가 `tellraw` JSON 텍스트로 보냅니다. `player.say("[...]")`로 출력하지 않습니다.
-- `.mcfunction` Compiler 결과는 `time query ...`이며 `[Preview]` 메시지를 파일에 넣지 않습니다.
-- 현재 MakeCode Extension 통합 패치는 **로컬 26개 테스트 및 TypeScript 정적 검사 PASS**, 실제 Education/PXT 결과는 사용자 실측이 나오기 전까지 미검증입니다.
-- `TIME QUERY`는 명령형 블록으로 이번에 도입합니다. 결과를 다른 수식의 숫자 입력에 연결하는 독립 Reporter API는 추후 설계 대상입니다.
+- `?`는 **전체 상세 진단이 아니라 색인형 요약**이다. 전체 개별 오류는 `함수명?`으로 읽는다. `cbi_diag`는 호환을 위해 이름만 유지하고 조회 내용은 요약으로 바뀐다.
+- `cbi_page N`은 숫자 인수 하나를 받는 새로운 채팅 명령이다. MakeCode 숫자 인수 처리의 실게임 동작은 이번에 최초로 검증해야 한다.
+- 페이지는 문제 함수 3개 단위이다. 페이지 끝 안내에 `cbi_page 2` 등이 표시된다. 다수 함수/긴 이름으로 한 줄이 길어지면 보존을 위해 나누어 출력할 수 있다.
+- `함수명?`은 대표 단일 진단 시 한 번의 짧은 출력이 가능하도록 묶지만, 긴 오류 설명·특수문자·복수 이슈는 모두 보존해야 하므로 출력이 여러 번일 수 있다.
+- `player.say()`가 `@`·대괄호 등의 문자를 해석할 수 있어, 해당 문자열은 기존 안전 `tellraw` 출력으로 유지한다.
+- 진단은 **조회 기능**이며 오류 내용을 캐시·재검증하지 않고 기존 저장 데이터를 사용한다. ERROR 차단, WARNING·INFO 실행 허용을 유지한다.
+- 이번 패치에서 `.mcfunction` AST·Compiler·Validator·Registry·Generator는 일절 변경하지 않았다.
+- 로컬 정적/모의 테스트는 Education Runtime 검증이 아니다. 지연 제거 여부는 실제 릴리스에서 확인한다.
+
+## 문제 발생 시 롤백
+
+백업한 두 파일을 되돌리고 재릴리스한다. `pxt.json.version`을 자동 수정하거나 기존 정상 기능을 삭제하지 않는다.
