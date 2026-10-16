@@ -52,14 +52,11 @@ namespace MCFunctionDiagnostics {
         if (chatRegistered) return;
         chatRegistered = true;
 
-        // 전체 진단 ? 명령
+        // Register the new short command, but retain the old name as an alias.
+        // Both invoke the same read-only project diagnostic viewer.
         player.onChat(allDiagnosticsChatCommandName(), function () {
-            player.say("DIAG START");
             showAll();
-            player.say("DIAG END");
         });
-
-        // 기존 cbi_diag 명령 유지
         player.onChat(chatCommandName(), function () {
             showAll();
         });
@@ -179,6 +176,102 @@ namespace MCFunctionDiagnostics {
     }
 
     /**
+     * Central UI-string entry point for future localization.
+     * Diagnostic codes and Validator messages remain untouched source data.
+     * Changing the display language should not change the AST or diagnostics.
+     */
+    function uiText(key: string): string {
+        if (key == "notExecuted") return "Diagnostic only; not executed.";
+        if (key == "allowed") return "execution allowed.";
+        if (key == "blocked") return "execution blocked.";
+        if (key == "noProblems") return "no problems found.";
+        if (key == "useAll") return "for project diagnostics.";
+        if (key == "allHint") return "All: ?. One: functionName? (no space).";
+        return key;
+    }
+
+    /**
+     * Minecraft Education may interpret selectors and [] in player.say() as
+     * command syntax. Use a short tellraw ONLY for such text; ordinary lines
+     * use player.say(), avoiding the stalled long-tellraw path observed in game.
+     */
+    function needsLiteralOutput(line: string): boolean {
+        for (let i = 0; i < line.length; i++) {
+            let ch = line.charAt(i);
+            if (ch == "@" || ch == "[" || ch == "]" ||
+                ch == "{" || ch == "}" || ch == "\"" ||
+                ch == "\\") return true;
+        }
+        return false;
+    }
+
+    /**
+     * Bound EVERY individual message, including a single exceptionally long
+     * Validator issue. 100 is a conservative probe size, not a measured API
+     * maximum. Avoid unsupported PXT string helpers such as lastIndexOf().
+     */
+    function emitDiagnosticLine(line: string): void {
+        if (line.length == 0) return;
+        const maxChars = 100;
+        let literal = needsLiteralOutput(line);
+        let start = 0;
+        while (start < line.length) {
+            let end = start + maxChars;
+            if (end > line.length) end = line.length;
+
+            // Prefer a word boundary without deleting a single input character.
+            if (end < line.length) {
+                let boundary = -1;
+                let lower = start + 60;
+                for (let j = end; j > lower; j--) {
+                    if (line.charAt(j - 1) == " ") {
+                        boundary = j;
+                        break;
+                    }
+                }
+                if (boundary > start) end = boundary;
+            }
+
+            let part = "";
+            for (let i = start; i < end; i++) {
+                part = part + line.charAt(i);
+            }
+            if (literal) {
+                // Existing RawText serializer preserves @, [], quotes, etc.
+                // A bounded payload avoids one large, blocking tellraw command.
+                MCFunctionPreview.previewSay(part);
+            } else {
+                // No brackets/selectors go through the SAY parser.
+                player.say("DIAG " + part);
+            }
+            start = end;
+        }
+    }
+
+    /**
+     * One display adapter for ?, functionName?, and legacy diagnostic routes.
+     * This is Preview-only text: it must never enter the .mcfunction Compiler.
+     */
+    function showLines(lines: string[]): void {
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            let begin = 0;
+            for (let j = 0; j < line.length; j++) {
+                let ch = line.charAt(j);
+                if (ch == "\n" || ch == "\r") {
+                    let part = "";
+                    for (let k = begin; k < j; k++) part = part + line.charAt(k);
+                    emitDiagnosticLine(part);
+                    begin = j + 1;
+                }
+            }
+            let last = "";
+            for (let k = begin; k < line.length; k++) last = last + line.charAt(k);
+            emitDiagnosticLine(last);
+        }
+    }
+
+    /**
      * Show only one FunctionFile's actual stored issues when the user types its
      * invalid function name. This never invokes the function's command plan.
      */
@@ -187,8 +280,9 @@ namespace MCFunctionDiagnostics {
         let warnings = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Warning);
         let info = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Info);
 
-        MCFunctionPreview.previewSay(
-            "mcfunction " + functionName + ": execution blocked; " +
+        let lines: string[] = [];
+        lines.push(
+            "mcfunction " + functionName + ": " + uiText("blocked") + " " +
             errors + " error(s), " + warnings + " warning(s), " + info + " info."
         );
 
@@ -197,17 +291,18 @@ namespace MCFunctionDiagnostics {
             let current = records[i];
             if (current.functionName != functionName) continue;
             found = true;
-            MCFunctionPreview.previewSay(
+            lines.push(
                 levelText(current.level) + " " + current.code +
                 " " + sourceText(current.source) + ": " + current.message
             );
         }
         if (!found) {
-            MCFunctionPreview.previewSay(
+            lines.push(
                 "No stored diagnostic details for " + functionName +
-                ". Use " + allDiagnosticsChatCommandName() + " for project diagnostics."
+                ". Use " + allDiagnosticsChatCommandName() + " " + uiText("useAll")
             );
         }
+        showLines(lines);
     }
 
     /**
@@ -226,9 +321,10 @@ namespace MCFunctionDiagnostics {
         );
         if (warnings == 0 && info == 0) return;
 
-        MCFunctionPreview.previewSay(
+        let lines: string[] = [];
+        lines.push(
             "mcfunction " + functionName + ": " + warnings +
-            " warning(s), " + info + " info; execution allowed."
+            " warning(s), " + info + " info; " + uiText("allowed")
         );
 
         for (let i = 0; i < records.length; i++) {
@@ -237,37 +333,12 @@ namespace MCFunctionDiagnostics {
             if (current.level != MCFunctionValidator.ValidationLevel.Warning &&
                 current.level != MCFunctionValidator.ValidationLevel.Info) continue;
 
-            MCFunctionPreview.previewSay(
+            lines.push(
                 levelText(current.level) + " " + current.code +
                 " " + sourceText(current.source) + ": " + current.message
             );
         }
-    }
-
-    /**
-     * Batch diagnostic lines into the fewest practical tellraw calls.
-     * One functionName? request typically becomes exactly one message.
-     * Longer whole-project reports are split at line boundaries to avoid
-     * oversized commands and to preserve readable output order.
-     */
-    function showLines(lines: string[]): void {
-        player.say("PROBE A");
-
-        // 1. 짧은 tellraw
-        MCFunctionPreview.previewSay("SHORT TEST");
-        player.say("PROBE B");
-
-        // 2. 진단 내용 결합 (줄바꿈 없음)
-        let content = "";
-        for (let i = 0; i < lines.length; i++) {
-            if (content.length > 0) {
-                content += " | ";
-            }
-            content += lines[i];
-        }
-
-        MCFunctionPreview.previewSay(content);
-        player.say("PROBE C");
+        showLines(lines);
     }
 
     /**
@@ -280,16 +351,14 @@ namespace MCFunctionDiagnostics {
         let info = countFunctionLevel(functionName, MCFunctionValidator.ValidationLevel.Info);
 
         if (errors + warnings + info == 0) {
-            MCFunctionPreview.previewSay(
-                "mcfunction " + functionName + ": OK. Diagnostic only; not executed."
-            );
+            showLines(["mcfunction " + functionName + ": OK. " + uiText("notExecuted")]);
             return;
         }
 
         let lines: string[] = [];
         lines.push(
             "mcfunction " + functionName + ": " + errors + " error(s), " +
-            warnings + " warning(s), " + info + " info. Diagnostic only; not executed."
+            warnings + " warning(s), " + info + " info. " + uiText("notExecuted")
         );
         for (let i = 0; i < records.length; i++) {
             let current = records[i];
@@ -308,10 +377,10 @@ namespace MCFunctionDiagnostics {
         let warnings = countLevel(MCFunctionValidator.ValidationLevel.Warning);
         let info = countLevel(MCFunctionValidator.ValidationLevel.Info);
         if (errors + warnings + info == 0) return;
-        MCFunctionPreview.previewSay(
+        showLines([
             "Diagnostics: " + errors + " error(s), " + warnings +
-            " warning(s), " + info + " info. All: ?. One: functionName? (no space)."
-        );
+            " warning(s), " + info + " info. " + uiText("allHint")
+        ]);
     }
 
     /** Detailed project viewer: ? (and backward-compatible cbi_diag). */
@@ -321,10 +390,10 @@ namespace MCFunctionDiagnostics {
         let infoCount = countLevel(MCFunctionValidator.ValidationLevel.Info);
 
         if (records.length == 0) {
-            MCFunctionPreview.previewSay(
+            showLines([
                 "Diagnostics: " + knownFunctionNames.length +
-                " mcfunction files, no problems found."
-            );
+                " mcfunction files, " + uiText("noProblems")
+            ]);
             return;
         }
 
@@ -346,12 +415,7 @@ namespace MCFunctionDiagnostics {
                 );
             }
         }
-
-        player.say("BEFORE LINES");
-
         showLines(lines);
-
-        player.say("AFTER LINES");
     }
 
 }
