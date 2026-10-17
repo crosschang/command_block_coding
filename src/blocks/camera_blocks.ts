@@ -587,6 +587,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_fade_options
+    //% blockHidden=true
     //% group="CAMERA" weight=110
     //% block="fade settings || time $time color $color"
     //% expandableArgumentMode="enabled"
@@ -599,12 +600,45 @@ namespace Command {
             color ? color.color : undefined);
     }
 
+    /** CAMERA fade has four official forms: bare fade, color, time, time + color.
+     * These three visible typed reporters make the optional forms explicit;
+     * the legacy expandable fade-settings reporter above remains hidden for
+     * existing workspaces.  No command strings are assembled in UI code.
+     */
+    //% blockId=mcfunction_camera_fade_color_only
+    //% group="CAMERA" weight=113
+    //% block="fade color $color"
+    //% color.shadow="mcfunction_camera_fade_color"
+    export function cameraFadeColorOnly(color: CameraFadeColorValue): CameraFadeOptionsValue {
+        return new CameraFadeOptionsValue(undefined, color ? color.color : undefined);
+    }
+
+    //% blockId=mcfunction_camera_fade_time_only
+    //% group="CAMERA" weight=112
+    //% block="fade time $time"
+    //% time.shadow="mcfunction_camera_fade_time"
+    export function cameraFadeTimeOnly(time: CameraFadeTimeValue): CameraFadeOptionsValue {
+        return new CameraFadeOptionsValue(time ? time.time : undefined, undefined);
+    }
+
+    //% blockId=mcfunction_camera_fade_time_color
+    //% group="CAMERA" weight=111
+    //% block="fade time $time color $color"
+    //% inlineInputMode=external
+    //% time.shadow="mcfunction_camera_fade_time"
+    //% color.shadow="mcfunction_camera_fade_color"
+    export function cameraFadeTimeColor(time: CameraFadeTimeValue,
+        color: CameraFadeColorValue): CameraFadeOptionsValue {
+        return new CameraFadeOptionsValue(time ? time.time : undefined,
+            color ? color.color : undefined);
+    }
+
     //% blockId=mcfunction_camera_action_fade_compact
     //% group="CAMERA" weight=117
     //% block="fade || settings $settings"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
-    //% settings.shadow="mcfunction_camera_fade_options"
+    //% settings.shadow="mcfunction_camera_fade_color_only"
     export function cameraActionFadeCompact(settings?: CameraFadeOptionsValue): CameraActionValue {
         return new CameraActionValue(MCFunctionAST.createCameraFadeCommand(undefined,
             settings ? settings.time : undefined, settings ? settings.color : undefined));
@@ -642,6 +676,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_entity_track_option
+    //% blockHidden=true
     //% group="CAMERA" weight=107
     //% block="track entity $entity || center offset $offset"
     //% expandableArgumentMode="enabled"
@@ -659,6 +694,41 @@ namespace Command {
     //% block="remove tracking target"
     export function cameraEntityRemoveOption(): CameraEntityOperationValue {
         return new CameraEntityOperationValue(MCFunctionAST.CameraAction.RemoveTarget);
+    }
+
+    /** Explicit target_entity syntax variants.  Unlike the legacy expandable
+     * reporter, these expose only arguments that belong to the chosen form.
+     */
+    //% blockId=mcfunction_camera_entity_track_direct
+    //% group="CAMERA" weight=107
+    //% block="track entity $entity"
+    //% entity.shadow="mcfunction_selector_self"
+    export function cameraEntityTrackDirect(entity: MCFunctionFields.SelectorValue): CameraEntityOperationValue {
+        return new CameraEntityOperationValue(MCFunctionAST.CameraAction.TargetEntity,
+            entity ? entity.selector : undefined);
+    }
+
+    /** A tracking center offset is not the SET entity_offset option.
+     * Both reuse the same 3-axis numeric value shape, not command strings.
+     */
+    //% blockId=mcfunction_camera_target_center_offset
+    //% group="CAMERA" weight=106
+    //% block="target center offset x $x y $y z $z"
+    //% x.defl=0 y.defl=1 z.defl=0
+    export function cameraTargetCenterOffset(x: number, y: number, z: number): CameraEntityOffsetValue {
+        return new CameraEntityOffsetValue(x, y, z);
+    }
+
+    //% blockId=mcfunction_camera_entity_track_offset
+    //% group="CAMERA" weight=106
+    //% block="track entity $entity target center offset $offset"
+    //% inlineInputMode=external
+    //% entity.shadow="mcfunction_selector_self"
+    //% offset.shadow="mcfunction_camera_target_center_offset"
+    export function cameraEntityTrackOffset(entity: MCFunctionFields.SelectorValue,
+        offset: CameraEntityOffsetValue): CameraEntityOperationValue {
+        return new CameraEntityOperationValue(MCFunctionAST.CameraAction.TargetEntity,
+            entity ? entity.selector : undefined, offset ? offset.value : undefined);
     }
 
     //% blockId=mcfunction_camera_action_entity_compact
@@ -685,6 +755,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_fov_set_option
+    //% blockHidden=true
     //% group="CAMERA" weight=105
     //% block="FOV set value $value || ease $ease"
     //% expandableArgumentMode="enabled"
@@ -696,6 +767,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_fov_clear_option
+    //% blockHidden=true
     //% group="CAMERA" weight=104
     //% block="FOV clear || ease $ease"
     //% expandableArgumentMode="enabled"
@@ -705,10 +777,50 @@ namespace Command {
             ease ? ease.ease : undefined);
     }
 
+    /** Explicit fov_set / fov_clear forms.  FOV easing is emitted as
+     * '<seconds> <easing-type>', with no 'ease' command keyword.
+     * Keep the older expandable reporters hidden for existing workspaces.
+     */
+    //% blockId=mcfunction_camera_fov_set_direct
+    //% group="CAMERA" weight=105
+    //% block="FOV set value $value"
+    //% value.defl=70
+    export function cameraFovSetDirect(value: number): CameraFovOperationValue {
+        return new CameraFovOperationValue(MCFunctionAST.CameraAction.FovSet, value);
+    }
+
+    //% blockId=mcfunction_camera_fov_set_eased
+    //% group="CAMERA" weight=104
+    //% block="FOV set value $value transition $ease"
+    //% inlineInputMode=external
+    //% value.defl=70
+    //% ease.shadow="mcfunction_camera_ease"
+    export function cameraFovSetEased(value: number,
+        ease: CameraEaseValue): CameraFovOperationValue {
+        return new CameraFovOperationValue(MCFunctionAST.CameraAction.FovSet,
+            value, ease ? ease.ease : undefined);
+    }
+
+    //% blockId=mcfunction_camera_fov_clear_direct
+    //% group="CAMERA" weight=103
+    //% block="FOV clear"
+    export function cameraFovClearDirect(): CameraFovOperationValue {
+        return new CameraFovOperationValue(MCFunctionAST.CameraAction.FovClear);
+    }
+
+    //% blockId=mcfunction_camera_fov_clear_eased
+    //% group="CAMERA" weight=102
+    //% block="FOV clear transition $ease"
+    //% ease.shadow="mcfunction_camera_ease"
+    export function cameraFovClearEased(ease: CameraEaseValue): CameraFovOperationValue {
+        return new CameraFovOperationValue(MCFunctionAST.CameraAction.FovClear,
+            undefined, ease ? ease.ease : undefined);
+    }
+
     //% blockId=mcfunction_camera_action_fov_compact
     //% group="CAMERA" weight=115
     //% block="FOV $operation"
-    //% operation.shadow="mcfunction_camera_fov_set_option"
+    //% operation.shadow="mcfunction_camera_fov_set_direct"
     export function cameraActionFovCompact(operation: CameraFovOperationValue): CameraActionValue {
         if (!operation) return new CameraActionValue(MCFunctionAST.createCameraFovCommand(
             <MCFunctionAST.CameraAction>-1, undefined));
