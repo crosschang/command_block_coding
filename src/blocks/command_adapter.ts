@@ -7,6 +7,13 @@ namespace MCFunctionBlocks {
         return MCFunctionAST.createCameraSetCommand(target, presetId);
     }
 
+    export function createCameraSetAdvancedCommand(
+        target: MCFunctionAST.Selector, presetId: string,
+        position?: MCFunctionAST.Position, rotation?: MCFunctionAST.Rotation
+    ): MCFunctionAST.CameraCommand {
+        return MCFunctionAST.createCameraSetAdvancedCommand(target, presetId, position, rotation);
+    }
+
     export function createCameraClearCommand(
         target: MCFunctionAST.Selector
     ): MCFunctionAST.CameraCommand {

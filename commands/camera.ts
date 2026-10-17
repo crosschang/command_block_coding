@@ -11,10 +11,23 @@ namespace MCFunctionAST {
         target: Selector;
         /** Preset ID is preserved exactly, including custom namespace IDs. Required only for Set. */
         presetId?: string;
+        /** Optional advanced camera position; uses the shared Position AST. */
+        position?: Position;
+        /** Shared rotation (yaw/pitch); camera syntax emits pitch (xRot) then yaw (yRot). */
+        rotation?: Rotation;
     }
 
     export function createCameraSetCommand(target: Selector, presetId: string): CameraCommand {
         return { kind: CommandKind.Camera, action: CameraAction.Set, target: target, presetId: presetId };
+    }
+
+    export function createCameraSetAdvancedCommand(
+        target: Selector, presetId: string, position?: Position, rotation?: Rotation
+    ): CameraCommand {
+        return {
+            kind: CommandKind.Camera, action: CameraAction.Set,
+            target: target, presetId: presetId, position: position, rotation: rotation
+        };
     }
 
     export function createCameraClearCommand(target: Selector): CameraCommand {

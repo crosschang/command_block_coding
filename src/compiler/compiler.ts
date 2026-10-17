@@ -90,7 +90,15 @@ namespace MCFunctionCompiler {
     function compileCamera(command: MCFunctionAST.CameraCommand): string {
         let result = "camera " + compileSelector(command.target);
         if (command.action == MCFunctionAST.CameraAction.Clear) return result + " clear";
-        return result + " set " + command.presetId;
+        result += " set " + command.presetId;
+        if (command.position) result += " pos " + compilePosition(command.position);
+        // /camera rot takes xRot (pitch) then yRot (yaw); the shared Rotation
+        // serializer is yaw then pitch for tp/execute and must not be changed.
+        if (command.rotation) {
+            result += " rot " + compileRotationValue(command.rotation.pitch) +
+                " " + compileRotationValue(command.rotation.yaw);
+        }
+        return result;
     }
 
     /** Canonical Bedrock syntax; optional args are emitted only as required. */

@@ -1573,6 +1573,10 @@ namespace MCFunctionValidator {
             return issues;
         }
         if (command.action == MCFunctionAST.CameraAction.Clear) {
+            if (command.position != undefined || command.rotation != undefined) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_CLEAR_EXTRA_OPTIONS",
+                    "CAMERA clear cannot include position or rotation options.");
+            }
             if (command.presetId != undefined) {
                 addIssue(issues, ValidationLevel.Error, "CAMERA_CLEAR_EXTRA_PRESET",
                     "CAMERA clear cannot include a preset ID.");
@@ -1588,6 +1592,24 @@ namespace MCFunctionValidator {
             command.presetId != "minecraft:free") {
             addIssue(issues, ValidationLevel.Info, "CAMERA_PRESET_CUSTOM",
                 "Custom or version-dependent camera preset; confirm it exists in this world.");
+        }
+        if (command.position != undefined) {
+            appendIssues(issues, validatePosition(command.position));
+            let coords = [command.position.x, command.position.y, command.position.z];
+            for (let i = 0; i < coords.length; i++) {
+                if (coords[i] && (!isFinite(coords[i].value))) {
+                    addIssue(issues, ValidationLevel.Error, "CAMERA_POSITION_NUMBER_INVALID",
+                        "CAMERA position coordinates must be finite numbers.");
+                    break;
+                }
+            }
+        }
+        if (command.rotation != undefined) {
+            appendIssues(issues, validateRotation(command.rotation));
+            if (!isFinite(command.rotation.pitch.value) || !isFinite(command.rotation.yaw.value)) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_ROTATION_NUMBER_INVALID",
+                    "CAMERA rotation values must be finite numbers.");
+            }
         }
         return issues;
     }

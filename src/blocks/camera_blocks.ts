@@ -45,6 +45,27 @@ namespace Command {
             preset ? preset.presetId : undefined));
     }
 
+    //% blockId=command_camera_set_advanced
+    //% group="CAMERA" weight=98
+    //% block="CAMERA target $target set $preset position $position rotation $rotation"
+    //% inlineInputMode=external
+    //% target.shadow="mcfunction_selector_self"
+    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% position.shadow="mcfunction_position_absolute"
+    //% rotation.shadow="mcfunction_rotation_absolute"
+    export function cameraSetAdvanced(
+        target: MCFunctionFields.SelectorValue,
+        preset: CameraPresetValue,
+        position?: MCFunctionPositionFields.PositionValue,
+        rotation?: MCFunctionRotationFields.RotationValue
+    ): void {
+        executeAudioCommand(MCFunctionBlocks.createCameraSetAdvancedCommand(
+            target ? target.selector : undefined,
+            preset ? preset.presetId : undefined,
+            position ? position.position : undefined,
+            rotation ? rotation.rotation : undefined));
+    }
+
     //% blockId=command_camera_clear
     //% group="CAMERA" weight=99
     //% block="CAMERA clear target $target"
