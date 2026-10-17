@@ -1597,7 +1597,7 @@ namespace MCFunctionValidator {
             appendIssues(issues, validatePosition(command.position));
             let coords = [command.position.x, command.position.y, command.position.z];
             for (let i = 0; i < coords.length; i++) {
-                if (coords[i] && (!isFinite(coords[i].value))) {
+                if (coords[i] && ((coords[i].value - coords[i].value) !== 0)) {
                     addIssue(issues, ValidationLevel.Error, "CAMERA_POSITION_NUMBER_INVALID",
                         "CAMERA position coordinates must be finite numbers.");
                     break;
@@ -1606,7 +1606,7 @@ namespace MCFunctionValidator {
         }
         if (command.rotation != undefined) {
             appendIssues(issues, validateRotation(command.rotation));
-            if (!isFinite(command.rotation.pitch.value) || !isFinite(command.rotation.yaw.value)) {
+            if ((command.rotation.pitch.value - command.rotation.pitch.value) !== 0 || (command.rotation.yaw.value - command.rotation.yaw.value) !== 0) {
                 addIssue(issues, ValidationLevel.Error, "CAMERA_ROTATION_NUMBER_INVALID",
                     "CAMERA rotation values must be finite numbers.");
             }
