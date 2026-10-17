@@ -86,17 +86,39 @@ namespace MCFunctionCompiler {
         }
     }
 
-    /** Base camera syntax; advanced options are added in a later structured phase. */
+    /** Official /camera forms: ease before pos, facing OR rot, fade is separate. */
     function compileCamera(command: MCFunctionAST.CameraCommand): string {
         let result = "camera " + compileSelector(command.target);
         if (command.action == MCFunctionAST.CameraAction.Clear) return result + " clear";
+        if (command.action == MCFunctionAST.CameraAction.Fade) {
+            result += " fade";
+            if (command.fadeTime) {
+                result += " time " + command.fadeTime.fadeIn + " " + command.fadeTime.hold + " " + command.fadeTime.fadeOut;
+            }
+            if (command.fadeColor) {
+                result += " color " + command.fadeColor.red + " " + command.fadeColor.green + " " + command.fadeColor.blue;
+            }
+            return result;
+        }
         result += " set " + command.presetId;
+        if (command.ease) {
+            let easingNames = ["linear", "in_sine", "out_sine", "in_out_sine",
+                "in_quad", "out_quad", "in_out_quad", "in_cubic", "out_cubic", "in_out_cubic",
+                "in_quart", "out_quart", "in_out_quart", "in_quint", "out_quint", "in_out_quint",
+                "in_expo", "out_expo", "in_out_expo", "in_circ", "out_circ", "in_out_circ",
+                "in_back", "out_back", "in_out_back", "in_elastic", "out_elastic", "in_out_elastic",
+                "in_bounce", "out_bounce", "in_out_bounce", "spring"];
+            result += " ease " + command.ease.seconds + " " + easingNames[<number>command.ease.type];
+        }
+        if (command.useDefault) return result + " default";
         if (command.position) result += " pos " + compilePosition(command.position);
-        // /camera rot takes xRot (pitch) then yRot (yaw); the shared Rotation
-        // serializer is yaw then pitch for tp/execute and must not be changed.
-        if (command.rotation) {
-            result += " rot " + compileRotationValue(command.rotation.pitch) +
-                " " + compileRotationValue(command.rotation.yaw);
+        if (command.facing) {
+            result += " facing ";
+            if (command.facing.kind == MCFunctionAST.FacingKind.Position) result += compilePosition(command.facing.position);
+            else result += compileSelector(command.facing.entitySelector);
+        } else if (command.rotation) {
+            // /camera uses xRot (pitch) followed by yRot (yaw).
+            result += " rot " + compileRotationValue(command.rotation.pitch) + " " + compileRotationValue(command.rotation.yaw);
         }
         return result;
     }

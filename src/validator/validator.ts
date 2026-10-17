@@ -1568,20 +1568,73 @@ namespace MCFunctionValidator {
         let issues: ValidationIssue[] = [];
         validatePlayerTarget(command.target, "CAMERA", issues);
         if (command.action != MCFunctionAST.CameraAction.Set &&
-            command.action != MCFunctionAST.CameraAction.Clear) {
-            addIssue(issues, ValidationLevel.Error, "CAMERA_ACTION_INVALID", "CAMERA action must be set or clear.");
+            command.action != MCFunctionAST.CameraAction.Clear &&
+            command.action != MCFunctionAST.CameraAction.Fade) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_ACTION_INVALID", "CAMERA action must be set, clear or fade.");
+            return issues;
+        }
+        let hasSetOptions = command.position != undefined || command.rotation != undefined ||
+            command.facing != undefined || command.ease != undefined || command.useDefault == true;
+        if (command.action == MCFunctionAST.CameraAction.Fade) {
+            if (hasSetOptions || command.presetId != undefined) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_FADE_EXTRA_OPTIONS", "CAMERA fade cannot contain set options or a preset.");
+            }
+            if (command.fadeTime) {
+                let times = [command.fadeTime.fadeIn, command.fadeTime.hold, command.fadeTime.fadeOut];
+                for (let i = 0; i < times.length; i++) {
+                    if (!(times[i] >= 0) || !(times[i] <= 1e308)) {
+                        addIssue(issues, ValidationLevel.Error, "CAMERA_FADE_TIME_INVALID", "Fade times must be finite nonnegative seconds.");
+                        break;
+                    }
+                }
+            }
+            if (command.fadeColor) {
+                let colors = [command.fadeColor.red, command.fadeColor.green, command.fadeColor.blue];
+                for (let i = 0; i < colors.length; i++) {
+                    if (!(colors[i] >= 0 && colors[i] <= 255) || colors[i] % 1 != 0) {
+                        addIssue(issues, ValidationLevel.Error, "CAMERA_FADE_COLOR_INVALID", "Fade RGB components must be integers from 0 to 255.");
+                        break;
+                    }
+                }
+            }
             return issues;
         }
         if (command.action == MCFunctionAST.CameraAction.Clear) {
-            if (command.position != undefined || command.rotation != undefined) {
+            if (hasSetOptions || command.fadeTime != undefined || command.fadeColor != undefined) {
                 addIssue(issues, ValidationLevel.Error, "CAMERA_CLEAR_EXTRA_OPTIONS",
-                    "CAMERA clear cannot include position or rotation options.");
+                    "CAMERA clear cannot include advanced options.");
             }
             if (command.presetId != undefined) {
                 addIssue(issues, ValidationLevel.Error, "CAMERA_CLEAR_EXTRA_PRESET",
                     "CAMERA clear cannot include a preset ID.");
             }
             return issues;
+        }
+        if (command.fadeTime != undefined || command.fadeColor != undefined) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_SET_FADE_OPTIONS", "CAMERA set cannot use fade options.");
+        }
+        if (command.useDefault && (command.position || command.rotation || command.facing)) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_DEFAULT_CONFLICT", "CAMERA default cannot be combined with pos, rot or facing.");
+        }
+        if (command.facing && command.rotation) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_FACING_ROT_CONFLICT", "CAMERA facing and rot are alternative forms.");
+        }
+        if (command.facing) {
+            if (command.facing.kind == MCFunctionAST.FacingKind.Position && command.facing.position) {
+                appendIssues(issues, validatePosition(command.facing.position));
+            } else if (command.facing.kind == MCFunctionAST.FacingKind.Entity && command.facing.entitySelector) {
+                appendIssues(issues, validateSelector(command.facing.entitySelector));
+                if (command.facing.anchor != undefined) addIssue(issues, ValidationLevel.Error,
+                    "CAMERA_FACING_ANCHOR_UNSUPPORTED", "CAMERA facing entity has no eyes/feet anchor argument.");
+                addIssue(issues, ValidationLevel.Warning, "CAMERA_FACING_ENTITY_SINGLE",
+                    "CAMERA facing entity must resolve to a single entity; verify selector count in game.");
+            } else addIssue(issues, ValidationLevel.Error, "CAMERA_FACING_INVALID", "CAMERA facing needs a position or an entity.");
+        }
+        if (command.ease) {
+            if (!(command.ease.seconds >= 0) || !(command.ease.seconds <= 1e308) ||
+                command.ease.type < 0 || command.ease.type > 31 || command.ease.type % 1 != 0) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_EASE_INVALID", "CAMERA ease needs finite nonnegative seconds and a known easing type.");
+            }
         }
         if (!isCameraPresetId(command.presetId)) {
             addIssue(issues, ValidationLevel.Error, "CAMERA_PRESET_ID_INVALID",

@@ -14,6 +14,17 @@ namespace MCFunctionBlocks {
         return MCFunctionAST.createCameraSetAdvancedCommand(target, presetId, position, rotation);
     }
 
+    export function createCameraSetOptionsCommand(target: MCFunctionAST.Selector, presetId: string,
+        position?: MCFunctionAST.Position, rotation?: MCFunctionAST.Rotation,
+        facing?: MCFunctionAST.Facing, ease?: MCFunctionAST.CameraEase,
+        useDefault?: boolean): MCFunctionAST.CameraCommand {
+        return MCFunctionAST.createCameraSetOptionsCommand(target, presetId, position, rotation, facing, ease, useDefault);
+    }
+    export function createCameraFadeCommand(target: MCFunctionAST.Selector,
+        time?: MCFunctionAST.CameraFadeTime, color?: MCFunctionAST.CameraFadeColor): MCFunctionAST.CameraCommand {
+        return MCFunctionAST.createCameraFadeCommand(target, time, color);
+    }
+
     export function createCameraClearCommand(
         target: MCFunctionAST.Selector
     ): MCFunctionAST.CameraCommand {
