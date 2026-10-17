@@ -3,7 +3,7 @@ namespace MCFunctionAST {
     export enum CameraAction {
         Set = 0,
         Clear = 1,
-        Fade = 2, Attach = 3, Detach = 4, TargetEntity = 5, RemoveTarget = 6, FovSet = 7, FovClear = 8
+        Fade = 2, Attach = 3, Detach = 4, TargetEntity = 5, RemoveTarget = 6, FovSet = 7, FovClear = 8, PlaySpline = 9
     }
 
     export enum CameraEaseType {
@@ -46,6 +46,8 @@ namespace MCFunctionAST {
         entityTarget?: Selector;
         targetCenterOffset?: CameraOffset3;
         fovValue?: number;
+        /** Name of a spline from a behavior pack; not a file path. */
+        splineName?: string;
     }
 
     export function createCameraSetCommand(target: Selector, presetId: string): CameraCommand {
@@ -86,6 +88,9 @@ namespace MCFunctionAST {
     export function createCameraFovCommand(action: CameraAction, target: Selector,
         value?: number, ease?: CameraEase): CameraCommand {
         return { kind: CommandKind.Camera, action: action, target: target, fovValue: value, ease: ease };
+    }
+    export function createCameraSplineCommand(target: Selector, name: string): CameraCommand {
+        return { kind: CommandKind.Camera, action: CameraAction.PlaySpline, target: target, splineName: name };
     }
     export function createCameraFadeCommand(target: Selector,
         fadeTime?: CameraFadeTime, fadeColor?: CameraFadeColor): CameraCommand {
