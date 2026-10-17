@@ -218,13 +218,17 @@ namespace MCFunctionDiagnostics {
      * use player.say(), avoiding the stalled long-tellraw path observed in game.
      */
     function needsLiteralOutput(line: string): boolean {
-        for (let i = 0; i < line.length; i++) {
-            let ch = line.charAt(i);
-            if (ch == "@" || ch == "[" || ch == "]" ||
-                ch == "{" || ch == "}" || ch == "\"" ||
-                ch == "\\") return true;
-        }
-        return false;
+        // Do not execute a nested series of comparisons for EVERY character
+        // when the player queries a prepared diagnostic. Minecraft MakeCode
+        // supports String.indexOf(): one fast lookup per special character.
+        // Preserve the same seven literal-safety characters as before.
+        return line.indexOf("@", 0) >= 0 ||
+            line.indexOf("[", 0) >= 0 ||
+            line.indexOf("]", 0) >= 0 ||
+            line.indexOf("{", 0) >= 0 ||
+            line.indexOf("}", 0) >= 0 ||
+            line.indexOf("\"", 0) >= 0 ||
+            line.indexOf("\\", 0) >= 0;
     }
 
     /**
