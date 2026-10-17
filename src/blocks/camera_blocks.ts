@@ -69,6 +69,7 @@ namespace Command {
     }
 
     //% blockId=command_camera_clear
+    //% blockHidden=true
     //% group="CAMERA" weight=99
     //% block="CAMERA clear target $target"
     //% target.shadow="mcfunction_selector_self"
@@ -220,6 +221,7 @@ namespace Command {
     }
 
     //% blockId=command_camera_fade
+    //% blockHidden=true
     //% group="CAMERA" weight=84
     //% block="CAMERA fade target $target time $time color $color"
     //% inlineInputMode=external
@@ -285,6 +287,7 @@ namespace Command {
     }
 
     //% blockId=command_camera_set_unified
+    //% blockHidden=true
     //% group="CAMERA" weight=110
     //% block="CAMERA target $target set $preset || ease $ease position $position orientation $orientation mode $mode view offset $viewOffset entity offset $entityOffset"
     //% expandableArgumentMode="enabled"
@@ -308,6 +311,7 @@ namespace Command {
             viewOffset ? viewOffset.value : undefined, entityOffset ? entityOffset.value : undefined));
     }
     //% blockId=command_camera_attach_entity
+    //% blockHidden=true
     //% group="CAMERA" weight=79
     //% block="CAMERA target $target attach to entity $entity"
     //% target.shadow="mcfunction_selector_self"
@@ -317,6 +321,7 @@ namespace Command {
             target ? target.selector : undefined, entity ? entity.selector : undefined));
     }
     //% blockId=command_camera_detach_entity
+    //% blockHidden=true
     //% group="CAMERA" weight=78
     //% block="CAMERA target $target detach from entity"
     //% target.shadow="mcfunction_selector_self"
@@ -325,6 +330,7 @@ namespace Command {
             target ? target.selector : undefined));
     }
     //% blockId=command_camera_target_entity
+    //% blockHidden=true
     //% group="CAMERA" weight=77
     //% block="CAMERA target $target track entity $entity || center offset $offset"
     //% expandableArgumentMode="enabled"
@@ -339,6 +345,7 @@ namespace Command {
             offset ? offset.value : undefined));
     }
     //% blockId=command_camera_remove_target
+    //% blockHidden=true
     //% group="CAMERA" weight=76
     //% block="CAMERA target $target remove tracking target"
     //% target.shadow="mcfunction_selector_self"
@@ -347,6 +354,7 @@ namespace Command {
             target ? target.selector : undefined));
     }
     //% blockId=command_camera_fov_set
+    //% blockHidden=true
     //% group="CAMERA" weight=75
     //% block="CAMERA target $target FOV set $fov || ease $ease"
     //% expandableArgumentMode="enabled"
@@ -359,6 +367,7 @@ namespace Command {
             target ? target.selector : undefined, fov, ease ? ease.ease : undefined));
     }
     //% blockId=command_camera_fov_clear
+    //% blockHidden=true
     //% group="CAMERA" weight=74
     //% block="CAMERA target $target FOV clear || ease $ease"
     //% expandableArgumentMode="enabled"
@@ -367,5 +376,121 @@ namespace Command {
     export function cameraFovClear(target: MCFunctionFields.SelectorValue, ease?: CameraEaseValue): void {
         executeAudioCommand(MCFunctionBlocks.createCameraFovCommand(MCFunctionAST.CameraAction.FovClear,
             target ? target.selector : undefined, undefined, ease ? ease.ease : undefined));
+    }
+}
+
+/** Single public CAMERA command: a target plus a typed action reporter.
+ * The reporter carries AST data, never a compiled command string.
+ * All legacy block IDs above remain available to previously saved workspaces.
+ */
+namespace Command {
+    export class CameraActionValue {
+        command: MCFunctionAST.CameraCommand;
+        constructor(command: MCFunctionAST.CameraCommand) { this.command = command; }
+    }
+
+    //% blockId=command_camera_dispatch
+    //% group="CAMERA" weight=120
+    //% block="CAMERA target $target command $action"
+    //% inlineInputMode=external
+    //% target.shadow="mcfunction_selector_self"
+    //% action.shadow="mcfunction_camera_action_set"
+    export function cameraCommand(target: MCFunctionFields.SelectorValue, action: CameraActionValue): void {
+        // Adapter creates the final AST with the main block's target.
+        executeAudioCommand(MCFunctionBlocks.createCameraFromAction(
+            target ? target.selector : undefined,
+            action ? action.command : undefined));
+    }
+
+    //% blockId=mcfunction_camera_action_set
+    //% group="CAMERA" weight=119
+    //% block="set $preset || ease $ease position $position orientation $orientation mode $mode view offset $viewOffset entity offset $entityOffset"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% ease.shadow="mcfunction_camera_ease"
+    //% position.shadow="mcfunction_position_absolute"
+    //% orientation.shadow="mcfunction_camera_orientation_rotation"
+    //% viewOffset.shadow="mcfunction_camera_view_offset"
+    //% entityOffset.shadow="mcfunction_camera_entity_offset"
+    export function cameraActionSet(preset: CameraPresetValue,
+        ease?: CameraEaseValue, position?: MCFunctionPositionFields.PositionValue,
+        orientation?: CameraOrientationValue, mode?: CameraSetMode,
+        viewOffset?: CameraViewOffsetValue, entityOffset?: CameraEntityOffsetValue): CameraActionValue {
+        return new CameraActionValue(MCFunctionAST.createCameraSetUnifiedCommand(
+            undefined, preset ? preset.presetId : undefined,
+            ease ? ease.ease : undefined, position ? position.position : undefined,
+            orientation ? orientation.rotation : undefined, orientation ? orientation.facing : undefined,
+            mode == CameraSetMode.Default,
+            viewOffset ? viewOffset.value : undefined, entityOffset ? entityOffset.value : undefined));
+    }
+
+    //% blockId=mcfunction_camera_action_clear
+    //% group="CAMERA" weight=118
+    //% block="clear camera"
+    export function cameraActionClear(): CameraActionValue {
+        return new CameraActionValue(MCFunctionAST.createCameraClearCommand(undefined));
+    }
+
+    //% blockId=mcfunction_camera_action_fade
+    //% group="CAMERA" weight=117
+    //% block="fade || time $time color $color"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% time.shadow="mcfunction_camera_fade_time"
+    //% color.shadow="mcfunction_camera_fade_color"
+    export function cameraActionFade(time?: CameraFadeTimeValue, color?: CameraFadeColorValue): CameraActionValue {
+        return new CameraActionValue(MCFunctionAST.createCameraFadeCommand(undefined,
+            time ? time.time : undefined, color ? color.color : undefined));
+    }
+
+    export enum CameraEntityActionChoice {
+        //% block="attach"
+        Attach = 0,
+        //% block="detach"
+        Detach = 1,
+        //% block="track"
+        Track = 2,
+        //% block="remove tracking"
+        RemoveTracking = 3
+    }
+
+    //% blockId=mcfunction_camera_action_entity
+    //% group="CAMERA" weight=116
+    //% block="entity control $operation || entity $entity center offset $offset"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% entity.shadow="mcfunction_selector_self"
+    //% offset.shadow="mcfunction_camera_entity_offset"
+    export function cameraActionEntity(operation: CameraEntityActionChoice,
+        entity?: MCFunctionFields.SelectorValue, offset?: CameraEntityOffsetValue): CameraActionValue {
+        let a = MCFunctionAST.CameraAction.Attach;
+        if (operation == CameraEntityActionChoice.Detach) a = MCFunctionAST.CameraAction.Detach;
+        else if (operation == CameraEntityActionChoice.Track) a = MCFunctionAST.CameraAction.TargetEntity;
+        else if (operation == CameraEntityActionChoice.RemoveTracking) a = MCFunctionAST.CameraAction.RemoveTarget;
+        return new CameraActionValue(MCFunctionAST.createCameraEntityCommand(a, undefined,
+            entity ? entity.selector : undefined, offset ? offset.value : undefined));
+    }
+
+    export enum CameraFovActionChoice {
+        //% block="set"
+        Set = 0,
+        //% block="clear"
+        Clear = 1
+    }
+
+    //% blockId=mcfunction_camera_action_fov
+    //% group="CAMERA" weight=115
+    //% block="FOV $operation || value $value ease $ease"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% value.defl=70
+    //% ease.shadow="mcfunction_camera_ease"
+    export function cameraActionFov(operation: CameraFovActionChoice,
+        value?: number, ease?: CameraEaseValue): CameraActionValue {
+        return new CameraActionValue(MCFunctionAST.createCameraFovCommand(
+            operation == CameraFovActionChoice.Clear ? MCFunctionAST.CameraAction.FovClear : MCFunctionAST.CameraAction.FovSet,
+            undefined, operation == CameraFovActionChoice.Clear ? undefined : (value == undefined ? 70 : value),
+            ease ? ease.ease : undefined));
     }
 }

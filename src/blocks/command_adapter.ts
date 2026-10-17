@@ -1,5 +1,22 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    /** Bind a typed CAMERA action to its player target, without compiling strings. */
+    export function createCameraFromAction(target: MCFunctionAST.Selector,
+        action: MCFunctionAST.CameraCommand): MCFunctionAST.CameraCommand {
+        if (!action) return { kind: MCFunctionAST.CommandKind.Camera,
+            action: MCFunctionAST.CameraAction.Set, target: target };
+        return {
+            kind: MCFunctionAST.CommandKind.Camera,
+            action: action.action, target: target, presetId: action.presetId,
+            position: action.position, rotation: action.rotation, facing: action.facing,
+            ease: action.ease, useDefault: action.useDefault,
+            fadeTime: action.fadeTime, fadeColor: action.fadeColor,
+            viewOffset: action.viewOffset, entityOffset: action.entityOffset,
+            entityTarget: action.entityTarget, targetCenterOffset: action.targetCenterOffset,
+            fovValue: action.fovValue
+        };
+    }
+
     /** CAMERA blocks reuse the common Selector and canonical AST. */
     export function createCameraSetCommand(
         target: MCFunctionAST.Selector, presetId: string
