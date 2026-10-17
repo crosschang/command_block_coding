@@ -76,4 +76,4 @@ FunctionFile.define("a41_sound_pitch_bad", function () {
     );
 });
 
-// Type cbi_diag to inspect all registered FunctionFile diagnostics.
+// Type ? to inspect all registered FunctionFile diagnostics.

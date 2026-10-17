@@ -1,7 +1,7 @@
 /**
  * TEMPORARY main.ts — test A: no GAMERULE LIST block.
  * Start this program separately (not together with the other fixtures).
- * Expected: cbi_diag remains registered; cbi_rules does NOT register.
+ * Expected: ? remains registered; cbi_rules does NOT register.
  */
 FunctionFile.define("gate_set_only", function () {
     Command.gamerule(Command.gameruleBooleanAction(

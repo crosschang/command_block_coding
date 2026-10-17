@@ -1,8 +1,7 @@
 /**
  * command_block_coding 0.0.60 / Minecraft Education diagnostic performance test.
  * Temporary main.ts only. Do not put this in test.ts.
- * The Extension owns player.onChat("?"), player.onChat("cbi_diag") and
- * player.onChat("cbi_page"); do NOT register them here.
+ * The Extension owns player.onChat("?") and player.onChat("cbi_page"); do NOT register them here.
  *
  * 4 affected functions => ? page 1/2 and cbi_page 2.
  */

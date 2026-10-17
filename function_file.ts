@@ -85,8 +85,6 @@ namespace FunctionFile {
                 code: "FUNCTION_NAME_RESERVED",
                 message: name == MCFunctionDiagnostics.allDiagnosticsChatCommandName()
                     ? "mcfunction name ? is reserved for the project diagnostic viewer."
-                    : name == MCFunctionDiagnostics.chatCommandName()
-                    ? "mcfunction name cbi_diag is reserved for the legacy diagnostic viewer."
                     : name == "cbi_page"
                     ? "mcfunction name cbi_page is reserved for the paged diagnostic viewer."
                     : "mcfunction name cbi_rules is reserved for the Gamerule Registry viewer."
@@ -455,7 +453,7 @@ namespace FunctionFile {
                     return;
                 }
                 // Normal execution must be quiet about stored WARNING/INFO.
-                // Only functionName? and ? (or cbi_diag) show diagnostics.
+                // Only functionName? and ? show diagnostics.
                 // This avoids delayed tellraw lines interleaving with the
                 // actual function output, without changing Validator policy.
                 runPreview(name);

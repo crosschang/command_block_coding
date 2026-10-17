@@ -1,7 +1,7 @@
 /**
  * TEMPORARY main.ts — test B: LIST occurs inside a definition with ERROR.
  * Use alone, not together with the enabled test fixture.
- * Expected: gate_invalid_list NOT registered; cbi_diag shows type mismatch;
+ * Expected: gate_invalid_list NOT registered; ? shows type mismatch;
  *           cbi_rules does NOT register.
  */
 FunctionFile.define("gate_invalid_list", function () {

@@ -48,4 +48,4 @@ FunctionFile.define("p40_bad", function () {
     Command.particle(MCFunctionParticleLibrary.custom("invalid particle id"));
 });
 
-// Run the existing cbi_diag chat command to inspect WARNING/INFO/ERROR.
+// Run the project ? chat command to inspect WARNING/INFO/ERROR.

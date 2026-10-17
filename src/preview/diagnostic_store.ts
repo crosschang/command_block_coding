@@ -4,7 +4,7 @@
  * Purpose:
  * - keep detailed validation diagnostics out of the normal chat flow
  * - preserve one current diagnostic set per FunctionFile
- * - provide ? for whole-project diagnostics (cbi_diag remains an alias); bad names show
+ * - provide ? for whole-project diagnostics; bad names show
  *   their own errors through diagnostic-only chat handlers
  *
  * This is derived Preview/editor state. It is NOT Minecraft Command AST data and
@@ -38,18 +38,13 @@ namespace MCFunctionDiagnostics {
     let cachedDetailLines: string[][] = [];
     let cachedSeverity: string[] = [];
 
-    /** Legacy alias preserved for existing tests and projects. */
-    export function chatCommandName(): string {
-        return "cbi_diag";
-    }
-
     /** Short user-facing command for the whole-project diagnostic viewer. */
     export function allDiagnosticsChatCommandName(): string {
         return "?";
     }
 
     export function isReservedChatCommand(name: string): boolean {
-        return name == chatCommandName() || name == allDiagnosticsChatCommandName() || name == "cbi_page";
+        return name == allDiagnosticsChatCommandName() || name == "cbi_page";
     }
 
     /**
@@ -60,12 +55,8 @@ namespace MCFunctionDiagnostics {
         if (chatRegistered) return;
         chatRegistered = true;
 
-        // Register the new short command, but retain the old name as an alias.
-        // Both invoke the same read-only project diagnostic viewer.
+        // Register only the short project diagnostic command.
         player.onChat(allDiagnosticsChatCommandName(), function () {
-            showAll();
-        });
-        player.onChat(chatCommandName(), function () {
             showAll();
         });
         // Extra pages use one numeric-argument handler, not many chat handlers.
@@ -388,40 +379,6 @@ namespace MCFunctionDiagnostics {
         );
     }
 
-    // 0.0.62 TEMPORARY REAL-CACHE PERFORMANCE PROBES.
-    // These only read already-prepared Preview diagnostics. They do not trigger
-    // validation, alter stored data, or affect .mcfunction generation.
-    // Remove after the Minecraft Education runtime investigation.
-
-    /** Perform precisely the real name-lookup loop, without chat output. */
-    export function probeFindDetailIndex(functionName: string): number {
-        for (let i = 0; i < cachedDetailNames.length; i++) {
-            if (cachedDetailNames[i] != functionName) continue;
-            return i;
-        }
-        return -1;
-    }
-
-    /** Traverse actual cached detail lines without calling player.say/tellraw. */
-    export function probeWalkDetailCharsAt(index: number): number {
-        if (index < 0 || index >= cachedDetailLines.length) return -1;
-        let prepared = cachedDetailLines[index];
-        let chars = 0;
-        for (let i = 0; i < prepared.length; i++) {
-            chars += prepared[i].length;
-        }
-        return chars;
-    }
-
-    /** Output actual cached lines, with the original adapter but NO name search. */
-    export function probeEmitDetailAt(index: number): void {
-        if (index < 0 || index >= cachedDetailLines.length) return;
-        let prepared = cachedDetailLines[index];
-        for (let i = 0; i < prepared.length; i++) {
-            emitCompactLine(prepared[i]);
-        }
-    }
-
     /**
      * An invalid FunctionFile may never execute its commands. Use the same
      * compact, literal-safe diagnostic output path as functionName? rather than
@@ -599,7 +556,7 @@ namespace MCFunctionDiagnostics {
         ]);
     }
 
-    /** Short project summary. ? and cbi_diag are exact aliases of page 1. */
+    /** Short project summary, invoked by the ? chat command. */
     export function showAll(): void {
         showPage(1);
     }
