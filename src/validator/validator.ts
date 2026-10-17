@@ -1678,6 +1678,29 @@ namespace MCFunctionValidator {
             }
             return issues;
         }
+        if (command.setOptionSequence != undefined) {
+            // The structured SET chain must match one official keyword sequence.
+            // Legacy reporters do not carry an order and retain their behavior.
+            let expected: MCFunctionAST.CameraSetOptionKind[] = [];
+            if (command.ease) expected.push(MCFunctionAST.CameraSetOptionKind.Ease);
+            if (command.useDefault) expected.push(MCFunctionAST.CameraSetOptionKind.Default);
+            if (command.position) expected.push(MCFunctionAST.CameraSetOptionKind.Position);
+            if (command.facing) expected.push(MCFunctionAST.CameraSetOptionKind.Facing);
+            if (command.rotation) expected.push(MCFunctionAST.CameraSetOptionKind.Rotation);
+            if (command.viewOffset) expected.push(MCFunctionAST.CameraSetOptionKind.ViewOffset);
+            if (command.entityOffset) expected.push(MCFunctionAST.CameraSetOptionKind.EntityOffset);
+            let actual = command.setOptionSequence;
+            let matches = actual.length == expected.length;
+            if (matches) for (let i = 0; i < actual.length; i++) {
+                if (actual[i] != expected[i]) { matches = false; break; }
+            }
+            if (!matches) addIssue(issues, ValidationLevel.Error,
+                "CAMERA_SET_CHAIN_ORDER", "CAMERA SET options must follow official order, without duplicates or missing inputs.");
+            // The modern chain never produces a bare 'ease' clause.
+            if (actual.length == 1 && actual[0] == MCFunctionAST.CameraSetOptionKind.Ease)
+                addIssue(issues, ValidationLevel.Error,
+                    "CAMERA_SET_CHAIN_EASE_ONLY", "CAMERA SET ease needs a following default or camera setting.");
+        }
         if (command.fadeTime != undefined || command.fadeColor != undefined) {
             addIssue(issues, ValidationLevel.Error, "CAMERA_SET_FADE_OPTIONS", "CAMERA set cannot use fade options.");
         }

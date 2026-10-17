@@ -394,7 +394,7 @@ namespace Command {
     //% block="CAMERA target $target command $action"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_selector_self"
-    //% action.shadow="mcfunction_camera_action_set_grammar"
+    //% action.shadow="mcfunction_camera_action_set_chain"
     export function cameraCommand(target: MCFunctionFields.SelectorValue, action: CameraActionValue): void {
         // Adapter creates the final AST with the main block's target.
         executeAudioCommand(MCFunctionBlocks.createCameraFromAction(
@@ -610,6 +610,7 @@ namespace Command {
      */
 
     //% blockId=mcfunction_camera_action_set_grammar
+    //% blockHidden=true
     //% group="CAMERA" weight=119
     //% block="set $preset || option $setting"
     //% expandableArgumentMode="enabled"
@@ -630,6 +631,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_default
+    //% blockHidden=true
     //% group="CAMERA" weight=112
     //% block="SET default"
     export function cameraSetBranchDefault(): CameraSetOptionsValue {
@@ -637,6 +639,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_pos
+    //% blockHidden=true
     //% group="CAMERA" weight=111
     //% block="SET pos $position"
     //% position.shadow="mcfunction_position_absolute"
@@ -645,6 +648,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_rot
+    //% blockHidden=true
     //% group="CAMERA" weight=110
     //% block="SET rot $rotation"
     //% rotation.shadow="mcfunction_rotation_absolute"
@@ -653,6 +657,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_facing_entity
+    //% blockHidden=true
     //% group="CAMERA" weight=109
     //% block="SET facing entity $facing"
     //% facing.shadow="mcfunction_camera_facing_entity"
@@ -662,6 +667,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_facing_position
+    //% blockHidden=true
     //% group="CAMERA" weight=108
     //% block="SET facing position $facing"
     //% facing.shadow="mcfunction_camera_facing_position"
@@ -671,6 +677,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_pos_rot
+    //% blockHidden=true
     //% group="CAMERA" weight=107
     //% block="SET pos $position rot $rotation"
     //% inlineInputMode=external
@@ -683,6 +690,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_pos_facing_entity
+    //% blockHidden=true
     //% group="CAMERA" weight=106
     //% block="SET pos $position facing entity $facing"
     //% inlineInputMode=external
@@ -695,6 +703,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_pos_facing_position
+    //% blockHidden=true
     //% group="CAMERA" weight=105
     //% block="SET pos $position facing position $facing"
     //% inlineInputMode=external
@@ -707,6 +716,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_view
+    //% blockHidden=true
     //% group="CAMERA" weight=104
     //% block="SET view offset $viewOffset"
     //% viewOffset.shadow="mcfunction_camera_view_offset"
@@ -716,6 +726,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_entity
+    //% blockHidden=true
     //% group="CAMERA" weight=103
     //% block="SET entity offset $entityOffset"
     //% entityOffset.shadow="mcfunction_camera_entity_offset"
@@ -725,6 +736,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_view_entity
+    //% blockHidden=true
     //% group="CAMERA" weight=102
     //% block="SET view offset $viewOffset entity offset $entityOffset"
     //% inlineInputMode=external
@@ -738,6 +750,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_rot_view
+    //% blockHidden=true
     //% group="CAMERA" weight=101
     //% block="SET rot $rotation view offset $viewOffset"
     //% inlineInputMode=external
@@ -751,6 +764,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_rot_entity
+    //% blockHidden=true
     //% group="CAMERA" weight=100
     //% block="SET rot $rotation entity offset $entityOffset"
     //% inlineInputMode=external
@@ -764,6 +778,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_branch_rot_view_entity
+    //% blockHidden=true
     //% group="CAMERA" weight=99
     //% block="SET rot $rotation view offset $viewOffset entity offset $entityOffset"
     //% inlineInputMode=external
@@ -780,6 +795,7 @@ namespace Command {
 
     /** Official ease preamble for any of the 14 supported SET branches. */
     //% blockId=mcfunction_camera_set_branch_ease
+    //% blockHidden=true
     //% group="CAMERA" weight=98
     //% block="SET ease $ease then $setting"
     //% inlineInputMode=external
@@ -790,6 +806,156 @@ namespace Command {
         return new CameraSetOptionsValue(ease ? ease.ease : undefined,
             setting.position, setting.rotation, setting.facing,
             setting.useDefault, setting.viewOffset, setting.entityOffset);
+    }
+
+    /**
+     * Selector-style ordered SET options. Each Reporter represents exactly one
+     * official /camera set keyword; no strings are assembled by MakeCode blocks.
+     * A typed chain is reduced into the canonical CameraCommand AST below.
+     */
+    export class CameraSetChainValue {
+        kind: MCFunctionAST.CameraSetOptionKind;
+        option: CameraSetOptionsValue;
+        next: CameraSetChainValue;
+        isEnd: boolean;
+        constructor(kind: MCFunctionAST.CameraSetOptionKind,
+            option?: CameraSetOptionsValue, next?: CameraSetChainValue) {
+            this.kind = kind;
+            this.option = option ? option : new CameraSetOptionsValue();
+            // Explicit terminal node; no implicit cyclic option traversal.
+            this.isEnd = kind == MCFunctionAST.CameraSetOptionKind.End;
+            this.next = next ? next : (this.isEnd ? this : new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.End));
+        }
+    }
+
+    //% blockId=mcfunction_camera_set_chain_end
+    //% group="CAMERA" weight=102
+    //% block="end SET options"
+    export function cameraSetChainEnd(): CameraSetChainValue {
+        return new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.End);
+    }
+
+    //% blockId=mcfunction_camera_set_chain_ease
+    //% group="CAMERA" weight=111
+    //% block="ease $ease|next $next"
+    //% inlineInputMode=external
+    //% ease.shadow="mcfunction_camera_ease"
+    //% next.shadow="mcfunction_camera_set_chain_end"
+    export function cameraSetChainEase(ease: CameraEaseValue, next: CameraSetChainValue): CameraSetChainValue {
+        return new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.Ease,
+            new CameraSetOptionsValue(ease ? ease.ease : undefined), next);
+    }
+
+    //% blockId=mcfunction_camera_set_chain_default
+    //% group="CAMERA" weight=110
+    //% block="default"
+    export function cameraSetChainDefault(): CameraSetChainValue {
+        return new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.Default,
+            new CameraSetOptionsValue(undefined, undefined, undefined, undefined, true));
+    }
+
+    //% blockId=mcfunction_camera_set_chain_pos
+    //% group="CAMERA" weight=109
+    //% block="pos $position|next $next"
+    //% inlineInputMode=external
+    //% position.shadow="mcfunction_position_absolute"
+    //% next.shadow="mcfunction_camera_set_chain_end"
+    export function cameraSetChainPos(position: MCFunctionPositionFields.PositionValue,
+        next: CameraSetChainValue): CameraSetChainValue {
+        return new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.Position,
+            new CameraSetOptionsValue(undefined, position ? position.position : undefined), next);
+    }
+
+    //% blockId=mcfunction_camera_set_chain_rot
+    //% group="CAMERA" weight=108
+    //% block="rot $rotation|next $next"
+    //% inlineInputMode=external
+    //% rotation.shadow="mcfunction_rotation_absolute"
+    //% next.shadow="mcfunction_camera_set_chain_end"
+    export function cameraSetChainRot(rotation: MCFunctionRotationFields.RotationValue,
+        next: CameraSetChainValue): CameraSetChainValue {
+        return new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.Rotation,
+            new CameraSetOptionsValue(undefined, undefined, rotation ? rotation.rotation : undefined), next);
+    }
+
+    //% blockId=mcfunction_camera_set_chain_facing_entity
+    //% group="CAMERA" weight=107
+    //% block="facing entity $facing"
+    //% facing.shadow="mcfunction_camera_facing_entity"
+    export function cameraSetChainFacingEntity(facing: CameraFacingValue): CameraSetChainValue {
+        return new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.Facing,
+            new CameraSetOptionsValue(undefined, undefined, undefined,
+                facing ? facing.facing : undefined));
+    }
+
+    //% blockId=mcfunction_camera_set_chain_facing_position
+    //% group="CAMERA" weight=106
+    //% block="facing position $facing"
+    //% facing.shadow="mcfunction_camera_facing_position"
+    export function cameraSetChainFacingPosition(facing: CameraFacingValue): CameraSetChainValue {
+        return new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.Facing,
+            new CameraSetOptionsValue(undefined, undefined, undefined,
+                facing ? facing.facing : undefined));
+    }
+
+    //% blockId=mcfunction_camera_set_chain_view
+    //% group="CAMERA" weight=105
+    //% block="view offset $offset|next $next"
+    //% inlineInputMode=external
+    //% offset.shadow="mcfunction_camera_view_offset"
+    //% next.shadow="mcfunction_camera_set_chain_end"
+    export function cameraSetChainView(offset: CameraViewOffsetValue,
+        next: CameraSetChainValue): CameraSetChainValue {
+        return new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.ViewOffset,
+            new CameraSetOptionsValue(undefined, undefined, undefined, undefined,
+                false, offset ? offset.value : undefined), next);
+    }
+
+    //% blockId=mcfunction_camera_set_chain_entity
+    //% group="CAMERA" weight=104
+    //% block="entity offset $offset"
+    //% offset.shadow="mcfunction_camera_entity_offset"
+    export function cameraSetChainEntity(offset: CameraEntityOffsetValue): CameraSetChainValue {
+        return new CameraSetChainValue(MCFunctionAST.CameraSetOptionKind.EntityOffset,
+            new CameraSetOptionsValue(undefined, undefined, undefined, undefined,
+                false, undefined, offset ? offset.value : undefined));
+    }
+
+    //% blockId=mcfunction_camera_action_set_chain
+    //% group="CAMERA" weight=119
+    //% block="set $preset|options $options"
+    //% inlineInputMode=external
+    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% options.shadow="mcfunction_camera_set_chain_end"
+    export function cameraActionSetChain(preset: CameraPresetValue,
+        options: CameraSetChainValue): CameraActionValue {
+        let node = MCFunctionAST.createCameraSetCommand(undefined,
+            preset ? preset.presetId : undefined);
+        let sequence: MCFunctionAST.CameraSetOptionKind[] = [];
+        let current = options;
+        // Never hang the MakeCode runtime on a malformed/cyclic chain.
+        let count = 0;
+        while (current && !current.isEnd && count < 16) {
+            let option = current.option;
+            sequence.push(current.kind);
+            if (option) {
+                if (current.kind == MCFunctionAST.CameraSetOptionKind.Ease) node.ease = option.ease;
+                else if (current.kind == MCFunctionAST.CameraSetOptionKind.Default) node.useDefault = true;
+                else if (current.kind == MCFunctionAST.CameraSetOptionKind.Position) node.position = option.position;
+                else if (current.kind == MCFunctionAST.CameraSetOptionKind.Rotation) node.rotation = option.rotation;
+                else if (current.kind == MCFunctionAST.CameraSetOptionKind.Facing) node.facing = option.facing;
+                else if (current.kind == MCFunctionAST.CameraSetOptionKind.ViewOffset) node.viewOffset = option.viewOffset;
+                else if (current.kind == MCFunctionAST.CameraSetOptionKind.EntityOffset) node.entityOffset = option.entityOffset;
+            }
+            current = current.next;
+            count++;
+        }
+        if (current && !current.isEnd && count >= 16) {
+            sequence.push(MCFunctionAST.CameraSetOptionKind.Invalid);
+        }
+        // Preserve the entered option order for Validator and future Parser.
+        node.setOptionSequence = sequence;
+        return new CameraActionValue(node);
     }
 
     //% blockId=mcfunction_camera_action_spline

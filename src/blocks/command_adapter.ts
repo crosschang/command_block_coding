@@ -11,9 +11,11 @@ namespace MCFunctionBlocks {
             action: <MCFunctionAST.CameraAction>-1, target: target };
 
         if (action.action == MCFunctionAST.CameraAction.Set) {
-            return MCFunctionAST.createCameraSetUnifiedCommand(target, action.presetId,
+            let node = MCFunctionAST.createCameraSetUnifiedCommand(target, action.presetId,
                 action.ease, action.position, action.rotation, action.facing,
                 action.useDefault, action.viewOffset, action.entityOffset);
+            node.setOptionSequence = action.setOptionSequence;
+            return node;
         }
         if (action.action == MCFunctionAST.CameraAction.Clear) {
             return MCFunctionAST.createCameraClearCommand(target);

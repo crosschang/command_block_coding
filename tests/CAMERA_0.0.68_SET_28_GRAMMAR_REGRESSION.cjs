@@ -80,7 +80,7 @@ assert.ok(V.validateCameraCommand(invalid).some(x=>x.code==='CAMERA_SET_BRANCH_C
 const filesrc=fs.readFileSync('src/blocks/camera_blocks.ts','utf8');
 const allBlockIds=[...filesrc.matchAll(/\/\/% blockId=(\S+)/g)].map(x=>x[1]);
 assert.strictEqual(new Set(allBlockIds).size,allBlockIds.length,'CAMERA block IDs must be unique');
-assert.ok(filesrc.includes('action.shadow="mcfunction_camera_action_set_grammar"'));
+assert.ok(filesrc.includes('action.shadow="mcfunction_camera_action_set_chain"'));
 assert.ok(/blockId=mcfunction_camera_action_set_composed\s+\/\/% blockHidden=true/.test(filesrc));
 assert.ok(/blockId=mcfunction_camera_set_options\s+\/\/% blockHidden=true/.test(filesrc));
 console.log(`PASS: ${executed}/28 official CAMERA SET variants; preset-only/custom/invalid/legacy ID checks.`);

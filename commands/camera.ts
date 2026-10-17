@@ -18,6 +18,11 @@ namespace MCFunctionAST {
         InElastic = 25, OutElastic = 26, InOutElastic = 27,
         InBounce = 28, OutBounce = 29, InOutBounce = 30, Spring = 31
     }
+    /** Official SET clause sequence, including the exact order entered by the editor. */
+    export enum CameraSetOptionKind {
+        Ease = 0, Default = 1, Position = 2, Rotation = 3,
+        Facing = 4, ViewOffset = 5, EntityOffset = 6, End = 7, Invalid = 8
+    }
     export interface CameraEase { seconds: number; type: CameraEaseType; }
     export interface CameraFadeTime { fadeIn: number; hold: number; fadeOut: number; }
     export interface CameraFadeColor { red: number; green: number; blue: number; }
@@ -39,6 +44,8 @@ namespace MCFunctionAST {
         facing?: Facing;
         ease?: CameraEase;
         useDefault?: boolean;
+        /** Optional order from the chain UI. Legacy ASTs omit this property. */
+        setOptionSequence?: CameraSetOptionKind[];
         fadeTime?: CameraFadeTime;
         fadeColor?: CameraFadeColor;
         viewOffset?: CameraOffset2;
