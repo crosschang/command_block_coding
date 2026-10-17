@@ -422,6 +422,22 @@ namespace MCFunctionDiagnostics {
         }
     }
 
+    /**
+     * An invalid FunctionFile may never execute its commands. Use the same
+     * compact, literal-safe diagnostic output path as functionName? rather than
+     * Preview.previewSay(), whose JSON-escape per-character loop and tellraw
+     * processing can stall Minecraft Education chat handlers.
+     *
+     * This is a Preview-only notification and does not change Validator, AST,
+     * Compiler, diagnostic records, or the generated .mcfunction output.
+     */
+    export function showBlockedExecutionHint(functionName: string): void {
+        emitCompactLine(
+            "mcfunction " + functionName + ": " + uiText("blocked") + " " +
+            "Type " + functionName + "? for details."
+        );
+    }
+
     /** Prefer one short SAY call; preserve literal []/@/JSON via existing tellraw. */
     function emitCompactLine(line: string): void {
         const maxCompactChars = 145; // Conservative probe threshold, not a protocol limit.

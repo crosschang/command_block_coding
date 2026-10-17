@@ -451,10 +451,7 @@ namespace FunctionFile {
                     // Running an invalid function remains forbidden. Keep chat
                     // output minimal; detailed causes belong to the explicit
                     // read-only diagnostic command (functionName?).
-                    MCFunctionPreview.previewSay(
-                        "mcfunction " + name + ": execution blocked. " +
-                        "Type " + name + "? for details."
-                    );
+                    MCFunctionDiagnostics.showBlockedExecutionHint(name);
                     return;
                 }
                 // Normal execution must be quiet about stored WARNING/INFO.
