@@ -89,6 +89,19 @@ namespace MCFunctionCompiler {
     /** Official /camera forms: ease before pos, facing OR rot, fade is separate. */
     function compileCamera(command: MCFunctionAST.CameraCommand): string {
         let result = "camera " + compileSelector(command.target);
+        if (command.action == MCFunctionAST.CameraAction.Attach) return result + " attach_to_entity " + compileSelector(command.entityTarget);
+        if (command.action == MCFunctionAST.CameraAction.Detach) return result + " detach_from_entity";
+        if (command.action == MCFunctionAST.CameraAction.TargetEntity) {
+            result += " targetEntity " + compileSelector(command.entityTarget);
+            if (command.targetCenterOffset) result += " targetCenterOffset " + command.targetCenterOffset.x + " " + command.targetCenterOffset.y + " " + command.targetCenterOffset.z;
+            return result;
+        }
+        if (command.action == MCFunctionAST.CameraAction.RemoveTarget) return result + " removeTarget";
+        if (command.action == MCFunctionAST.CameraAction.FovSet || command.action == MCFunctionAST.CameraAction.FovClear) {
+            result += command.action == MCFunctionAST.CameraAction.FovSet ? " fov_set " + command.fovValue : " fov_clear";
+            if (command.ease) result += " " + command.ease.seconds + " " + compileCameraEaseType(command.ease.type);
+            return result;
+        }
         if (command.action == MCFunctionAST.CameraAction.Clear) return result + " clear";
         if (command.action == MCFunctionAST.CameraAction.Fade) {
             result += " fade";
@@ -101,15 +114,7 @@ namespace MCFunctionCompiler {
             return result;
         }
         result += " set " + command.presetId;
-        if (command.ease) {
-            let easingNames = ["linear", "in_sine", "out_sine", "in_out_sine",
-                "in_quad", "out_quad", "in_out_quad", "in_cubic", "out_cubic", "in_out_cubic",
-                "in_quart", "out_quart", "in_out_quart", "in_quint", "out_quint", "in_out_quint",
-                "in_expo", "out_expo", "in_out_expo", "in_circ", "out_circ", "in_out_circ",
-                "in_back", "out_back", "in_out_back", "in_elastic", "out_elastic", "in_out_elastic",
-                "in_bounce", "out_bounce", "in_out_bounce", "spring"];
-            result += " ease " + command.ease.seconds + " " + easingNames[<number>command.ease.type];
-        }
+        if (command.ease) result += " ease " + command.ease.seconds + " " + compileCameraEaseType(command.ease.type);
         if (command.useDefault) return result + " default";
         if (command.position) result += " pos " + compilePosition(command.position);
         if (command.facing) {
@@ -120,7 +125,19 @@ namespace MCFunctionCompiler {
             // /camera uses xRot (pitch) followed by yRot (yaw).
             result += " rot " + compileRotationValue(command.rotation.pitch) + " " + compileRotationValue(command.rotation.yaw);
         }
+        if (command.viewOffset) result += " view_offset " + command.viewOffset.x + " " + command.viewOffset.y;
+        if (command.entityOffset) result += " entity_offset " + command.entityOffset.x + " " + command.entityOffset.y + " " + command.entityOffset.z;
         return result;
+    }
+
+    function compileCameraEaseType(type: MCFunctionAST.CameraEaseType): string {
+        let names = ["linear", "in_sine", "out_sine", "in_out_sine",
+            "in_quad", "out_quad", "in_out_quad", "in_cubic", "out_cubic", "in_out_cubic",
+            "in_quart", "out_quart", "in_out_quart", "in_quint", "out_quint", "in_out_quint",
+            "in_expo", "out_expo", "in_out_expo", "in_circ", "out_circ", "in_out_circ",
+            "in_back", "out_back", "in_out_back", "in_elastic", "out_elastic", "in_out_elastic",
+            "in_bounce", "out_bounce", "in_out_bounce", "spring"];
+        return names[<number>type];
     }
 
     /** Canonical Bedrock syntax; optional args are emitted only as required. */

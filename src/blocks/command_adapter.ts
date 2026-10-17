@@ -20,6 +20,24 @@ namespace MCFunctionBlocks {
         useDefault?: boolean): MCFunctionAST.CameraCommand {
         return MCFunctionAST.createCameraSetOptionsCommand(target, presetId, position, rotation, facing, ease, useDefault);
     }
+    export function createCameraSetUnifiedCommand(target: MCFunctionAST.Selector, presetId: string,
+        ease?: MCFunctionAST.CameraEase, position?: MCFunctionAST.Position,
+        rotation?: MCFunctionAST.Rotation, facing?: MCFunctionAST.Facing,
+        useDefault?: boolean, viewOffset?: MCFunctionAST.CameraOffset2,
+        entityOffset?: MCFunctionAST.CameraOffset3): MCFunctionAST.CameraCommand {
+        return MCFunctionAST.createCameraSetUnifiedCommand(target, presetId, ease, position,
+            rotation, facing, useDefault, viewOffset, entityOffset);
+    }
+    export function createCameraEntityCommand(action: MCFunctionAST.CameraAction,
+        target: MCFunctionAST.Selector, entity?: MCFunctionAST.Selector,
+        offset?: MCFunctionAST.CameraOffset3): MCFunctionAST.CameraCommand {
+        return MCFunctionAST.createCameraEntityCommand(action, target, entity, offset);
+    }
+    export function createCameraFovCommand(action: MCFunctionAST.CameraAction,
+        target: MCFunctionAST.Selector, value?: number,
+        ease?: MCFunctionAST.CameraEase): MCFunctionAST.CameraCommand {
+        return MCFunctionAST.createCameraFovCommand(action, target, value, ease);
+    }
     export function createCameraFadeCommand(target: MCFunctionAST.Selector,
         time?: MCFunctionAST.CameraFadeTime, color?: MCFunctionAST.CameraFadeColor): MCFunctionAST.CameraCommand {
         return MCFunctionAST.createCameraFadeCommand(target, time, color);

@@ -3,7 +3,7 @@ namespace MCFunctionAST {
     export enum CameraAction {
         Set = 0,
         Clear = 1,
-        Fade = 2
+        Fade = 2, Attach = 3, Detach = 4, TargetEntity = 5, RemoveTarget = 6, FovSet = 7, FovClear = 8
     }
 
     export enum CameraEaseType {
@@ -22,6 +22,9 @@ namespace MCFunctionAST {
     export interface CameraFadeTime { fadeIn: number; hold: number; fadeOut: number; }
     export interface CameraFadeColor { red: number; green: number; blue: number; }
 
+    export interface CameraOffset2 { x: number; y: number; }
+    export interface CameraOffset3 { x: number; y: number; z: number; }
+
     export interface CameraCommand extends CommandNode {
         kind: CommandKind;
         action: CameraAction;
@@ -38,6 +41,11 @@ namespace MCFunctionAST {
         useDefault?: boolean;
         fadeTime?: CameraFadeTime;
         fadeColor?: CameraFadeColor;
+        viewOffset?: CameraOffset2;
+        entityOffset?: CameraOffset3;
+        entityTarget?: Selector;
+        targetCenterOffset?: CameraOffset3;
+        fovValue?: number;
     }
 
     export function createCameraSetCommand(target: Selector, presetId: string): CameraCommand {
@@ -62,6 +70,22 @@ namespace MCFunctionAST {
         return { kind: CommandKind.Camera, action: CameraAction.Set, target: target,
             presetId: presetId, position: position, rotation: rotation,
             facing: facing, ease: ease, useDefault: useDefault };
+    }
+    export function createCameraSetUnifiedCommand(target: Selector, presetId: string,
+        ease?: CameraEase, position?: Position, rotation?: Rotation, facing?: Facing,
+        useDefault?: boolean, viewOffset?: CameraOffset2, entityOffset?: CameraOffset3): CameraCommand {
+        let node = createCameraSetOptionsCommand(target, presetId, position, rotation, facing, ease, useDefault);
+        node.viewOffset = viewOffset; node.entityOffset = entityOffset;
+        return node;
+    }
+    export function createCameraEntityCommand(action: CameraAction, target: Selector,
+        entityTarget?: Selector, offset?: CameraOffset3): CameraCommand {
+        return { kind: CommandKind.Camera, action: action, target: target,
+            entityTarget: entityTarget, targetCenterOffset: offset };
+    }
+    export function createCameraFovCommand(action: CameraAction, target: Selector,
+        value?: number, ease?: CameraEase): CameraCommand {
+        return { kind: CommandKind.Camera, action: action, target: target, fovValue: value, ease: ease };
     }
     export function createCameraFadeCommand(target: Selector,
         fadeTime?: CameraFadeTime, fadeColor?: CameraFadeColor): CameraCommand {

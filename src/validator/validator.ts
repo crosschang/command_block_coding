@@ -1564,17 +1564,63 @@ namespace MCFunctionValidator {
     }
 
     /** CAMERA basic: player target, set/clear action, one safe namespaced preset token. */
+    function cameraFinite(value: number): boolean {
+        return value != undefined && value >= -1e308 && value <= 1e308;
+    }
+    function validateCameraOffsetNumbers(issues: ValidationIssue[], values: number[]): void {
+        for (let i = 0; i < values.length; i++) {
+            if (!cameraFinite(values[i])) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_OFFSET_INVALID", "CAMERA offset values must be finite numbers.");
+                return;
+            }
+        }
+    }
+    function validateCameraEaseValue(ease: MCFunctionAST.CameraEase, issues: ValidationIssue[]): void {
+        if (!cameraFinite(ease.seconds) || ease.seconds < 0 ||
+            ease.type < 0 || ease.type > 31 || ease.type % 1 != 0) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_EASE_INVALID", "CAMERA ease requires nonnegative finite seconds and a known easing type.");
+        }
+    }
+
     export function validateCameraCommand(command: MCFunctionAST.CameraCommand): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
         validatePlayerTarget(command.target, "CAMERA", issues);
         if (command.action != MCFunctionAST.CameraAction.Set &&
             command.action != MCFunctionAST.CameraAction.Clear &&
-            command.action != MCFunctionAST.CameraAction.Fade) {
+            command.action != MCFunctionAST.CameraAction.Fade &&
+            (command.action < MCFunctionAST.CameraAction.Attach || command.action > MCFunctionAST.CameraAction.FovClear)) {
             addIssue(issues, ValidationLevel.Error, "CAMERA_ACTION_INVALID", "CAMERA action must be set, clear or fade.");
             return issues;
         }
         let hasSetOptions = command.position != undefined || command.rotation != undefined ||
-            command.facing != undefined || command.ease != undefined || command.useDefault == true;
+            command.facing != undefined || command.ease != undefined || command.useDefault == true ||
+            command.viewOffset != undefined || command.entityOffset != undefined;
+        if (command.action >= MCFunctionAST.CameraAction.Attach) {
+            if (command.presetId != undefined || command.position != undefined || command.rotation != undefined ||
+                command.facing != undefined || command.useDefault == true || command.fadeTime != undefined ||
+                command.fadeColor != undefined || command.viewOffset != undefined || command.entityOffset != undefined) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_ACTION_EXTRA_OPTIONS", "This CAMERA action cannot contain set/fade options.");
+            }
+            let needsEntity = command.action == MCFunctionAST.CameraAction.Attach || command.action == MCFunctionAST.CameraAction.TargetEntity;
+            if (needsEntity && !command.entityTarget) addIssue(issues, ValidationLevel.Error, "CAMERA_ENTITY_REQUIRED", "An entity target is required.");
+            if (!needsEntity && command.entityTarget != undefined) addIssue(issues, ValidationLevel.Error, "CAMERA_ENTITY_UNEXPECTED", "Unexpected entity target.");
+            if (command.entityTarget) {
+                appendIssues(issues, validateSelector(command.entityTarget));
+                addIssue(issues, ValidationLevel.Warning, "CAMERA_ENTITY_SINGLE", "CAMERA entity target must identify one entity.");
+            }
+            if (command.targetCenterOffset && command.action != MCFunctionAST.CameraAction.TargetEntity) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_TARGET_OFFSET_UNEXPECTED", "Only targetEntity accepts targetCenterOffset.");
+            }
+            if (command.targetCenterOffset) validateCameraOffsetNumbers(issues,
+                [command.targetCenterOffset.x, command.targetCenterOffset.y, command.targetCenterOffset.z]);
+            let isFov = command.action == MCFunctionAST.CameraAction.FovSet || command.action == MCFunctionAST.CameraAction.FovClear;
+            if (command.action == MCFunctionAST.CameraAction.FovSet) {
+                if (!cameraFinite(command.fovValue)) addIssue(issues, ValidationLevel.Error, "CAMERA_FOV_INVALID", "FOV must be a finite number.");
+            } else if (command.fovValue != undefined) addIssue(issues, ValidationLevel.Error, "CAMERA_FOV_UNEXPECTED", "Unexpected FOV value.");
+            if (!isFov && command.ease != undefined) addIssue(issues, ValidationLevel.Error, "CAMERA_EASE_UNEXPECTED", "Only FOV actions support easing here.");
+            if (isFov && command.ease) validateCameraEaseValue(command.ease, issues);
+            return issues;
+        }
         if (command.action == MCFunctionAST.CameraAction.Fade) {
             if (hasSetOptions || command.presetId != undefined) {
                 addIssue(issues, ValidationLevel.Error, "CAMERA_FADE_EXTRA_OPTIONS", "CAMERA fade cannot contain set options or a preset.");
@@ -1613,7 +1659,7 @@ namespace MCFunctionValidator {
         if (command.fadeTime != undefined || command.fadeColor != undefined) {
             addIssue(issues, ValidationLevel.Error, "CAMERA_SET_FADE_OPTIONS", "CAMERA set cannot use fade options.");
         }
-        if (command.useDefault && (command.position || command.rotation || command.facing)) {
+        if (command.useDefault && (command.position || command.rotation || command.facing || command.viewOffset || command.entityOffset)) {
             addIssue(issues, ValidationLevel.Error, "CAMERA_DEFAULT_CONFLICT", "CAMERA default cannot be combined with pos, rot or facing.");
         }
         if (command.facing && command.rotation) {
@@ -1630,11 +1676,19 @@ namespace MCFunctionValidator {
                     "CAMERA facing entity must resolve to a single entity; verify selector count in game.");
             } else addIssue(issues, ValidationLevel.Error, "CAMERA_FACING_INVALID", "CAMERA facing needs a position or an entity.");
         }
-        if (command.ease) {
-            if (!(command.ease.seconds >= 0) || !(command.ease.seconds <= 1e308) ||
-                command.ease.type < 0 || command.ease.type > 31 || command.ease.type % 1 != 0) {
-                addIssue(issues, ValidationLevel.Error, "CAMERA_EASE_INVALID", "CAMERA ease needs finite nonnegative seconds and a known easing type.");
-            }
+        if (command.ease) validateCameraEaseValue(command.ease, issues);
+        // Official Stable /camera set grammar has two non-interchangeable branches:
+        // position/facing/default OR rotation/offsets. Reject unsupported mixtures.
+        if ((command.viewOffset || command.entityOffset) && (command.position || command.facing)) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_SET_BRANCH_CONFLICT",
+                "pos/facing cannot be combined with view_offset/entity_offset.");
+        }
+        if (command.viewOffset) validateCameraOffsetNumbers(issues,
+            [command.viewOffset.x, command.viewOffset.y]);
+        if (command.entityOffset) validateCameraOffsetNumbers(issues,
+            [command.entityOffset.x, command.entityOffset.y, command.entityOffset.z]);
+        if (command.entityTarget != undefined || command.targetCenterOffset != undefined || command.fovValue != undefined) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_SET_EXTRA_ACTION_OPTIONS", "CAMERA set does not accept entity tracking or FOV values.");
         }
         if (!isCameraPresetId(command.presetId)) {
             addIssue(issues, ValidationLevel.Error, "CAMERA_PRESET_ID_INVALID",
