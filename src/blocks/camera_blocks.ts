@@ -394,7 +394,7 @@ namespace Command {
     //% block="CAMERA target $target command $action"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_selector_self"
-    //% action.shadow="mcfunction_camera_action_set_composed"
+    //% action.shadow="mcfunction_camera_action_set_grammar"
     export function cameraCommand(target: MCFunctionFields.SelectorValue, action: CameraActionValue): void {
         // Adapter creates the final AST with the main block's target.
         executeAudioCommand(MCFunctionBlocks.createCameraFromAction(
@@ -471,6 +471,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_action_set_compact
+    //% blockHidden=true
     //% group="CAMERA" weight=119
     //% block="set $preset || settings $settings"
     //% expandableArgumentMode="enabled"
@@ -496,6 +497,7 @@ namespace Command {
      * The legacy all-in-one options block remains hidden and loadable.
      */
     //% blockId=mcfunction_camera_set_config_default
+    //% blockHidden=true
     //% group="CAMERA" weight=113
     //% block="SET default"
     export function cameraSetConfigDefault(): CameraSetOptionsValue {
@@ -504,6 +506,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_config_position
+    //% blockHidden=true
     //% group="CAMERA" weight=112
     //% block="SET position $position || orientation $orientation"
     //% expandableArgumentMode="enabled"
@@ -518,6 +521,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_config_orientation
+    //% blockHidden=true
     //% group="CAMERA" weight=111
     //% block="SET orientation $orientation"
     //% orientation.shadow="mcfunction_camera_orientation_rotation"
@@ -528,6 +532,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_config_view_offset
+    //% blockHidden=true
     //% group="CAMERA" weight=110
     //% block="SET view offset $offset"
     //% offset.shadow="mcfunction_camera_view_offset"
@@ -537,6 +542,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_config_entity_offset
+    //% blockHidden=true
     //% group="CAMERA" weight=109
     //% block="SET entity offset $offset"
     //% offset.shadow="mcfunction_camera_entity_offset"
@@ -546,6 +552,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_config_offsets
+    //% blockHidden=true
     //% group="CAMERA" weight=108
     //% block="SET offsets view $viewOffset entity $entityOffset"
     //% inlineInputMode=external
@@ -560,6 +567,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_config_rotation_offsets
+    //% blockHidden=true
     //% group="CAMERA" weight=107
     //% block="SET rotation $rotation || view offset $viewOffset entity offset $entityOffset"
     //% expandableArgumentMode="enabled"
@@ -576,6 +584,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_action_set_composed
+    //% blockHidden=true
     //% group="CAMERA" weight=119
     //% block="set $preset || ease $ease settings $settings"
     //% expandableArgumentMode="enabled"
@@ -593,6 +602,194 @@ namespace Command {
             settings ? settings.useDefault : false,
             settings ? settings.viewOffset : undefined,
             settings ? settings.entityOffset : undefined));
+    }
+
+    /** CAMERA SET grammar reporters (official 28 variants = 14 options and
+     * their eased counterparts). Reporter outputs are typed AST options only.
+     * Historical IDs above stay hidden but callable for older workspaces.
+     */
+
+    //% blockId=mcfunction_camera_action_set_grammar
+    //% group="CAMERA" weight=119
+    //% block="set $preset || option $setting"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% preset.shadow="mcfunction_camera_preset_builtin"
+    // No setting shadow: leaving the socket empty is preset-only, not default.
+    export function cameraActionSetGrammar(preset: CameraPresetValue,
+        setting?: CameraSetOptionsValue): CameraActionValue {
+        return new CameraActionValue(MCFunctionAST.createCameraSetUnifiedCommand(
+            undefined, preset ? preset.presetId : undefined,
+            setting ? setting.ease : undefined,
+            setting ? setting.position : undefined,
+            setting ? setting.rotation : undefined,
+            setting ? setting.facing : undefined,
+            setting ? setting.useDefault : false,
+            setting ? setting.viewOffset : undefined,
+            setting ? setting.entityOffset : undefined));
+    }
+
+    //% blockId=mcfunction_camera_set_branch_default
+    //% group="CAMERA" weight=112
+    //% block="SET default"
+    export function cameraSetBranchDefault(): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined, undefined, true);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_pos
+    //% group="CAMERA" weight=111
+    //% block="SET pos $position"
+    //% position.shadow="mcfunction_position_absolute"
+    export function cameraSetBranchPos(position: MCFunctionPositionFields.PositionValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, position ? position.position : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_rot
+    //% group="CAMERA" weight=110
+    //% block="SET rot $rotation"
+    //% rotation.shadow="mcfunction_rotation_absolute"
+    export function cameraSetBranchRot(rotation: MCFunctionRotationFields.RotationValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, rotation ? rotation.rotation : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_facing_entity
+    //% group="CAMERA" weight=109
+    //% block="SET facing entity $facing"
+    //% facing.shadow="mcfunction_camera_facing_entity"
+    export function cameraSetBranchFacingEntity(facing: CameraFacingValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined,
+            facing ? facing.facing : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_facing_position
+    //% group="CAMERA" weight=108
+    //% block="SET facing position $facing"
+    //% facing.shadow="mcfunction_camera_facing_position"
+    export function cameraSetBranchFacingPosition(facing: CameraFacingValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined,
+            facing ? facing.facing : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_pos_rot
+    //% group="CAMERA" weight=107
+    //% block="SET pos $position rot $rotation"
+    //% inlineInputMode=external
+    //% position.shadow="mcfunction_position_absolute"
+    //% rotation.shadow="mcfunction_rotation_absolute"
+    export function cameraSetBranchPosRot(position: MCFunctionPositionFields.PositionValue,
+        rotation: MCFunctionRotationFields.RotationValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, position ? position.position : undefined,
+            rotation ? rotation.rotation : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_pos_facing_entity
+    //% group="CAMERA" weight=106
+    //% block="SET pos $position facing entity $facing"
+    //% inlineInputMode=external
+    //% position.shadow="mcfunction_position_absolute"
+    //% facing.shadow="mcfunction_camera_facing_entity"
+    export function cameraSetBranchPosFacingEntity(position: MCFunctionPositionFields.PositionValue,
+        facing: CameraFacingValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, position ? position.position : undefined,
+            undefined, facing ? facing.facing : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_pos_facing_position
+    //% group="CAMERA" weight=105
+    //% block="SET pos $position facing position $facing"
+    //% inlineInputMode=external
+    //% position.shadow="mcfunction_position_absolute"
+    //% facing.shadow="mcfunction_camera_facing_position"
+    export function cameraSetBranchPosFacingPosition(position: MCFunctionPositionFields.PositionValue,
+        facing: CameraFacingValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, position ? position.position : undefined,
+            undefined, facing ? facing.facing : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_view
+    //% group="CAMERA" weight=104
+    //% block="SET view offset $viewOffset"
+    //% viewOffset.shadow="mcfunction_camera_view_offset"
+    export function cameraSetBranchView(viewOffset: CameraViewOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined, undefined,
+            false, viewOffset ? viewOffset.value : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_entity
+    //% group="CAMERA" weight=103
+    //% block="SET entity offset $entityOffset"
+    //% entityOffset.shadow="mcfunction_camera_entity_offset"
+    export function cameraSetBranchEntity(entityOffset: CameraEntityOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined, undefined,
+            false, undefined, entityOffset ? entityOffset.value : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_view_entity
+    //% group="CAMERA" weight=102
+    //% block="SET view offset $viewOffset entity offset $entityOffset"
+    //% inlineInputMode=external
+    //% viewOffset.shadow="mcfunction_camera_view_offset"
+    //% entityOffset.shadow="mcfunction_camera_entity_offset"
+    export function cameraSetBranchViewEntity(viewOffset: CameraViewOffsetValue,
+        entityOffset: CameraEntityOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined, undefined,
+            false, viewOffset ? viewOffset.value : undefined,
+            entityOffset ? entityOffset.value : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_rot_view
+    //% group="CAMERA" weight=101
+    //% block="SET rot $rotation view offset $viewOffset"
+    //% inlineInputMode=external
+    //% rotation.shadow="mcfunction_rotation_absolute"
+    //% viewOffset.shadow="mcfunction_camera_view_offset"
+    export function cameraSetBranchRotView(rotation: MCFunctionRotationFields.RotationValue,
+        viewOffset: CameraViewOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined,
+            rotation ? rotation.rotation : undefined, undefined, false,
+            viewOffset ? viewOffset.value : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_rot_entity
+    //% group="CAMERA" weight=100
+    //% block="SET rot $rotation entity offset $entityOffset"
+    //% inlineInputMode=external
+    //% rotation.shadow="mcfunction_rotation_absolute"
+    //% entityOffset.shadow="mcfunction_camera_entity_offset"
+    export function cameraSetBranchRotEntity(rotation: MCFunctionRotationFields.RotationValue,
+        entityOffset: CameraEntityOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined,
+            rotation ? rotation.rotation : undefined, undefined, false, undefined,
+            entityOffset ? entityOffset.value : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_branch_rot_view_entity
+    //% group="CAMERA" weight=99
+    //% block="SET rot $rotation view offset $viewOffset entity offset $entityOffset"
+    //% inlineInputMode=external
+    //% rotation.shadow="mcfunction_rotation_absolute"
+    //% viewOffset.shadow="mcfunction_camera_view_offset"
+    //% entityOffset.shadow="mcfunction_camera_entity_offset"
+    export function cameraSetBranchRotViewEntity(rotation: MCFunctionRotationFields.RotationValue,
+        viewOffset: CameraViewOffsetValue, entityOffset: CameraEntityOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined,
+            rotation ? rotation.rotation : undefined, undefined, false,
+            viewOffset ? viewOffset.value : undefined,
+            entityOffset ? entityOffset.value : undefined);
+    }
+
+    /** Official ease preamble for any of the 14 supported SET branches. */
+    //% blockId=mcfunction_camera_set_branch_ease
+    //% group="CAMERA" weight=98
+    //% block="SET ease $ease then $setting"
+    //% inlineInputMode=external
+    //% ease.shadow="mcfunction_camera_ease"
+    export function cameraSetBranchEase(ease: CameraEaseValue,
+        setting: CameraSetOptionsValue): CameraSetOptionsValue {
+        if (!setting) return new CameraSetOptionsValue(ease ? ease.ease : undefined);
+        return new CameraSetOptionsValue(ease ? ease.ease : undefined,
+            setting.position, setting.rotation, setting.facing,
+            setting.useDefault, setting.viewOffset, setting.entityOffset);
     }
 
     //% blockId=mcfunction_camera_action_spline

@@ -64,7 +64,7 @@ assert.strictEqual(compiler.compileCommand(customNode),'camera @s set example:sk
 assert.ok(validator.validateCameraCommand(customNode).some(i=>i.code==='CAMERA_PRESET_CUSTOM'));
 // Check default shadow points to the new block, and old IDs survive hidden.
 const source=fs.readFileSync('src/blocks/camera_blocks.ts','utf8');
-assert.ok(source.includes('action.shadow="mcfunction_camera_action_set_composed"'));
+assert.ok(source.includes('action.shadow="mcfunction_camera_action_set_grammar"'));
 assert.ok(/blockId=mcfunction_camera_set_options\s*\n\s*\/\/\% blockHidden=true/.test(source));
 assert.ok(/blockId=mcfunction_camera_action_set_compact[\s\S]*?function cameraActionSetCompact/.test(source));
 console.log(`PASS: ${cases.length} CAMERA SET variants + custom preset, legacy block, and shadow refs.`);
