@@ -1,20 +1,43 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
-    /** Bind a typed CAMERA action to its player target, without compiling strings. */
+    /** Bind a typed CAMERA action to the selected player(s), using existing
+     * AST constructors rather than copying every optional field by hand.
+     * This prevents future properties from silently disappearing in the adapter.
+     * Unsupported/missing reporters produce an invalid AST for the validator.
+     */
     export function createCameraFromAction(target: MCFunctionAST.Selector,
         action: MCFunctionAST.CameraCommand): MCFunctionAST.CameraCommand {
         if (!action) return { kind: MCFunctionAST.CommandKind.Camera,
-            action: MCFunctionAST.CameraAction.Set, target: target };
-        return {
-            kind: MCFunctionAST.CommandKind.Camera,
-            action: action.action, target: target, presetId: action.presetId,
-            position: action.position, rotation: action.rotation, facing: action.facing,
-            ease: action.ease, useDefault: action.useDefault,
-            fadeTime: action.fadeTime, fadeColor: action.fadeColor,
-            viewOffset: action.viewOffset, entityOffset: action.entityOffset,
-            entityTarget: action.entityTarget, targetCenterOffset: action.targetCenterOffset,
-            fovValue: action.fovValue
-        };
+            action: <MCFunctionAST.CameraAction>-1, target: target };
+
+        if (action.action == MCFunctionAST.CameraAction.Set) {
+            return MCFunctionAST.createCameraSetUnifiedCommand(target, action.presetId,
+                action.ease, action.position, action.rotation, action.facing,
+                action.useDefault, action.viewOffset, action.entityOffset);
+        }
+        if (action.action == MCFunctionAST.CameraAction.Clear) {
+            return MCFunctionAST.createCameraClearCommand(target);
+        }
+        if (action.action == MCFunctionAST.CameraAction.Fade) {
+            return MCFunctionAST.createCameraFadeCommand(target, action.fadeTime, action.fadeColor);
+        }
+        if (action.action == MCFunctionAST.CameraAction.Attach ||
+            action.action == MCFunctionAST.CameraAction.Detach ||
+            action.action == MCFunctionAST.CameraAction.TargetEntity ||
+            action.action == MCFunctionAST.CameraAction.RemoveTarget) {
+            return MCFunctionAST.createCameraEntityCommand(action.action,
+                target, action.entityTarget, action.targetCenterOffset);
+        }
+        if (action.action == MCFunctionAST.CameraAction.FovSet ||
+            action.action == MCFunctionAST.CameraAction.FovClear) {
+            return MCFunctionAST.createCameraFovCommand(action.action,
+                target, action.fovValue, action.ease);
+        }
+        if (action.action == MCFunctionAST.CameraAction.PlaySpline) {
+            return MCFunctionAST.createCameraSplineCommand(target, action.splineName);
+        }
+        return { kind: MCFunctionAST.CommandKind.Camera,
+            action: action.action, target: target };
     }
 
     /** CAMERA blocks reuse the common Selector and canonical AST. */
