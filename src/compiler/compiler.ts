@@ -89,14 +89,15 @@ namespace MCFunctionCompiler {
     /** Official /camera forms: ease before pos, facing OR rot, fade is separate. */
     function compileCamera(command: MCFunctionAST.CameraCommand): string {
         let result = "camera " + compileSelector(command.target);
+        if (command.action == MCFunctionAST.CameraAction.PlaySpline) return result + " play_spline " + command.splineName;
         if (command.action == MCFunctionAST.CameraAction.Attach) return result + " attach_to_entity " + compileSelector(command.entityTarget);
         if (command.action == MCFunctionAST.CameraAction.Detach) return result + " detach_from_entity";
         if (command.action == MCFunctionAST.CameraAction.TargetEntity) {
-            result += " targetEntity " + compileSelector(command.entityTarget);
-            if (command.targetCenterOffset) result += " targetCenterOffset " + command.targetCenterOffset.x + " " + command.targetCenterOffset.y + " " + command.targetCenterOffset.z;
+            result += " target_entity " + compileSelector(command.entityTarget);
+            if (command.targetCenterOffset) result += " target_center_offset " + command.targetCenterOffset.x + " " + command.targetCenterOffset.y + " " + command.targetCenterOffset.z;
             return result;
         }
-        if (command.action == MCFunctionAST.CameraAction.RemoveTarget) return result + " removeTarget";
+        if (command.action == MCFunctionAST.CameraAction.RemoveTarget) return result + " remove_target";
         if (command.action == MCFunctionAST.CameraAction.FovSet || command.action == MCFunctionAST.CameraAction.FovClear) {
             result += command.action == MCFunctionAST.CameraAction.FovSet ? " fov_set " + command.fovValue : " fov_clear";
             if (command.ease) result += " " + command.ease.seconds + " " + compileCameraEaseType(command.ease.type);

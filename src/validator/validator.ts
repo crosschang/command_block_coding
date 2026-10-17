@@ -1588,13 +1588,32 @@ namespace MCFunctionValidator {
         if (command.action != MCFunctionAST.CameraAction.Set &&
             command.action != MCFunctionAST.CameraAction.Clear &&
             command.action != MCFunctionAST.CameraAction.Fade &&
-            (command.action < MCFunctionAST.CameraAction.Attach || command.action > MCFunctionAST.CameraAction.FovClear)) {
-            addIssue(issues, ValidationLevel.Error, "CAMERA_ACTION_INVALID", "CAMERA action must be set, clear or fade.");
+            (command.action < MCFunctionAST.CameraAction.Attach || command.action > MCFunctionAST.CameraAction.PlaySpline)) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_ACTION_INVALID", "Unsupported CAMERA action.");
             return issues;
         }
         let hasSetOptions = command.position != undefined || command.rotation != undefined ||
             command.facing != undefined || command.ease != undefined || command.useDefault == true ||
             command.viewOffset != undefined || command.entityOffset != undefined;
+        if (command.action == MCFunctionAST.CameraAction.PlaySpline) {
+            if (command.presetId != undefined || hasSetOptions || command.fadeTime != undefined ||
+                command.fadeColor != undefined || command.entityTarget != undefined || command.fovValue != undefined ||
+                command.targetCenterOffset != undefined) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_SPLINE_EXTRA_OPTIONS", "play_spline accepts only a spline name.");
+            }
+            if (!command.splineName || !command.splineName.trim()) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_SPLINE_NAME_REQUIRED", "play_spline requires a spline name.");
+            } else if (command.splineName.indexOf(" ") >= 0 || command.splineName.indexOf("\n") >= 0 ||
+                command.splineName.indexOf("\r") >= 0 || command.splineName.indexOf("\t") >= 0) {
+                addIssue(issues, ValidationLevel.Error, "CAMERA_SPLINE_NAME_INVALID", "Spline name must be one command token.");
+            }
+            addIssue(issues, ValidationLevel.Info, "CAMERA_SPLINE_PLATFORM",
+                "play_spline requires a registered behavior-pack spline; verify platform/version and experimental requirements.");
+            return issues;
+        }
+        if (command.splineName != undefined) {
+            addIssue(issues, ValidationLevel.Error, "CAMERA_SPLINE_UNEXPECTED", "Spline name is only valid for play_spline.");
+        }
         if (command.action >= MCFunctionAST.CameraAction.Attach) {
             if (command.presetId != undefined || command.position != undefined || command.rotation != undefined ||
                 command.facing != undefined || command.useDefault == true || command.fadeTime != undefined ||
@@ -1609,10 +1628,11 @@ namespace MCFunctionValidator {
                 addIssue(issues, ValidationLevel.Warning, "CAMERA_ENTITY_SINGLE", "CAMERA entity target must identify one entity.");
             }
             if (command.targetCenterOffset && command.action != MCFunctionAST.CameraAction.TargetEntity) {
-                addIssue(issues, ValidationLevel.Error, "CAMERA_TARGET_OFFSET_UNEXPECTED", "Only targetEntity accepts targetCenterOffset.");
+                addIssue(issues, ValidationLevel.Error, "CAMERA_TARGET_OFFSET_UNEXPECTED", "Only target_entity accepts target_center_offset.");
             }
             if (command.targetCenterOffset) validateCameraOffsetNumbers(issues,
                 [command.targetCenterOffset.x, command.targetCenterOffset.y, command.targetCenterOffset.z]);
+
             let isFov = command.action == MCFunctionAST.CameraAction.FovSet || command.action == MCFunctionAST.CameraAction.FovClear;
             if (command.action == MCFunctionAST.CameraAction.FovSet) {
                 if (!cameraFinite(command.fovValue)) addIssue(issues, ValidationLevel.Error, "CAMERA_FOV_INVALID", "FOV must be a finite number.");
@@ -1622,7 +1642,8 @@ namespace MCFunctionValidator {
             return issues;
         }
         if (command.action == MCFunctionAST.CameraAction.Fade) {
-            if (hasSetOptions || command.presetId != undefined) {
+            if (hasSetOptions || command.presetId != undefined || command.entityTarget != undefined ||
+                command.targetCenterOffset != undefined || command.fovValue != undefined) {
                 addIssue(issues, ValidationLevel.Error, "CAMERA_FADE_EXTRA_OPTIONS", "CAMERA fade cannot contain set options or a preset.");
             }
             if (command.fadeTime) {
@@ -1646,7 +1667,8 @@ namespace MCFunctionValidator {
             return issues;
         }
         if (command.action == MCFunctionAST.CameraAction.Clear) {
-            if (hasSetOptions || command.fadeTime != undefined || command.fadeColor != undefined) {
+            if (hasSetOptions || command.fadeTime != undefined || command.fadeColor != undefined ||
+                command.entityTarget != undefined || command.targetCenterOffset != undefined || command.fovValue != undefined) {
                 addIssue(issues, ValidationLevel.Error, "CAMERA_CLEAR_EXTRA_OPTIONS",
                     "CAMERA clear cannot include advanced options.");
             }
