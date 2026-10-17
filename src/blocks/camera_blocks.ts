@@ -394,7 +394,7 @@ namespace Command {
     //% block="CAMERA target $target command $action"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_selector_self"
-    //% action.shadow="mcfunction_camera_action_set_compact"
+    //% action.shadow="mcfunction_camera_action_set_composed"
     export function cameraCommand(target: MCFunctionFields.SelectorValue, action: CameraActionValue): void {
         // Adapter creates the final AST with the main block's target.
         executeAudioCommand(MCFunctionBlocks.createCameraFromAction(
@@ -448,6 +448,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_set_options
+    //% blockHidden=true
     //% group="CAMERA" weight=113
     //% block="camera SET options || ease $ease position $position orientation $orientation mode $mode view offset $viewOffset entity offset $entityOffset"
     //% expandableArgumentMode="enabled"
@@ -481,6 +482,111 @@ namespace Command {
         return new CameraActionValue(MCFunctionAST.createCameraSetUnifiedCommand(
             undefined, preset ? preset.presetId : undefined,
             settings ? settings.ease : undefined,
+            settings ? settings.position : undefined,
+            settings ? settings.rotation : undefined,
+            settings ? settings.facing : undefined,
+            settings ? settings.useDefault : false,
+            settings ? settings.viewOffset : undefined,
+            settings ? settings.entityOffset : undefined));
+    }
+
+    /** Compact SET composition: choose exactly one official grammar branch.
+     * Every reporter returns the existing CameraSetOptionsValue and reuses
+     * shared Position/Rotation/Facing types.  No command text is assembled.
+     * The legacy all-in-one options block remains hidden and loadable.
+     */
+    //% blockId=mcfunction_camera_set_config_default
+    //% group="CAMERA" weight=113
+    //% block="SET default"
+    export function cameraSetConfigDefault(): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined,
+            undefined, true);
+    }
+
+    //% blockId=mcfunction_camera_set_config_position
+    //% group="CAMERA" weight=112
+    //% block="SET position $position || orientation $orientation"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% position.shadow="mcfunction_position_absolute"
+    export function cameraSetConfigPosition(position: MCFunctionPositionFields.PositionValue,
+        orientation?: CameraOrientationValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined,
+            position ? position.position : undefined,
+            orientation ? orientation.rotation : undefined,
+            orientation ? orientation.facing : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_config_orientation
+    //% group="CAMERA" weight=111
+    //% block="SET orientation $orientation"
+    //% orientation.shadow="mcfunction_camera_orientation_rotation"
+    export function cameraSetConfigOrientation(orientation: CameraOrientationValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined,
+            orientation ? orientation.rotation : undefined,
+            orientation ? orientation.facing : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_config_view_offset
+    //% group="CAMERA" weight=110
+    //% block="SET view offset $offset"
+    //% offset.shadow="mcfunction_camera_view_offset"
+    export function cameraSetConfigViewOffset(offset: CameraViewOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined,
+            undefined, false, offset ? offset.value : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_config_entity_offset
+    //% group="CAMERA" weight=109
+    //% block="SET entity offset $offset"
+    //% offset.shadow="mcfunction_camera_entity_offset"
+    export function cameraSetConfigEntityOffset(offset: CameraEntityOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined,
+            undefined, false, undefined, offset ? offset.value : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_config_offsets
+    //% group="CAMERA" weight=108
+    //% block="SET offsets view $viewOffset entity $entityOffset"
+    //% inlineInputMode=external
+    //% viewOffset.shadow="mcfunction_camera_view_offset"
+    //% entityOffset.shadow="mcfunction_camera_entity_offset"
+    export function cameraSetConfigOffsets(viewOffset: CameraViewOffsetValue,
+        entityOffset: CameraEntityOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined, undefined,
+            undefined, false,
+            viewOffset ? viewOffset.value : undefined,
+            entityOffset ? entityOffset.value : undefined);
+    }
+
+    //% blockId=mcfunction_camera_set_config_rotation_offsets
+    //% group="CAMERA" weight=107
+    //% block="SET rotation $rotation || view offset $viewOffset entity offset $entityOffset"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% rotation.shadow="mcfunction_rotation_absolute"
+    export function cameraSetConfigRotationOffsets(rotation: MCFunctionRotationFields.RotationValue,
+        viewOffset?: CameraViewOffsetValue,
+        entityOffset?: CameraEntityOffsetValue): CameraSetOptionsValue {
+        return new CameraSetOptionsValue(undefined, undefined,
+            rotation ? rotation.rotation : undefined,
+            undefined, false,
+            viewOffset ? viewOffset.value : undefined,
+            entityOffset ? entityOffset.value : undefined);
+    }
+
+    //% blockId=mcfunction_camera_action_set_composed
+    //% group="CAMERA" weight=119
+    //% block="set $preset || ease $ease settings $settings"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% preset.shadow="mcfunction_camera_preset_builtin"
+    // No optional shadows: expanding the block must not silently enable ease/settings.
+    export function cameraActionSetComposed(preset: CameraPresetValue,
+        ease?: CameraEaseValue, settings?: CameraSetOptionsValue): CameraActionValue {
+        return new CameraActionValue(MCFunctionAST.createCameraSetUnifiedCommand(
+            undefined, preset ? preset.presetId : undefined,
+            ease ? ease.ease : undefined,
             settings ? settings.position : undefined,
             settings ? settings.rotation : undefined,
             settings ? settings.facing : undefined,
