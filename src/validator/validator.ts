@@ -1965,7 +1965,7 @@ namespace MCFunctionValidator {
                 addIssue(issues, ValidationLevel.Error, "CLEARSPAWNPOINT_DEFAULT_EXTRA", "Default clearspawnpoint takes no target.");
             }
             // Bedrock/Education accepts this in chat, but command blocks require a target.
-            addIssue(issues, ValidationLevel.Warning, "CLEARSPAWNPOINT_CONTEXT_TARGET", "Specify a player target when running clearspawnpoint from a command block.");
+            addIssue(issues, ValidationLevel.Warning, "CLEARSPAWNPOINT_CONTEXT_TARGET", "Omitted target clears the executing player in chat; command blocks require a target. Verify Preview separately.");
         } else if (command.mode == MCFunctionAST.ClearSpawnPointMode.Target) {
             appendIssues(issues, validatePlayerReference(command.target));
         } else {

@@ -40,6 +40,14 @@ FunctionFile.define("a8_clear_self", function () {
         MCFunctionFields.self(MCFunctionFields.noSelectorCondition())));
 });
 
+// Omitted target: canonical clearspawnpoint (no suffix).
+// In chat this affects the player who ran the command. Previous records do
+// NOT separately verify this form through new FunctionFile/Preview code.
+// Re-run a8_sp_abs before this independent test. A context WARNING is expected.
+FunctionFile.define("a8_clear_default", function () {
+    Command.clearSpawnPoint();
+});
+
 // Named-target round trip: verify common SELECTOR -> named player reporter.
 // Change "Steve" before testing this or the next named-target case.
 FunctionFile.define("a8_sp_named", function () {

@@ -63,15 +63,17 @@ namespace Command {
             target ? target.target : undefined, position ? position.position : undefined));
     }
 
-    /** Clear a player's personal spawn; keep a required target for command-block execution. */
+    /** Omitted target clears the executor's checkpoint where that form is supported. */
     //% blockId=command_clearspawnpoint
     //% group="SPAWNPOINT" weight=105
-    //% block="CLEARSPAWNPOINT target $target"
+    //% block="CLEARSPAWNPOINT || target $target"
+    //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_target_selector"
-    export function clearSpawnPoint(target: MCFunctionFields.TargetValue): void {
+    export function clearSpawnPoint(target?: MCFunctionFields.TargetValue): void {
         executeAudioCommand(MCFunctionBlocks.createClearSpawnPointCommand(
-            MCFunctionAST.ClearSpawnPointMode.Target, target ? target.target : undefined));
+            target ? MCFunctionAST.ClearSpawnPointMode.Target : MCFunctionAST.ClearSpawnPointMode.Default,
+            target ? target.target : undefined));
     }
 
     /** One expandable world-spawn block covers omitted and explicit positions. */

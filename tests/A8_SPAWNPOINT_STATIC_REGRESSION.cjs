@@ -131,10 +131,10 @@ assert.ok(blocks.includes('//% blockId=command_spawnpoint_shared') &&
     blocks.includes('target.shadow="mcfunction_target_selector"'),
     'New SPAWNPOINT block must accept SELECTOR common target reporter');
 assert.ok(blocks.includes('//% blockId=command_clearspawnpoint') &&
-    blocks.includes('//% block="CLEARSPAWNPOINT target $target"') &&
+    blocks.includes('//% block="CLEARSPAWNPOINT || target $target"') &&
     blocks.includes('//% group="SPAWNPOINT" weight=105'),
     'CLEARSPAWNPOINT must be one visible block in the existing SPAWNPOINT group');
-assert.strictEqual((blocks.match(/\/\/% expandableArgumentMode="enabled"/g) || []).length, 3,
+assert.strictEqual((blocks.match(/\/\/% expandableArgumentMode="enabled"/g) || []).length, 4,
     'New and legacy expandable A8 blocks must remain defined');
 
 // Public block dispatch regression: make sure compact wrappers still produce
@@ -164,6 +164,7 @@ const compactCases = [
     ['shared selector position', () => publicBlocks.spawnpointShared(sharedSelectorTarget, inputPosition), 'spawnpoint @s 10 64 -20'],
     ['shared named', () => publicBlocks.spawnpointShared(sharedNamedTarget), 'spawnpoint "Alex Rider"'],
     ['shared named position', () => publicBlocks.spawnpointShared(sharedNamedTarget, inputPosition), 'spawnpoint "Alex Rider" 10 64 -20'],
+    ['clear omitted target', () => publicBlocks.clearSpawnPoint(), 'clearspawnpoint'],
     ['clear shared selector', () => publicBlocks.clearSpawnPoint(sharedSelectorTarget), 'clearspawnpoint @s'],
     ['clear shared named', () => publicBlocks.clearSpawnPoint(sharedNamedTarget), 'clearspawnpoint "Alex Rider"']
 ];
@@ -181,8 +182,9 @@ publicBlocks.spawnpointShared(undefined, inputPosition);
 assert.ok(validator.validateCommand(dispatched).some(issue => issue.code === 'PLAYER_TARGET_MISSING'),
     'New SPAWNPOINT coordinates without target must be rejected');
 publicBlocks.clearSpawnPoint(undefined);
-assert.ok(validator.validateCommand(dispatched).some(issue => issue.code === 'PLAYER_TARGET_MISSING'),
-    'CLEARSPAWNPOINT target input must not silently turn into chat-only no-target form');
+assert.strictEqual(dispatched.mode, CS.Default, 'Omitted optional target must be an explicit default-mode AST');
+assert.ok(validator.validateCommand(dispatched).some(issue => issue.code === 'CLEARSPAWNPOINT_CONTEXT_TARGET'),
+    'No-target CLEARSPAWNPOINT must warn about command-block Preview context');
 
 console.log('PASS: ' + valid.length + ' canonical commands, ' + invalid.length +
     ' validator negatives, ' + compactCases.length + ' public block forms (including CLEARSPAWNPOINT), 10 compatible A8 blocks hidden, pxt.json registration and version.');

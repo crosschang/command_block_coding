@@ -37,6 +37,11 @@ FunctionFile.define("a8_sp_named_at", function () {
 
 // Clear the per-player spawn checkpoint set above; do not use in a live world.
 // In Preview/command-block context, the explicit target is important.
+// Chat-style omitted target is supported by the AST; compare Preview separately.
+FunctionFile.define("a8_clear_default", function () {
+    Command.clearSpawnPoint();
+});
+
 FunctionFile.define("a8_clear_self", function () {
     Command.clearSpawnPoint(MCFunctionFields.targetSelector(
         MCFunctionFields.self(MCFunctionFields.noSelectorCondition())));
