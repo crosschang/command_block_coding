@@ -56,12 +56,33 @@ namespace MCFunctionDiagnostics {
         if (chatRegistered) return;
         chatRegistered = true;
 
-        // One handler supports both ? (first page) and ? N (page N).
-        // MakeCode supplies 0 when the numeric argument is omitted. Also
-        // accept undefined to keep local test harnesses and hosts tolerant.
-        player.onChat(allDiagnosticsChatCommandName(), function (page: number) {
-            if (!page) showAll();
-            else showPage(page);
+        // `player.onChat("?", function (page: number) { ... })` REQUIRES
+        // exactly one numeric argument in Minecraft Education. Bare `?`
+        // otherwise raises a chat syntax error before this code can run.
+        // Register the core handler (which has no argument-arity contract)
+        // and read the optional page argument ourselves.
+        player.onChatCommandCore(allDiagnosticsChatCommandName(), function () {
+            let args = player.getChatArgs(allDiagnosticsChatCommandName());
+            if (!args || args.length == 0) {
+                showAll();
+                return;
+            }
+            if (args.length == 1) {
+                // Compare to the prepared page indexes. Avoid parseInt
+                // compatibility assumptions or per-character parsing on PXT.
+                // `? 1` also works when no functions have been defined yet.
+                if (args[0] == "1") {
+                    showPage(1);
+                    return;
+                }
+                for (let i = 1; i < cachedPageTexts.length; i++) {
+                    if (args[0] == "" + (i + 1)) {
+                        showPage(i + 1);
+                        return;
+                    }
+                }
+            }
+            showPage(0); // Existing localized invalid-page message.
         });
     }
 
