@@ -83,8 +83,8 @@ namespace FunctionFile {
             let reservedIssues: MCFunctionValidator.ValidationIssue[] = [{
                 level: MCFunctionValidator.ValidationLevel.Error,
                 code: "FUNCTION_NAME_RESERVED",
-                message: name == MCFunctionDiagnostics.allDiagnosticsChatCommandName()
-                    ? "mcfunction name ? is reserved for the project diagnostic viewer."
+                message: MCFunctionDiagnostics.isReservedChatCommand(name)
+                    ? "mcfunction name " + name + " is reserved for the project diagnostic viewer."
                     : "mcfunction name cbi_rules is reserved for the Gamerule Registry viewer."
             }];
 

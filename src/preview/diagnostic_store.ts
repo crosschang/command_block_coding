@@ -29,6 +29,9 @@ namespace MCFunctionDiagnostics {
     let records: DiagnosticRecord[] = [];
     let knownFunctionNames: string[] = [];
     let chatRegistered = false;
+    // Page events stay registered for this MakeCode run, even if diagnostics
+    // later shrink. Never register the same ?N command twice.
+    let highestRegisteredPage = 0;
 
     // Derived PREVIEW presentation cache. The original DiagnosticRecords remain
     // authoritative; cache values never enter the AST or the .mcfunction output.
@@ -44,46 +47,51 @@ namespace MCFunctionDiagnostics {
     }
 
     export function isReservedChatCommand(name: string): boolean {
-        // cbi_page was retired: only the project viewer command is reserved.
-        return name == allDiagnosticsChatCommandName();
+        if (name == allDiagnosticsChatCommandName()) return true;
+        // A ? followed entirely by decimal digits belongs to the page viewer.
+        // Validate only on function definition/registration, never during chat
+        // queries; ordinary function names retain their previous behavior.
+        if (!name || name.length < 2 || name.charAt(0) != "?") return false;
+        for (let i = 1; i < name.length; i++) {
+            if ("0123456789".indexOf(name.charAt(i), 0) < 0) return false;
+        }
+        return true;
+    }
+
+    /** Register a number-specific chat event without requiring any chat args. */
+    function registerPageChat(page: number): void {
+        player.onChat("?" + page, function () {
+            showPage(page);
+        });
     }
 
     /**
-     * Register the diagnostic viewer exactly once for this MakeCode program run.
-     * FunctionFile.define() may call this many times safely.
+     * Register only pages that actually exist in the current cached summary.
+     * Called after cache changes, not when the player asks to see a page.
+     * Registrations are monotonic because MakeCode does not unregister onChat.
+     */
+    function ensurePageChatsRegistered(): void {
+        if (!chatRegistered) return;
+        let pages = cachedPageTexts.length;
+        if (pages < 1) pages = 1;
+        for (let page = highestRegisteredPage + 1; page <= pages; page++) {
+            registerPageChat(page);
+            highestRegisteredPage = page;
+        }
+    }
+
+    /**
+     * Register the global viewer once. The literal ? (page one) has zero
+     * arguments, and ?1, ?2, ?10... are independent zero-argument commands.
+     * This avoids Education's required-argument error for ? N.
      */
     export function ensureChatRegistered(): void {
         if (chatRegistered) return;
         chatRegistered = true;
-
-        // `player.onChat("?", function (page: number) { ... })` REQUIRES
-        // exactly one numeric argument in Minecraft Education. Bare `?`
-        // otherwise raises a chat syntax error before this code can run.
-        // Register the core handler (which has no argument-arity contract)
-        // and read the optional page argument ourselves.
-        player.onChatCommandCore(allDiagnosticsChatCommandName(), function () {
-            let args = player.getChatArgs(allDiagnosticsChatCommandName());
-            if (!args || args.length == 0) {
-                showAll();
-                return;
-            }
-            if (args.length == 1) {
-                // Compare to the prepared page indexes. Avoid parseInt
-                // compatibility assumptions or per-character parsing on PXT.
-                // `? 1` also works when no functions have been defined yet.
-                if (args[0] == "1") {
-                    showPage(1);
-                    return;
-                }
-                for (let i = 1; i < cachedPageTexts.length; i++) {
-                    if (args[0] == "" + (i + 1)) {
-                        showPage(i + 1);
-                        return;
-                    }
-                }
-            }
-            showPage(0); // Existing localized invalid-page message.
+        player.onChat(allDiagnosticsChatCommandName(), function () {
+            showAll();
         });
+        ensurePageChatsRegistered();
     }
 
     function rememberFunction(name: string): void {
@@ -215,10 +223,10 @@ namespace MCFunctionDiagnostics {
         if (key == "blocked") return "execution blocked.";
         if (key == "noProblems") return "no problems found.";
         if (key == "useAll") return "for project diagnostics.";
-        if (key == "allHint") return "All: ? or ? N. One: functionName? (no space).";
+        if (key == "allHint") return "All: ? or ?1, ?2... One: functionName? (no space).";
         if (key == "diagTitle") return "DIAG";
         if (key == "pageTitle") return "page";
-        if (key == "nextPage") return "Next: ? ";
+        if (key == "nextPage") return "Next: ?";
         if (key == "detailsHint") return "Details: functionName?";
         if (key == "invalidPage") return "Invalid page. Choose 1..";
         return key;
@@ -548,6 +556,9 @@ namespace MCFunctionDiagnostics {
             else out += ". " + uiText("detailsHint");
             cachedPageTexts.push(out);
         }
+        // New diagnostic pages become directly addressable as ?2, ?3, ...
+        // without changing the already working bare-? event.
+        ensurePageChatsRegistered();
     }
 
     /** Page reads are O(1) apart from a bounded display adapter call. */
@@ -559,7 +570,7 @@ namespace MCFunctionDiagnostics {
             return;
         }
         if (page < 1 || page > pages || page != Math.floor(page)) {
-            emitCompactLine(uiText("diagTitle") + " " + uiText("invalidPage") + pages + " Use ? N.");
+            emitCompactLine(uiText("diagTitle") + " " + uiText("invalidPage") + pages + " Use ?1..?" + pages + ".");
             return;
         }
         emitCompactLine(cachedPageTexts[page - 1]);
