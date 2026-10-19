@@ -116,7 +116,7 @@ namespace MCFunctionCompiler {
         }
         let name = target.name || "";
         if (name.indexOf(" ") >= 0 || name.indexOf("\t") >= 0 || name.indexOf('"') >= 0) {
-            return '"' + name.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+            return quoteCommandString(name);
         }
         return name;
     }
