@@ -2,6 +2,12 @@
 namespace MCFunctionCompiler {
     export function compileCommand(command: MCFunctionAST.CommandNode): string {
         switch (command.kind) {
+            case MCFunctionAST.CommandKind.SpawnPoint:
+                return compileSpawnPoint(<MCFunctionAST.SpawnPointCommand>command);
+
+            case MCFunctionAST.CommandKind.SetWorldSpawn:
+                return compileSetWorldSpawn(<MCFunctionAST.SetWorldSpawnCommand>command);
+
             case MCFunctionAST.CommandKind.Raw:
                 return compileRaw(<MCFunctionAST.RawCommand>command);
 
@@ -84,6 +90,35 @@ namespace MCFunctionCompiler {
             default:
                 return "";
         }
+    }
+
+    /** Command lines have no leading slash in a .mcfunction. */
+    function compileSpawnPoint(command: MCFunctionAST.SpawnPointCommand): string {
+        let result = "spawnpoint";
+        if (command.mode != MCFunctionAST.SpawnPointMode.Default && command.target) {
+            result += " " + compilePlayerTarget(command.target);
+        }
+        if (command.mode == MCFunctionAST.SpawnPointMode.TargetAt && command.position) {
+            result += " " + compilePosition(command.position);
+        }
+        return result;
+    }
+
+    function compileSetWorldSpawn(command: MCFunctionAST.SetWorldSpawnCommand): string {
+        return command.mode == MCFunctionAST.SetWorldSpawnMode.At && command.position
+            ? "setworldspawn " + compilePosition(command.position) : "setworldspawn";
+    }
+
+    /** Common target serializer for selectors and literal player names. */
+    export function compilePlayerTarget(target: MCFunctionAST.PlayerTarget): string {
+        if (target.kind == MCFunctionAST.PlayerTargetKind.Selector) {
+            return compileSelector(target.selector);
+        }
+        let name = target.name || "";
+        if (name.indexOf(" ") >= 0 || name.indexOf("\t") >= 0 || name.indexOf('"') >= 0) {
+            return '"' + name.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+        }
+        return name;
     }
 
     /** Official /camera forms: ease before pos, facing OR rot, fade is separate. */

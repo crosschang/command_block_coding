@@ -13,6 +13,7 @@
         "src/ast/range.ts",
         "src/ast/slot.ts",
         "src/ast/selector.ts",
+        "src/ast/player_target.ts",
         "src/ast/position.ts",
         "src/ast/block.ts",
         "src/ast/rotation.ts",
@@ -60,6 +61,7 @@
         "commands/give.ts",
         "commands/summon.ts",
         "commands/teleport.ts",
+        "commands/spawnpoint.ts",
         "src/blocks/command_adapter.ts",
         "src/compiler/compiler.ts",
         "src/registry/registry_lookup.generated.ts",
@@ -132,6 +134,7 @@
         "src/blocks/camerashake_blocks.ts",
         "commands/simple_commands.ts",
         "src/blocks/simple_command_blocks.ts",
+        "src/blocks/spawnpoint_blocks.ts",
         "docs/CHANGELOG_SIMPLE_BATCH_0.0.48_2026-10-14.md",
         "commands/camera.ts",
         "src/blocks/camera_blocks.ts"

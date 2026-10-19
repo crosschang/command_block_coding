@@ -1889,8 +1889,83 @@ namespace MCFunctionValidator {
         return issues;
     }
 
+    /** Shared player target: retain a structured Selector or a literal player name. */
+    export function validatePlayerReference(target: MCFunctionAST.PlayerTarget): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (!target) {
+            addIssue(issues, ValidationLevel.Error, "PLAYER_TARGET_MISSING", "Player target is required.");
+            return issues;
+        }
+        if (target.kind == MCFunctionAST.PlayerTargetKind.Selector) {
+            if (!target.selector || target.name != undefined) {
+                addIssue(issues, ValidationLevel.Error, "PLAYER_TARGET_SELECTOR_INVALID", "Selector player target must contain only a Selector.");
+            } else {
+                appendIssues(issues, validateSelector(target.selector));
+                if (target.selector.base == MCFunctionAST.SelectorBase.AllEntities ||
+                    target.selector.base == MCFunctionAST.SelectorBase.Initiator) {
+                    addIssue(issues, ValidationLevel.Warning, "PLAYER_TARGET_SELECTOR_CONTEXT", "The selector must resolve to players and may need a special execution context.");
+                }
+            }
+        } else if (target.kind == MCFunctionAST.PlayerTargetKind.Name) {
+            if (target.selector != undefined || !target.name || target.name.trim().length == 0) {
+                addIssue(issues, ValidationLevel.Error, "PLAYER_TARGET_NAME_INVALID", "A named player target requires a nonempty name and no Selector.");
+            } else if (target.name.indexOf("\n") >= 0 || target.name.indexOf("\r") >= 0) {
+                addIssue(issues, ValidationLevel.Error, "PLAYER_TARGET_NAME_LINE_BREAK", "Player names cannot contain line breaks.");
+            } else if (target.name.charAt(0) == "@") {
+                addIssue(issues, ValidationLevel.Error, "PLAYER_TARGET_USE_SELECTOR", "Use a Selector block for @a, @p, @s, and other selectors.");
+            }
+        } else {
+            addIssue(issues, ValidationLevel.Error, "PLAYER_TARGET_KIND_INVALID", "Unknown player target type.");
+        }
+        return issues;
+    }
+
+    export function validateSpawnPointCommand(command: MCFunctionAST.SpawnPointCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (command.mode != MCFunctionAST.SpawnPointMode.Default &&
+            command.mode != MCFunctionAST.SpawnPointMode.TargetCurrent &&
+            command.mode != MCFunctionAST.SpawnPointMode.TargetAt) {
+            addIssue(issues, ValidationLevel.Error, "SPAWNPOINT_MODE_INVALID", "Unknown spawnpoint form.");
+        }
+        if (command.mode == MCFunctionAST.SpawnPointMode.Default) {
+            if (command.target || command.position) {
+                addIssue(issues, ValidationLevel.Error, "SPAWNPOINT_DEFAULT_EXTRA", "Default spawnpoint takes no target or position.");
+            }
+        } else {
+            appendIssues(issues, validatePlayerReference(command.target));
+        }
+        if (command.mode == MCFunctionAST.SpawnPointMode.TargetCurrent && command.position) {
+            addIssue(issues, ValidationLevel.Error, "SPAWNPOINT_UNEXPECTED_POSITION", "Target-current spawnpoint cannot include a position.");
+        }
+        if (command.mode == MCFunctionAST.SpawnPointMode.TargetAt && !command.position) {
+            addIssue(issues, ValidationLevel.Error, "SPAWNPOINT_POSITION_REQUIRED", "A position is required for this spawnpoint form.");
+        }
+        if (command.position) appendIssues(issues, validatePosition(command.position));
+        return issues;
+    }
+
+    export function validateSetWorldSpawnCommand(command: MCFunctionAST.SetWorldSpawnCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (command.mode == MCFunctionAST.SetWorldSpawnMode.Current) {
+            if (command.position) addIssue(issues, ValidationLevel.Error, "SETWORLDSPAWN_UNEXPECTED_POSITION", "Current-position form takes no position.");
+        } else if (command.mode == MCFunctionAST.SetWorldSpawnMode.At) {
+            if (!command.position) addIssue(issues, ValidationLevel.Error, "SETWORLDSPAWN_POSITION_REQUIRED", "A position is required for this form.");
+        } else {
+            addIssue(issues, ValidationLevel.Error, "SETWORLDSPAWN_MODE_INVALID", "Unknown setworldspawn form.");
+        }
+        if (command.position) appendIssues(issues, validatePosition(command.position));
+        return issues;
+    }
+
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
+
+        if (command.kind == MCFunctionAST.CommandKind.SpawnPoint) {
+            appendIssues(issues, validateSpawnPointCommand(<MCFunctionAST.SpawnPointCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.SetWorldSpawn) {
+            appendIssues(issues, validateSetWorldSpawnCommand(<MCFunctionAST.SetWorldSpawnCommand>command));
+        }
 
         if (command.kind == MCFunctionAST.CommandKind.Raw) {
             let raw = <MCFunctionAST.RawCommand>command;

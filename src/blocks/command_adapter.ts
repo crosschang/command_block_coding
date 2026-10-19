@@ -1,5 +1,17 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    /** A8 spawn commands reuse the common target and position ASTs. */
+    export function createSpawnPointCommand(mode: MCFunctionAST.SpawnPointMode,
+        target?: MCFunctionAST.PlayerTarget,
+        position?: MCFunctionAST.Position): MCFunctionAST.SpawnPointCommand {
+        return MCFunctionAST.createSpawnPointCommand(mode, target, position);
+    }
+
+    export function createSetWorldSpawnCommand(mode: MCFunctionAST.SetWorldSpawnMode,
+        position?: MCFunctionAST.Position): MCFunctionAST.SetWorldSpawnCommand {
+        return MCFunctionAST.createSetWorldSpawnCommand(mode, position);
+    }
+
     /** Bind a typed CAMERA action to the selected player(s), using existing
      * AST constructors rather than copying every optional field by hand.
      * This prevents future properties from silently disappearing in the adapter.

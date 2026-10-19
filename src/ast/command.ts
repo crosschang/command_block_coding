@@ -31,7 +31,9 @@ namespace MCFunctionAST {
         Difficulty = 24,
         Hud = 25,
         InputPermission = 26,
-        Camera = 27
+        Camera = 27,
+        SpawnPoint = 28,
+        SetWorldSpawn = 29
     }
 
     export interface CommandNode {
