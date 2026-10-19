@@ -85,8 +85,6 @@ namespace FunctionFile {
                 code: "FUNCTION_NAME_RESERVED",
                 message: name == MCFunctionDiagnostics.allDiagnosticsChatCommandName()
                     ? "mcfunction name ? is reserved for the project diagnostic viewer."
-                    : name == "cbi_page"
-                    ? "mcfunction name cbi_page is reserved for the paged diagnostic viewer."
                     : "mcfunction name cbi_rules is reserved for the Gamerule Registry viewer."
             }];
 

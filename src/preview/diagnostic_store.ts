@@ -44,7 +44,8 @@ namespace MCFunctionDiagnostics {
     }
 
     export function isReservedChatCommand(name: string): boolean {
-        return name == allDiagnosticsChatCommandName() || name == "cbi_page";
+        // cbi_page was retired: only the project viewer command is reserved.
+        return name == allDiagnosticsChatCommandName();
     }
 
     /**
@@ -55,13 +56,12 @@ namespace MCFunctionDiagnostics {
         if (chatRegistered) return;
         chatRegistered = true;
 
-        // Register only the short project diagnostic command.
-        player.onChat(allDiagnosticsChatCommandName(), function () {
-            showAll();
-        });
-        // Extra pages use one numeric-argument handler, not many chat handlers.
-        player.onChat("cbi_page", function (page: number) {
-            showPage(page);
+        // One handler supports both ? (first page) and ? N (page N).
+        // MakeCode supplies 0 when the numeric argument is omitted. Also
+        // accept undefined to keep local test harnesses and hosts tolerant.
+        player.onChat(allDiagnosticsChatCommandName(), function (page: number) {
+            if (!page) showAll();
+            else showPage(page);
         });
     }
 
@@ -194,10 +194,10 @@ namespace MCFunctionDiagnostics {
         if (key == "blocked") return "execution blocked.";
         if (key == "noProblems") return "no problems found.";
         if (key == "useAll") return "for project diagnostics.";
-        if (key == "allHint") return "All: ?. One: functionName? (no space).";
+        if (key == "allHint") return "All: ? or ? N. One: functionName? (no space).";
         if (key == "diagTitle") return "DIAG";
         if (key == "pageTitle") return "page";
-        if (key == "nextPage") return "Next: cbi_page ";
+        if (key == "nextPage") return "Next: ? ";
         if (key == "detailsHint") return "Details: functionName?";
         if (key == "invalidPage") return "Invalid page. Choose 1..";
         return key;
@@ -538,7 +538,7 @@ namespace MCFunctionDiagnostics {
             return;
         }
         if (page < 1 || page > pages || page != Math.floor(page)) {
-            emitCompactLine(uiText("diagTitle") + " " + uiText("invalidPage") + pages + " via cbi_page N.");
+            emitCompactLine(uiText("diagTitle") + " " + uiText("invalidPage") + pages + " Use ? N.");
             return;
         }
         emitCompactLine(cachedPageTexts[page - 1]);

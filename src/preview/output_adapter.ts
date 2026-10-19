@@ -42,23 +42,56 @@ namespace MCFunctionPreview {
         );
     }
 
-    /** Escape text for a JSON rawtext text component. */
+    /**
+     * Escape text for a JSON rawtext text component.
+     *
+     * PERF (Education): avoid testing five escape conditions for every ordinary
+     * character. Use MakeCode-supported indexOf() to skip safe substrings, and
+     * escape only actual special characters. This preserves the exact output
+     * of the previous character-by-character serializer.
+     *
+     * Do not use String.replace()/lastIndexOf() here; compatibility with PXT
+     * is intentionally limited to indexOf(), substr(), and charAt().
+     */
     export function previewEscapeJsonText(value: string): string {
+        // Most Preview notices are plain ASCII without JSON escape characters.
+        // The fast path also preserves non-ASCII text (e.g. future translations).
+        if (value.indexOf("\\", 0) < 0 &&
+            value.indexOf("\"", 0) < 0 &&
+            value.indexOf("\n", 0) < 0 &&
+            value.indexOf("\r", 0) < 0 &&
+            value.indexOf("\t", 0) < 0) {
+            return value;
+        }
+
         let result = "";
-        for (let i = 0; i < value.length; i++) {
-            let ch = value.charAt(i);
-            if (ch == "\\" || ch == "\"") {
-                result = result + "\\";
+        let start = 0;
+        while (start < value.length) {
+            // Find the first character which requires a JSON escape.
+            let next = value.length;
+            let pos = value.indexOf("\\", start);
+            if (pos >= 0 && pos < next) next = pos;
+            pos = value.indexOf("\"", start);
+            if (pos >= 0 && pos < next) next = pos;
+            pos = value.indexOf("\n", start);
+            if (pos >= 0 && pos < next) next = pos;
+            pos = value.indexOf("\r", start);
+            if (pos >= 0 && pos < next) next = pos;
+            pos = value.indexOf("\t", start);
+            if (pos >= 0 && pos < next) next = pos;
+
+            if (next > start) {
+                result += value.substr(start, next - start);
             }
-            if (ch == "\n") {
-                result = result + "\\n";
-            } else if (ch == "\r") {
-                result = result + "\\r";
-            } else if (ch == "\t") {
-                result = result + "\\t";
-            } else {
-                result = result + ch;
-            }
+            if (next == value.length) break;
+
+            let ch = value.charAt(next);
+            if (ch == "\\") result += "\\\\";
+            else if (ch == "\"") result += "\\\"";
+            else if (ch == "\n") result += "\\n";
+            else if (ch == "\r") result += "\\r";
+            else result += "\\t";
+            start = next + 1;
         }
         return result;
     }
