@@ -1,4 +1,4 @@
-/** A8 MakeCode public blocks: spawnpoint and setworldspawn. */
+/** A8 MakeCode public blocks: spawnpoint, clearspawnpoint and setworldspawn. */
 namespace Command {
     /** A typed target reporter keeps selector and named-player ASTs distinct. */
     export class SpawnPointTargetValue {
@@ -61,6 +61,17 @@ namespace Command {
             target ? MCFunctionAST.SpawnPointMode.TargetCurrent : MCFunctionAST.SpawnPointMode.Default;
         executeAudioCommand(MCFunctionBlocks.createSpawnPointCommand(mode,
             target ? target.target : undefined, position ? position.position : undefined));
+    }
+
+    /** Clear a player's personal spawn; keep a required target for command-block execution. */
+    //% blockId=command_clearspawnpoint
+    //% group="SPAWNPOINT" weight=105
+    //% block="CLEARSPAWNPOINT target $target"
+    //% inlineInputMode=external
+    //% target.shadow="mcfunction_target_selector"
+    export function clearSpawnPoint(target: MCFunctionFields.TargetValue): void {
+        executeAudioCommand(MCFunctionBlocks.createClearSpawnPointCommand(
+            MCFunctionAST.ClearSpawnPointMode.Target, target ? target.target : undefined));
     }
 
     /** One expandable world-spawn block covers omitted and explicit positions. */

@@ -1958,6 +1958,22 @@ namespace MCFunctionValidator {
         return issues;
     }
 
+    export function validateClearSpawnPointCommand(command: MCFunctionAST.ClearSpawnPointCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (command.mode == MCFunctionAST.ClearSpawnPointMode.Default) {
+            if (command.target) {
+                addIssue(issues, ValidationLevel.Error, "CLEARSPAWNPOINT_DEFAULT_EXTRA", "Default clearspawnpoint takes no target.");
+            }
+            // Bedrock/Education accepts this in chat, but command blocks require a target.
+            addIssue(issues, ValidationLevel.Warning, "CLEARSPAWNPOINT_CONTEXT_TARGET", "Specify a player target when running clearspawnpoint from a command block.");
+        } else if (command.mode == MCFunctionAST.ClearSpawnPointMode.Target) {
+            appendIssues(issues, validatePlayerReference(command.target));
+        } else {
+            addIssue(issues, ValidationLevel.Error, "CLEARSPAWNPOINT_MODE_INVALID", "Unknown clearspawnpoint form.");
+        }
+        return issues;
+    }
+
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
 
@@ -1966,6 +1982,9 @@ namespace MCFunctionValidator {
         }
         if (command.kind == MCFunctionAST.CommandKind.SetWorldSpawn) {
             appendIssues(issues, validateSetWorldSpawnCommand(<MCFunctionAST.SetWorldSpawnCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.ClearSpawnPoint) {
+            appendIssues(issues, validateClearSpawnPointCommand(<MCFunctionAST.ClearSpawnPointCommand>command));
         }
 
         if (command.kind == MCFunctionAST.CommandKind.Raw) {

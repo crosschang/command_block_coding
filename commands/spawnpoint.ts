@@ -11,6 +11,11 @@ namespace MCFunctionAST {
         At = 1
     }
 
+    export enum ClearSpawnPointMode {
+        Default = 0,
+        Target = 1
+    }
+
     export interface SpawnPointCommand extends CommandNode {
         mode: SpawnPointMode;
         /** Omitted player means the executor. */
@@ -23,6 +28,11 @@ namespace MCFunctionAST {
         position?: Position;
     }
 
+    export interface ClearSpawnPointCommand extends CommandNode {
+        mode: ClearSpawnPointMode;
+        target?: PlayerTarget;
+    }
+
     export function createSpawnPointCommand(mode: SpawnPointMode, target?: PlayerTarget,
         position?: Position): SpawnPointCommand {
         return { kind: CommandKind.SpawnPoint, mode: mode, target: target, position: position };
@@ -31,5 +41,10 @@ namespace MCFunctionAST {
     export function createSetWorldSpawnCommand(mode: SetWorldSpawnMode,
         position?: Position): SetWorldSpawnCommand {
         return { kind: CommandKind.SetWorldSpawn, mode: mode, position: position };
+    }
+
+    export function createClearSpawnPointCommand(mode: ClearSpawnPointMode,
+        target?: PlayerTarget): ClearSpawnPointCommand {
+        return { kind: CommandKind.ClearSpawnPoint, mode: mode, target: target };
     }
 }

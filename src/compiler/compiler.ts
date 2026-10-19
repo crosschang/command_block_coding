@@ -8,6 +8,9 @@ namespace MCFunctionCompiler {
             case MCFunctionAST.CommandKind.SetWorldSpawn:
                 return compileSetWorldSpawn(<MCFunctionAST.SetWorldSpawnCommand>command);
 
+            case MCFunctionAST.CommandKind.ClearSpawnPoint:
+                return compileClearSpawnPoint(<MCFunctionAST.ClearSpawnPointCommand>command);
+
             case MCFunctionAST.CommandKind.Raw:
                 return compileRaw(<MCFunctionAST.RawCommand>command);
 
@@ -107,6 +110,11 @@ namespace MCFunctionCompiler {
     function compileSetWorldSpawn(command: MCFunctionAST.SetWorldSpawnCommand): string {
         return command.mode == MCFunctionAST.SetWorldSpawnMode.At && command.position
             ? "setworldspawn " + compilePosition(command.position) : "setworldspawn";
+    }
+
+    function compileClearSpawnPoint(command: MCFunctionAST.ClearSpawnPointCommand): string {
+        return command.mode == MCFunctionAST.ClearSpawnPointMode.Target && command.target
+            ? "clearspawnpoint " + compilePlayerTarget(command.target) : "clearspawnpoint";
     }
 
     /** Common target serializer for selectors and literal player names. */

@@ -35,6 +35,23 @@ FunctionFile.define("a8_sp_named_at", function () {
         MCFunctionPositionFields.absolute(10, 80, 10));
 });
 
+// Clear the per-player spawn checkpoint set above; do not use in a live world.
+// In Preview/command-block context, the explicit target is important.
+FunctionFile.define("a8_clear_self", function () {
+    Command.clearSpawnPoint(MCFunctionFields.targetSelector(
+        MCFunctionFields.self(MCFunctionFields.noSelectorCondition())));
+});
+
+FunctionFile.define("a8_clear_all", function () {
+    Command.clearSpawnPoint(MCFunctionFields.targetSelector(
+        MCFunctionFields.allPlayers(MCFunctionFields.noSelectorCondition())));
+});
+
+// Replace "Steve" with a connected test player's exact name.
+FunctionFile.define("a8_clear_named", function () {
+    Command.clearSpawnPoint(MCFunctionFields.namedPlayerTarget("Steve"));
+});
+
 // These alter the WORLD spawn. Test individually in a copied test world.
 FunctionFile.define("a8_world_abs", function () {
     Command.setWorldSpawnCompact(MCFunctionPositionFields.absolute(10, 80, 10));

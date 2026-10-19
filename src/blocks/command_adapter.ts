@@ -12,6 +12,11 @@ namespace MCFunctionBlocks {
         return MCFunctionAST.createSetWorldSpawnCommand(mode, position);
     }
 
+    export function createClearSpawnPointCommand(mode: MCFunctionAST.ClearSpawnPointMode,
+        target?: MCFunctionAST.PlayerTarget): MCFunctionAST.ClearSpawnPointCommand {
+        return MCFunctionAST.createClearSpawnPointCommand(mode, target);
+    }
+
     /** Bind a typed CAMERA action to the selected player(s), using existing
      * AST constructors rather than copying every optional field by hand.
      * This prevents future properties from silently disappearing in the adapter.

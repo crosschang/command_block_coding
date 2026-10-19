@@ -33,7 +33,8 @@ namespace MCFunctionAST {
         InputPermission = 26,
         Camera = 27,
         SpawnPoint = 28,
-        SetWorldSpawn = 29
+        SetWorldSpawn = 29,
+        ClearSpawnPoint = 30
     }
 
     export interface CommandNode {

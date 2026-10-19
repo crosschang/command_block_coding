@@ -54,6 +54,7 @@ const relative = A.createRelativePosition(0, 1, 0);
 const local = A.createLocalPosition(0, 0, 3);
 const SP = A.SpawnPointMode;
 const WS = A.SetWorldSpawnMode;
+const CS = A.ClearSpawnPointMode;
 
 const valid = [
     ['default player', adapter.createSpawnPointCommand(SP.Default), 'spawnpoint'],
@@ -70,11 +71,19 @@ const valid = [
     ['world absolute', adapter.createSetWorldSpawnCommand(WS.At, absolute), 'setworldspawn 10 64 -20'],
     ['world all zeros preserved', adapter.createSetWorldSpawnCommand(WS.At, origin), 'setworldspawn 0 0 0'],
     ['world relative', adapter.createSetWorldSpawnCommand(WS.At, relative), 'setworldspawn ~ ~1 ~'],
+    ['clear chat default', adapter.createClearSpawnPointCommand(CS.Default), 'clearspawnpoint'],
+    ['clear self', adapter.createClearSpawnPointCommand(CS.Target, self), 'clearspawnpoint @s'],
+    ['clear all players', adapter.createClearSpawnPointCommand(CS.Target, everyone), 'clearspawnpoint @a'],
+    ['clear named player', adapter.createClearSpawnPointCommand(CS.Target, steve), 'clearspawnpoint Steve'],
+    ['clear spaced player', adapter.createClearSpawnPointCommand(CS.Target, spaced), 'clearspawnpoint "Alex Rider"'],
 ];
 for (const [label, node, expected] of valid) {
     assert.strictEqual(compiler.compileCommand(node), expected, label);
     assert.strictEqual(validator.hasError(validator.validateCommand(node)), false, label);
 }
+assert.ok(validator.validateCommand(adapter.createClearSpawnPointCommand(CS.Default))
+    .some(issue => issue.code === 'CLEARSPAWNPOINT_CONTEXT_TARGET' && issue.level === validator.ValidationLevel.Warning),
+    'No-target chat form must warn about command-block context');
 
 const invalid = [
     ['target missing', adapter.createSpawnPointCommand(SP.TargetAt, undefined, absolute), 'PLAYER_TARGET_MISSING'],
@@ -87,6 +96,11 @@ const invalid = [
     ['invalid player target', adapter.createSpawnPointCommand(SP.TargetCurrent, {kind: 999}), 'PLAYER_TARGET_KIND_INVALID'],
     ['world position missing', adapter.createSetWorldSpawnCommand(WS.At), 'SETWORLDSPAWN_POSITION_REQUIRED'],
     ['world invalid form', adapter.createSetWorldSpawnCommand(999), 'SETWORLDSPAWN_MODE_INVALID'],
+    ['clear target missing', adapter.createClearSpawnPointCommand(CS.Target), 'PLAYER_TARGET_MISSING'],
+    ['clear invalid name', adapter.createClearSpawnPointCommand(CS.Target, A.createNamedPlayerTarget(' ')), 'PLAYER_TARGET_NAME_INVALID'],
+    ['clear selector in name', adapter.createClearSpawnPointCommand(CS.Target, A.createNamedPlayerTarget('@a')), 'PLAYER_TARGET_USE_SELECTOR'],
+    ['clear default with target', adapter.createClearSpawnPointCommand(CS.Default, self), 'CLEARSPAWNPOINT_DEFAULT_EXTRA'],
+    ['clear invalid form', adapter.createClearSpawnPointCommand(999), 'CLEARSPAWNPOINT_MODE_INVALID'],
     ['mixed local coordinates', adapter.createSetWorldSpawnCommand(WS.At,
         A.createPosition(A.createCoordinate(A.CoordinateMode.Local, 0),
             A.createCoordinate(A.CoordinateMode.Relative, 0),
@@ -116,6 +130,10 @@ assert.strictEqual((blocks.match(/\/\/% blockHidden=true/g) || []).length, 10,
 assert.ok(blocks.includes('//% blockId=command_spawnpoint_shared') &&
     blocks.includes('target.shadow="mcfunction_target_selector"'),
     'New SPAWNPOINT block must accept SELECTOR common target reporter');
+assert.ok(blocks.includes('//% blockId=command_clearspawnpoint') &&
+    blocks.includes('//% block="CLEARSPAWNPOINT target $target"') &&
+    blocks.includes('//% group="SPAWNPOINT" weight=105'),
+    'CLEARSPAWNPOINT must be one visible block in the existing SPAWNPOINT group');
 assert.strictEqual((blocks.match(/\/\/% expandableArgumentMode="enabled"/g) || []).length, 3,
     'New and legacy expandable A8 blocks must remain defined');
 
@@ -145,7 +163,9 @@ const compactCases = [
     ['shared selector', () => publicBlocks.spawnpointShared(sharedSelectorTarget), 'spawnpoint @s'],
     ['shared selector position', () => publicBlocks.spawnpointShared(sharedSelectorTarget, inputPosition), 'spawnpoint @s 10 64 -20'],
     ['shared named', () => publicBlocks.spawnpointShared(sharedNamedTarget), 'spawnpoint "Alex Rider"'],
-    ['shared named position', () => publicBlocks.spawnpointShared(sharedNamedTarget, inputPosition), 'spawnpoint "Alex Rider" 10 64 -20']
+    ['shared named position', () => publicBlocks.spawnpointShared(sharedNamedTarget, inputPosition), 'spawnpoint "Alex Rider" 10 64 -20'],
+    ['clear shared selector', () => publicBlocks.clearSpawnPoint(sharedSelectorTarget), 'clearspawnpoint @s'],
+    ['clear shared named', () => publicBlocks.clearSpawnPoint(sharedNamedTarget), 'clearspawnpoint "Alex Rider"']
 ];
 for (const [label, run, expected] of compactCases) {
     dispatched = undefined;
@@ -160,6 +180,9 @@ assert.ok(validator.validateCommand(dispatched).some(issue => issue.code === 'PL
 publicBlocks.spawnpointShared(undefined, inputPosition);
 assert.ok(validator.validateCommand(dispatched).some(issue => issue.code === 'PLAYER_TARGET_MISSING'),
     'New SPAWNPOINT coordinates without target must be rejected');
+publicBlocks.clearSpawnPoint(undefined);
+assert.ok(validator.validateCommand(dispatched).some(issue => issue.code === 'PLAYER_TARGET_MISSING'),
+    'CLEARSPAWNPOINT target input must not silently turn into chat-only no-target form');
 
 console.log('PASS: ' + valid.length + ' canonical commands, ' + invalid.length +
-    ' validator negatives, ' + compactCases.length + ' public block forms, 10 compatible A8 blocks hidden, pxt.json registration and version.');
+    ' validator negatives, ' + compactCases.length + ' public block forms (including CLEARSPAWNPOINT), 10 compatible A8 blocks hidden, pxt.json registration and version.');
