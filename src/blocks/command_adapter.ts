@@ -329,6 +329,18 @@ namespace MCFunctionBlocks {
         );
     }
 
+    /** Shared named-player / selector target, preserving canonical TP AST. */
+    export function createTeleportReferenceCommand(
+        target: MCFunctionAST.PlayerTarget,
+        destination: MCFunctionAST.TeleportDestination,
+        orientation?: MCFunctionAST.TeleportOrientation,
+        checkForBlocks?: boolean
+    ): MCFunctionAST.TeleportCommand {
+        return MCFunctionAST.createTeleportReferenceCommand(
+            target, destination, orientation, checkForBlocks
+        );
+    }
+
     export function createTeleportSelfCommand(
         destination: MCFunctionAST.TeleportDestination,
         orientation?: MCFunctionAST.TeleportOrientation,

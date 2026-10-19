@@ -1155,6 +1155,35 @@ namespace MCFunctionFields {
         }
     }
 
+    /** Command target reference: a Selector AST or a literal player name. */
+    export class TargetValue {
+        target: MCFunctionAST.PlayerTarget;
+
+        constructor(target: MCFunctionAST.PlayerTarget) {
+            this.target = target;
+        }
+    }
+
+    /** Reuse all existing selector conditions inside a target argument. */
+    //% group="Selector Targets" weight=102
+    //% blockId=mcfunction_target_selector
+    //% block="target selector $selector"
+    //% selector.shadow="mcfunction_selector_self"
+    //% inlineInputMode=external
+    export function targetSelector(selector: SelectorValue): TargetValue {
+        return new TargetValue(MCFunctionAST.createSelectorPlayerTarget(
+            selector ? selector.selector : undefined));
+    }
+
+    /** Shared literal-name reporter for SPAWNPOINT, TP and future target commands. */
+    //% group="Selector Targets" weight=101
+    //% blockId=mcfunction_target_named_player
+    //% block="named player $playerName"
+    //% playerName.shadow="text" playerName.defl="Steve"
+    export function namedPlayerTarget(playerName: string): TargetValue {
+        return new TargetValue(MCFunctionAST.createNamedPlayerTarget(playerName));
+    }
+
     // ---------------------------------------------------------------------
     // Selector 대상
     //

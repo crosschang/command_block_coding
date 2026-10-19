@@ -1166,7 +1166,7 @@ namespace MCFunctionValidator {
         // target is optional: omitted target is the Bedrock `tp <destination>`
         // self-teleport form. Validate only when an explicit victim exists.
         if (command.target) {
-            appendIssues(issues, validateSelector(command.target));
+            appendIssues(issues, validatePlayerReference(command.target, true));
         }
 
         if (!command.destination) {
@@ -1178,7 +1178,7 @@ namespace MCFunctionValidator {
             if (!command.destination.entity) {
                 addIssue(issues, ValidationLevel.Error, "TP_DESTINATION_ENTITY_MISSING", "Teleport destination entity is missing.");
             } else {
-                appendIssues(issues, validateSelector(command.destination.entity));
+                appendIssues(issues, validatePlayerReference(command.destination.entity, true));
             }
 
             if (command.orientation) {
@@ -1224,7 +1224,7 @@ namespace MCFunctionValidator {
             if (!command.orientation.facingEntity) {
                 addIssue(issues, ValidationLevel.Error, "TP_FACING_ENTITY_MISSING", "Teleport facing entity is missing.");
             } else {
-                appendIssues(issues, validateSelector(command.orientation.facingEntity));
+                appendIssues(issues, validatePlayerReference(command.orientation.facingEntity, true));
             }
         } else {
             addIssue(issues, ValidationLevel.Error, "TP_ORIENTATION_KIND_INVALID", "Unsupported teleport orientation kind.");
@@ -1890,7 +1890,8 @@ namespace MCFunctionValidator {
     }
 
     /** Shared player target: retain a structured Selector or a literal player name. */
-    export function validatePlayerReference(target: MCFunctionAST.PlayerTarget): ValidationIssue[] {
+    export function validatePlayerReference(target: MCFunctionAST.PlayerTarget,
+        allowEntitySelectors?: boolean): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
         if (!target) {
             addIssue(issues, ValidationLevel.Error, "PLAYER_TARGET_MISSING", "Player target is required.");
@@ -1901,7 +1902,7 @@ namespace MCFunctionValidator {
                 addIssue(issues, ValidationLevel.Error, "PLAYER_TARGET_SELECTOR_INVALID", "Selector player target must contain only a Selector.");
             } else {
                 appendIssues(issues, validateSelector(target.selector));
-                if (target.selector.base == MCFunctionAST.SelectorBase.AllEntities ||
+                if ((target.selector.base == MCFunctionAST.SelectorBase.AllEntities && !allowEntitySelectors) ||
                     target.selector.base == MCFunctionAST.SelectorBase.Initiator) {
                     addIssue(issues, ValidationLevel.Warning, "PLAYER_TARGET_SELECTOR_CONTEXT", "The selector must resolve to players and may need a special execution context.");
                 }

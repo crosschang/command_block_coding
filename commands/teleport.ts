@@ -18,7 +18,7 @@ namespace MCFunctionAST {
     export interface TeleportDestination {
         kind: TeleportDestinationKind;
         position?: Position;
-        entity?: Selector;
+        entity?: PlayerTarget;
     }
 
     export enum TeleportOrientationKind {
@@ -31,7 +31,7 @@ namespace MCFunctionAST {
         kind: TeleportOrientationKind;
         rotation?: Rotation;
         facingPosition?: Position;
-        facingEntity?: Selector;
+        facingEntity?: PlayerTarget;
     }
 
     export interface TeleportCommand extends CommandNode {
@@ -40,7 +40,7 @@ namespace MCFunctionAST {
         //   tp <destination>
         // Present target means an explicit victim is teleported:
         //   tp <victim> <destination>
-        target?: Selector;
+        target?: PlayerTarget;
         destination: TeleportDestination;
         orientation?: TeleportOrientation;
         checkForBlocks?: boolean;
@@ -60,8 +60,15 @@ namespace MCFunctionAST {
     ): TeleportDestination {
         return {
             kind: TeleportDestinationKind.Entity,
-            entity: entity
+            entity: createSelectorPlayerTarget(entity)
         };
+    }
+
+    /** Literal-name and selector destinations share one AST target reference. */
+    export function createTeleportTargetDestination(
+        entity: PlayerTarget
+    ): TeleportDestination {
+        return { kind: TeleportDestinationKind.Entity, entity: entity };
     }
 
     export function createTeleportRotationOrientation(
@@ -87,12 +94,34 @@ namespace MCFunctionAST {
     ): TeleportOrientation {
         return {
             kind: TeleportOrientationKind.FacingEntity,
-            facingEntity: entity
+            facingEntity: createSelectorPlayerTarget(entity)
         };
+    }
+
+    export function createTeleportFacingTargetOrientation(
+        entity: PlayerTarget
+    ): TeleportOrientation {
+        return { kind: TeleportOrientationKind.FacingEntity, facingEntity: entity };
     }
 
     export function createTeleportCommand(
         target: Selector,
+        destination: TeleportDestination,
+        orientation?: TeleportOrientation,
+        checkForBlocks?: boolean
+    ): TeleportCommand {
+        return {
+            kind: CommandKind.Teleport,
+            target: createSelectorPlayerTarget(target),
+            destination: destination,
+            orientation: orientation,
+            checkForBlocks: checkForBlocks
+        };
+    }
+
+    /** Common name/selector target constructor for new public TP blocks. */
+    export function createTeleportReferenceCommand(
+        target: PlayerTarget,
         destination: TeleportDestination,
         orientation?: TeleportOrientation,
         checkForBlocks?: boolean

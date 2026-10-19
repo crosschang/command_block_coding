@@ -697,11 +697,11 @@ namespace MCFunctionCompiler {
         //   tp <victim> <destination>
         // Keep that distinction in the compiled command instead of forcing @s.
         if (command.target) {
-            result = result + compileSelector(command.target) + " ";
+            result = result + compilePlayerTarget(command.target) + " ";
         }
 
         if (command.destination.kind == MCFunctionAST.TeleportDestinationKind.Entity) {
-            result = result + compileSelector(command.destination.entity);
+            result = result + compilePlayerTarget(command.destination.entity);
         } else {
             result = result + compilePosition(command.destination.position);
 
@@ -711,7 +711,7 @@ namespace MCFunctionCompiler {
                 } else if (command.orientation.kind == MCFunctionAST.TeleportOrientationKind.FacingPosition) {
                     result = result + " facing " + compilePosition(command.orientation.facingPosition);
                 } else if (command.orientation.kind == MCFunctionAST.TeleportOrientationKind.FacingEntity) {
-                    result = result + " facing " + compileSelector(command.orientation.facingEntity);
+                    result = result + " facing " + compilePlayerTarget(command.orientation.facingEntity);
                 }
             }
         }

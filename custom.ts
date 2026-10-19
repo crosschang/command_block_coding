@@ -574,6 +574,7 @@ namespace Command {
 
     /** Entity destination for TP. */
     //% blockId=mcfunction_tp_destination_entity
+    //% blockHidden=true
     //% group="TELEPORT" weight=98
     //% block="entity $destination"
     //% destination.shadow="mcfunction_selector_nearest_player"
@@ -582,6 +583,21 @@ namespace Command {
     ): TeleportDestinationValue {
         return new TeleportDestinationValue(
             MCFunctionAST.createTeleportEntityDestination(destination.selector)
+        );
+    }
+
+    /** TP entity destination can be a SELECTOR selector or a named player. */
+    //% blockId=mcfunction_tp_destination_target
+    //% group="TELEPORT" weight=98
+    //% block="entity $destination"
+    //% destination.shadow="mcfunction_target_selector"
+    //% inlineInputMode=external
+    export function teleportDestinationTarget(
+        destination: MCFunctionFields.TargetValue
+    ): TeleportDestinationValue {
+        return new TeleportDestinationValue(
+            MCFunctionAST.createTeleportTargetDestination(
+                destination ? destination.target : undefined)
         );
     }
 
@@ -615,6 +631,7 @@ namespace Command {
 
     /** Face an entity after teleporting to a position destination. */
     //% blockId=mcfunction_tp_orientation_facing_entity
+    //% blockHidden=true
     //% group="TELEPORT" weight=95
     //% block="facing entity $facingEntity"
     //% facingEntity.shadow="mcfunction_selector_nearest_player"
@@ -625,6 +642,21 @@ namespace Command {
             MCFunctionAST.createTeleportFacingEntityOrientation(
                 facingEntity.selector
             )
+        );
+    }
+
+    /** Facing a named player or selector uses the same typed target reporter. */
+    //% blockId=mcfunction_tp_orientation_facing_target
+    //% group="TELEPORT" weight=95
+    //% block="facing entity $facingEntity"
+    //% facingEntity.shadow="mcfunction_target_selector"
+    //% inlineInputMode=external
+    export function teleportFacingTargetOption(
+        facingEntity: MCFunctionFields.TargetValue
+    ): TeleportOrientationValue {
+        return new TeleportOrientationValue(
+            MCFunctionAST.createTeleportFacingTargetOrientation(
+                facingEntity ? facingEntity.target : undefined)
         );
     }
 
@@ -668,6 +700,7 @@ namespace Command {
      *   tp <victim> <destination> [orientation] [checkForBlocks]
      */
     //% blockId=mcfunction_tp_target
+    //% blockHidden=true
     //% group="TELEPORT" weight=99
     //% block="TP TARGET victim $victim destination $destination check blocks $checkForBlocks || $orientation"
     //% expandableArgumentMode="enabled"
@@ -685,6 +718,31 @@ namespace Command {
             MCFunctionBlocks.createTeleportCommand(
                 victim.selector,
                 destination.destination,
+                orientation ? orientation.orientation : undefined,
+                MCFunctionFields.booleanLiteralValue(checkForBlocks)
+            )
+        );
+    }
+
+    /** New TP TARGET: victim may be a named player or any valid selector. */
+    //% blockId=mcfunction_tp_target_reference
+    //% group="TELEPORT" weight=99
+    //% block="TP TARGET victim $victim destination $destination check blocks $checkForBlocks || $orientation"
+    //% expandableArgumentMode="enabled"
+    //% inlineInputMode=external
+    //% victim.shadow="mcfunction_target_selector"
+    //% destination.shadow="mcfunction_tp_destination_position"
+    //% orientation.shadow="mcfunction_tp_orientation_rotation"
+    export function teleportTargetReference(
+        victim: MCFunctionFields.TargetValue,
+        destination: TeleportDestinationValue,
+        checkForBlocks: MCFunctionFields.BooleanLiteral,
+        orientation?: TeleportOrientationValue
+    ): void {
+        executeCommand(
+            MCFunctionBlocks.createTeleportReferenceCommand(
+                victim ? victim.target : undefined,
+                destination ? destination.destination : undefined,
                 orientation ? orientation.orientation : undefined,
                 MCFunctionFields.booleanLiteralValue(checkForBlocks)
             )
