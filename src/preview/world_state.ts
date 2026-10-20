@@ -8,8 +8,9 @@
 namespace MCFunctionPreview {
     let knownTagNames: string[] = [];
 
-    // Preview session only: a successful set through this extension does NOT
-    // guarantee the world still has the value (chat, packs, or others may change it).
+    // Preview session only: player.execute() reported success for the last set.
+    // This does NOT guarantee that the command changed the world or that the
+    // value remains current (chat, packs, or others may change it).
     let gameRuleLastSetIds: string[] = [];
     let gameRuleLastSetValues: string[] = [];
 
@@ -25,7 +26,7 @@ namespace MCFunctionPreview {
         gameRuleLastSetValues.push(value);
     }
 
-    /** Last value set successfully THROUGH THIS preview; never an actual world read. */
+    /** Last API-reported successful set THROUGH THIS preview; never a world read. */
     export function getLastSetGameRuleValue(ruleId: string): string {
         for (let i = 0; i < gameRuleLastSetIds.length; i++) {
             if (gameRuleLastSetIds[i] == ruleId) return gameRuleLastSetValues[i];

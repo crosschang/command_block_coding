@@ -1,9 +1,10 @@
 /**
  * Preview Query Adapter.
  *
- * player.execute() returns command success/failure but does not expose textual
- * output for some valid Bedrock/Education commands. This adapter provides
- * Preview-only feedback without changing the AST or Compiler grammar.
+ * player.execute() returns an API boolean (not proof of a persisted world
+ * effect) and does not expose textual output for some valid Bedrock/Education
+ * commands. This adapter provides Preview-only feedback without changing the
+ * AST or Compiler grammar.
  *
  * First implementation: TAG list.
  * - TAG add/remove remain normal DIRECT commands.
@@ -18,6 +19,67 @@
  */
 namespace MCFunctionPreview {
     let previewQueryBusy = false;
+    let spawnPointPreviewNoticeShown = false;
+
+    /**
+     * Definition-time diagnostics about the MakeCode Preview bridge only.
+     * Keep these separate from canonical command validation: valid Bedrock
+     * grammar must remain valid for a future real .mcfunction export.
+     */
+    export function previewCompatibilityIssues(
+        command: MCFunctionAST.CommandNode
+    ): MCFunctionValidator.ValidationIssue[] {
+        let issues: MCFunctionValidator.ValidationIssue[] = [];
+        if (command.kind == MCFunctionAST.CommandKind.SpawnPoint) {
+            issues.push({
+                level: MCFunctionValidator.ValidationLevel.Info,
+                code: "SPAWNPOINT_PREVIEW_LIMITATION",
+                message: "Education 26.32 MakeCode Preview returned true for SPAWNPOINT but respawn stayed at world spawn. Canonical command is unchanged; real .mcfunction is not yet tested."
+            });
+        } else if (command.kind == MCFunctionAST.CommandKind.Tag) {
+            let tag = <MCFunctionAST.TagCommand>command;
+            if (tag.action == MCFunctionAST.TagActionKind.List) {
+                issues.push({
+                    level: MCFunctionValidator.ValidationLevel.Info,
+                    code: "TAG_LIST_SESSION_KNOWN",
+                    message: "Preview checks live tag membership only for tag names seen through this extension in the current session; other names may be missing."
+                });
+            }
+        } else if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
+            let rule = <MCFunctionAST.GameRuleCommand>command;
+            if (rule.action == MCFunctionAST.GameRuleAction.Query) {
+                issues.push({
+                    level: MCFunctionValidator.ValidationLevel.Info,
+                    code: "GAMERULE_QUERY_OUTPUT_HIDDEN",
+                    message: "Preview cannot read the live gamerule value. SESSION_KNOWN is only the last value reported successful by this Preview session."
+                });
+            } else if (rule.action == MCFunctionAST.GameRuleAction.List) {
+                issues.push({
+                    level: MCFunctionValidator.ValidationLevel.Info,
+                    code: "GAMERULE_LIST_REGISTRY_ONLY",
+                    message: "Preview shows a partial Registry of names/types, NOT live world gamerule values. Check /gamerule in game chat."
+                });
+            } else if (rule.action == MCFunctionAST.GameRuleAction.SetEnum &&
+                rule.ruleId == "playerwaypoints") {
+                issues.push({
+                    level: MCFunctionValidator.ValidationLevel.Warning,
+                    code: "GAMERULE_PLAYERWAYPOINTS_PREVIEW_UNSUPPORTED",
+                    message: "Education 26.32 MakeCode Preview rejected playerwaypoints. Use direct game chat; canonical command remains unchanged."
+                });
+            }
+        }
+        return issues;
+    }
+
+    /** Warning once per MakeCode run; a true command result is not state proof. */
+    export function noticeSpawnPointPreviewOnce(success: boolean): void {
+        if (spawnPointPreviewNoticeShown) return;
+        spawnPointPreviewNoticeShown = true;
+        previewSay("WARNING [SPAWNPOINT_PREVIEW_LIMITATION] MakeCode returned " +
+            success + " for SPAWNPOINT. Education Preview did not reliably change " +
+            "the player's respawn point. Do not treat this as a gameplay PASS; " +
+            "direct game chat worked, real .mcfunction remains unverified.");
+    }
 
     // Preview-only catalog command, separate from canonical /gamerule LIST.
     // PXT chat-command number arguments are supported by Minecraft MakeCode.
@@ -85,14 +147,16 @@ namespace MCFunctionPreview {
     }
 
     /**
-     * Observe successfully validated structured commands after runtime execution.
-     * This records authored tag vocabulary; it does not replace Minecraft state.
+     * Observe structured commands for Preview session hints only.
+     * player.execute() returning true is an API report, not proof of persisted
+     * world state (as the SPAWNPOINT Education test demonstrated).
      */
     export function observeCommand(
         command: MCFunctionAST.CommandNode,
         success: boolean
     ): void {
-        // Only successful world changes are recorded, never mere attempts.
+        // Only API-reported successes are remembered, never false results.
+        // Neither a true result nor the stored value proves current world state.
         if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
             if (!success) return;
             let rule = <MCFunctionAST.GameRuleCommand>command;
@@ -181,12 +245,13 @@ namespace MCFunctionPreview {
         if (command.action == MCFunctionAST.GameRuleAction.Query) {
             let last = getLastSetGameRuleValue(command.ruleId);
             if (last.length > 0) {
-                previewSay("GAMERULE " + command.ruleId + " last set by this Preview: " + last +
-                    " (SESSION_KNOWN, NOT live). Current value: type /gamerule " + command.ruleId + " in game chat.");
-                return handledQuery(QueryConfidence.SessionKnown, "last successful Preview set, not live state");
+                previewSay("INFO [SESSION_KNOWN] GAMERULE " + command.ruleId +
+                    " last API-reported successful set: " + last +
+                    ". NOT a live/verified world value. Check /gamerule " + command.ruleId + " in game chat.");
+                return handledQuery(QueryConfidence.SessionKnown, "last Preview API-reported successful set, not live state");
             }
-            previewSay("GAMERULE " + command.ruleId +
-                " live value cannot be read by player.execute(). Type /gamerule " +
+            previewSay("INFO [UNAVAILABLE] GAMERULE " + command.ruleId +
+                " live value cannot be read by MakeCode Preview. Type /gamerule " +
                 command.ruleId + " in game chat.");
             return handledQuery(QueryConfidence.Unavailable, "live gamerule value unavailable");
         }
@@ -194,7 +259,7 @@ namespace MCFunctionPreview {
             // Canonical "gamerule" returns live world settings in game chat.
             // player.execute() cannot expose that text; never substitute Registry
             // metadata or cached session values as if they were live state.
-            previewSay("GAMERULE LIST live world values are OUTPUT_HIDDEN in MakeCode Preview. " +
+            previewSay("INFO [PARTIAL] GAMERULE LIST live world values are OUTPUT_HIDDEN in MakeCode Preview. " +
                 "Type /gamerule in game chat. Registry reference (NOT live values): cbi_rules 1.");
             showGameRuleCatalogPage(1);
             return handledQuery(QueryConfidence.Partial,
@@ -204,7 +269,8 @@ namespace MCFunctionPreview {
             command.ruleId == "playerwaypoints") {
             // Minecraft Education 26.32 chat succeeds; player.execute rejects this
             // rule name. Preserve the command, but do not claim a successful set.
-            previewSay("GAMERULE playerwaypoints: Education 26.32 player.execute() rejected this syntax. " +
+            previewSay("WARNING [GAMERULE_PLAYERWAYPOINTS_PREVIEW_UNSUPPORTED] " +
+                "Education 26.32 player.execute() rejected playerwaypoints. " +
                 "Use direct game chat: /gamerule playerwaypoints " + command.enumValue +
                 ". Canonical command is unchanged.");
             return handledQuery(QueryConfidence.Unavailable, "playerwaypoints Preview compatibility limitation");
@@ -299,7 +365,8 @@ namespace MCFunctionPreview {
             }
         }
 
-        previewSay("TAG list uses tags tracked by this custom-block Preview session.");
+        previewSay("INFO [SESSION_KNOWN] TAG list checked live membership for tag names tracked " +
+            "in this Preview session only. Other tag names may be omitted.");
 
         cleanupTagQueryMarkers(viewerTag, targetTag);
         previewQueryBusy = false;

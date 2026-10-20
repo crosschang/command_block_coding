@@ -27,6 +27,9 @@ namespace Command {
         if (compiled.length > 0) {
             let success = player.execute(compiled);
             MCFunctionPreview.observeCommand(command, success);
+            if (command.kind == MCFunctionAST.CommandKind.SpawnPoint) {
+                MCFunctionPreview.noticeSpawnPointPreviewOnce(success);
+            }
         }
     }
 

@@ -239,6 +239,15 @@ namespace FunctionFile {
         }
 
         if (!MCFunctionValidator.hasError(issues)) {
+            // Preview limitations are diagnostic hints, not canonical syntax
+            // validation errors. Store them for ?, functionName?, and the
+            // Definition summary without altering the AST/compiler.
+            if (command) {
+                let compatibilityIssues = MCFunctionPreview.previewCompatibilityIssues(command);
+                for (let i = 0; i < compatibilityIssues.length; i++) {
+                    addDefinitionIssueUnique(compatibilityIssues[i]);
+                }
+            }
             definitionActions.push(action);
             // Metadata follows the captured command AST, not the presence of a
             // detached reporter or source-code text. No Minecraft state is read.

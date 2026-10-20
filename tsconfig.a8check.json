@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "ES5",
+        "noEmit": true,
+        "noImplicitAny": false,
+        "skipLibCheck": true
+    },
+    "include": [
+        "a8check-pxt-stubs.d.ts",
+        "commands/**/*.ts",
+        "src/**/*.ts",
+        "custom.ts",
+        "function_file.ts",
+        "item_components.ts",
+        "tests/A8_SPAWNPOINT_PUBLIC_API_MAIN.ts",
+        "tests/A8_SPAWNPOINT_CLEARSPAWNPOINT_INGAME_TEST_MAIN.ts",
+        "tests/PREVIEW_COMPAT_DIAGNOSTICS_0.0.72_MAIN.ts",
+        "tests/TARGET_NAMED_PLAYER_PUBLIC_API_MAIN.ts"
+    ],
+    "exclude": ["tests", "_history", "pxt_modules"]
+}
