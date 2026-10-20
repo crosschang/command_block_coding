@@ -15,7 +15,8 @@
         "tests/A8_SPAWNPOINT_PUBLIC_API_MAIN.ts",
         "tests/A8_SPAWNPOINT_CLEARSPAWNPOINT_INGAME_TEST_MAIN.ts",
         "tests/PREVIEW_COMPAT_DIAGNOSTICS_0.0.72_MAIN.ts",
-        "tests/TARGET_NAMED_PLAYER_PUBLIC_API_MAIN.ts"
+        "tests/TARGET_NAMED_PLAYER_PUBLIC_API_MAIN.ts",
+        "tests/B3_C1_0.0.72_PUBLIC_API_MAIN.ts"
     ],
     "exclude": ["tests", "_history", "pxt_modules"]
 }

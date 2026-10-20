@@ -1974,8 +1974,169 @@ namespace MCFunctionValidator {
         return issues;
     }
 
+    /** B3: /damage accepts an integer amount and a fixed Bedrock cause enum. */
+    export function validateDamageCommand(command: MCFunctionAST.DamageCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        appendIssues(issues, validatePlayerReference(command.target, true));
+        if (command.amount == undefined || command.amount - command.amount != 0 ||
+            Math.floor(command.amount) != command.amount || command.amount < 0) {
+            addIssue(issues, ValidationLevel.Error, "DAMAGE_AMOUNT_INVALID",
+                "DAMAGE amount must be a non-negative integer.");
+        }
+        let validCauses = ["piston", "lava", "campfire", "fire", "anvil", "magma",
+            "soul_campfire", "wither", "falling_block", "fireworks", "thorns",
+            "none", "contact", "sonic_boom", "override", "entity_attack",
+            "projectile", "suffocation", "mace_smash", "fall", "starve",
+            "ram_attack", "fire_tick", "stalactite", "drowning",
+            "block_explosion", "entity_explosion", "void", "self_destruct",
+            "magic", "charging", "stalagmite", "fly_into_wall",
+            "lightning", "freezing", "temperature"];
+        if (command.cause != undefined && validCauses.indexOf(command.cause) < 0) {
+            addIssue(issues, ValidationLevel.Error, "DAMAGE_CAUSE_INVALID",
+                "DAMAGE cause must be a known Bedrock damagecause value.");
+        }
+        if (command.action == MCFunctionAST.DamageAction.Apply) {
+            if (command.damager) addIssue(issues, ValidationLevel.Error,
+                "DAMAGE_UNEXPECTED_DAMAGER", "Basic DAMAGE cannot include a damager.");
+        } else if (command.action == MCFunctionAST.DamageAction.FromEntity) {
+            if (command.cause == undefined) addIssue(issues, ValidationLevel.Error,
+                "DAMAGE_SOURCE_CAUSE_REQUIRED", "Damage attributed to an entity requires a cause.");
+            appendIssues(issues, validatePlayerReference(command.damager, true));
+            addIssue(issues, ValidationLevel.Info, "DAMAGE_SOURCE_EDUCATION_SYNTAX_UNVERIFIED",
+                "Source form uses 'entity <damager>' from earlier Bedrock documentation; Education 26.32 autocomplete verification remains pending.");
+        } else {
+            addIssue(issues, ValidationLevel.Error, "DAMAGE_ACTION_INVALID", "Unknown DAMAGE form.");
+        }
+        return issues;
+    }
+
+    /** PXT-safe ID check. A literal command token may not inject whitespace. */
+    function isSafeCommandId(value: string): boolean {
+        if (!value || value.length == 0) return false;
+        for (let i = 0; i < value.length; i++) {
+            let c = value.charCodeAt(i);
+            let valid = (c >= 48 && c <= 57) || (c >= 65 && c <= 90) ||
+                (c >= 97 && c <= 122) || c == 95 || c == 58 ||
+                c == 46 || c == 47 || c == 45;
+            if (!valid) return false;
+        }
+        return true;
+    }
+
+    /** B3 event IDs may come from add-ons. Owner metadata is advisory only. */
+    export function validateEventCommand(command: MCFunctionAST.EventCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        appendIssues(issues, validatePlayerReference(command.target, true));
+        if (!isSafeCommandId(command.eventId)) {
+            addIssue(issues, ValidationLevel.Error, "EVENT_ID_INVALID",
+                "EVENT needs a nonempty ID without spaces or command control characters.");
+        }
+        if (command.ownerEntityId != undefined && command.ownerEntityId.length > 0) {
+            if (!isSafeCommandId(command.ownerEntityId)) {
+                addIssue(issues, ValidationLevel.Error, "EVENT_OWNER_HINT_INVALID",
+                    "Owner hint must be a valid entity identifier.");
+            } else if (!MCFunctionEntityEventRegistry.hasOwnerData(command.ownerEntityId)) {
+                addIssue(issues, ValidationLevel.Info, "EVENT_OWNER_CUSTOM",
+                    "Owner is absent from current vanilla metadata; custom/add-on events remain allowed.");
+            } else if (command.eventId && !MCFunctionEntityEventRegistry.isDefinedForOwner(
+                    command.ownerEntityId, command.eventId)) {
+                addIssue(issues, ValidationLevel.Warning, "EVENT_OWNER_EVENT_UNLISTED",
+                    "EVENT ID is not listed for this owner in current vanilla metadata. Custom or other-version events may still work.");
+            }
+        } else {
+            addIssue(issues, ValidationLevel.Info, "EVENT_OWNER_NOT_VERIFIED",
+                "EVENT validity depends on the entity type. An optional owner hint enables Registry checks.");
+        }
+        return issues;
+    }
+
+    /** C1 /controlscheme is legal only with camera-compatible schemes. */
+    export function validateControlSchemeCommand(command: MCFunctionAST.ControlSchemeCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        appendIssues(issues, validatePlayerReference(command.target));
+        if (command.action == MCFunctionAST.ControlSchemeAction.Clear) {
+            if (command.scheme != undefined) addIssue(issues, ValidationLevel.Error,
+                "CONTROLSCHEME_CLEAR_EXTRA", "Clear cannot specify a scheme.");
+        } else if (command.action == MCFunctionAST.ControlSchemeAction.Set) {
+            if (command.scheme == undefined || command.scheme < 0 || command.scheme > 4 ||
+                command.scheme != Math.floor(command.scheme)) {
+                addIssue(issues, ValidationLevel.Error, "CONTROLSCHEME_SCHEME_INVALID",
+                    "Choose a supported control scheme.");
+            } else {
+                addIssue(issues, ValidationLevel.Info, "CONTROLSCHEME_CAMERA_COMPATIBILITY",
+                    "Control scheme depends on the current camera. Test player_relative or camera_relative after camera @s set minecraft:free; default first/third-person cameras only permit locked_player_relative_strafe. Preview cannot confirm movement.");
+            }
+        } else {
+            addIssue(issues, ValidationLevel.Error, "CONTROLSCHEME_ACTION_INVALID", "Unknown control scheme action.");
+        }
+        return issues;
+    }
+
+    /** C1 angles 10-90 and max distance 1-16, per official Aim Assist guide. */
+    export function validateAimAssistCommand(command: MCFunctionAST.AimAssistCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        appendIssues(issues, validatePlayerReference(command.target));
+        let hasAny = command.xAngle != undefined || command.yAngle != undefined ||
+            command.maxDistance != undefined || command.targetMode != undefined || command.presetId != undefined;
+        if (command.action == MCFunctionAST.AimAssistAction.Clear) {
+            if (hasAny) addIssue(issues, ValidationLevel.Error,
+                "AIMASSIST_CLEAR_EXTRA", "Clear cannot include set options.");
+        } else if (command.action == MCFunctionAST.AimAssistAction.Set) {
+            let hasSettings = command.xAngle != undefined || command.yAngle != undefined ||
+                command.maxDistance != undefined || command.targetMode != undefined;
+            if (hasSettings && (command.xAngle == undefined || command.yAngle == undefined ||
+                command.maxDistance == undefined || command.targetMode == undefined)) {
+                addIssue(issues, ValidationLevel.Error, "AIMASSIST_SETTINGS_INCOMPLETE",
+                    "This block requires X angle, Y angle, distance, and target mode together.");
+            }
+            if (command.xAngle != undefined && (command.xAngle - command.xAngle != 0 ||
+                command.xAngle < 10 || command.xAngle > 90)) {
+                addIssue(issues, ValidationLevel.Error, "AIMASSIST_X_ANGLE_RANGE",
+                    "Horizontal angle must be between 10 and 90 degrees.");
+            }
+            if (command.yAngle != undefined && (command.yAngle - command.yAngle != 0 ||
+                command.yAngle < 10 || command.yAngle > 90)) {
+                addIssue(issues, ValidationLevel.Error, "AIMASSIST_Y_ANGLE_RANGE",
+                    "Vertical angle must be between 10 and 90 degrees.");
+            }
+            if (command.maxDistance != undefined && (command.maxDistance - command.maxDistance != 0 ||
+                command.maxDistance < 1 || command.maxDistance > 16)) {
+                addIssue(issues, ValidationLevel.Error, "AIMASSIST_DISTANCE_RANGE",
+                    "Maximum target distance must be between 1 and 16 blocks.");
+            }
+            if (command.targetMode != undefined && command.targetMode != MCFunctionAST.AimAssistTargetMode.Distance &&
+                command.targetMode != MCFunctionAST.AimAssistTargetMode.Angle) {
+                addIssue(issues, ValidationLevel.Error, "AIMASSIST_TARGET_MODE_INVALID",
+                    "AIMASSIST target mode must be distance or angle.");
+            }
+            if (command.presetId != undefined && command.presetId.length > 0 &&
+                !isSafeCommandId(command.presetId)) {
+                addIssue(issues, ValidationLevel.Error, "AIMASSIST_PRESET_ID_INVALID",
+                    "Preset ID cannot contain spaces or command control characters.");
+            }
+            addIssue(issues, ValidationLevel.Info, "AIMASSIST_CAMERA_CONTEXT",
+                "Target selection is based on player facing, and third-person camera behavior must be checked in game.");
+        } else {
+            addIssue(issues, ValidationLevel.Error, "AIMASSIST_ACTION_INVALID", "Unknown AIMASSIST action.");
+        }
+        return issues;
+    }
+
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
+
+        if (command.kind == MCFunctionAST.CommandKind.Damage) {
+            appendIssues(issues, validateDamageCommand(<MCFunctionAST.DamageCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Event) {
+            appendIssues(issues, validateEventCommand(<MCFunctionAST.EventCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.ControlScheme) {
+            appendIssues(issues, validateControlSchemeCommand(<MCFunctionAST.ControlSchemeCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.AimAssist) {
+            appendIssues(issues, validateAimAssistCommand(<MCFunctionAST.AimAssistCommand>command));
+        }
 
         if (command.kind == MCFunctionAST.CommandKind.SpawnPoint) {
             appendIssues(issues, validateSpawnPointCommand(<MCFunctionAST.SpawnPointCommand>command));

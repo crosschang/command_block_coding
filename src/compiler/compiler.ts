@@ -2,6 +2,14 @@
 namespace MCFunctionCompiler {
     export function compileCommand(command: MCFunctionAST.CommandNode): string {
         switch (command.kind) {
+            case MCFunctionAST.CommandKind.Damage:
+                return compileDamage(<MCFunctionAST.DamageCommand>command);
+            case MCFunctionAST.CommandKind.Event:
+                return compileEvent(<MCFunctionAST.EventCommand>command);
+            case MCFunctionAST.CommandKind.ControlScheme:
+                return compileControlScheme(<MCFunctionAST.ControlSchemeCommand>command);
+            case MCFunctionAST.CommandKind.AimAssist:
+                return compileAimAssist(<MCFunctionAST.AimAssistCommand>command);
             case MCFunctionAST.CommandKind.SpawnPoint:
                 return compileSpawnPoint(<MCFunctionAST.SpawnPointCommand>command);
 
@@ -93,6 +101,38 @@ namespace MCFunctionCompiler {
             default:
                 return "";
         }
+    }
+
+    function compileDamage(command: MCFunctionAST.DamageCommand): string {
+        let result = "damage " + compilePlayerTarget(command.target) + " " + command.amount;
+        if (command.cause != undefined) result += " " + command.cause;
+        // Education 26.32 source attribution form awaits user syntax verification.
+        if (command.action == MCFunctionAST.DamageAction.FromEntity && command.damager) {
+            result += " entity " + compilePlayerTarget(command.damager);
+        }
+        return result;
+    }
+    function compileEvent(command: MCFunctionAST.EventCommand): string {
+        return "event entity " + compilePlayerTarget(command.target) + " " + command.eventId;
+    }
+    function compileControlScheme(command: MCFunctionAST.ControlSchemeCommand): string {
+        let result = "controlscheme " + compilePlayerTarget(command.target);
+        if (command.action == MCFunctionAST.ControlSchemeAction.Clear) return result + " clear";
+        let names = ["camera_relative", "camera_relative_strafe", "player_relative",
+            "player_relative_strafe", "locked_player_relative_strafe"];
+        return result + " set " + names[<number>command.scheme];
+    }
+    function compileAimAssist(command: MCFunctionAST.AimAssistCommand): string {
+        let result = "aimassist " + compilePlayerTarget(command.target);
+        if (command.action == MCFunctionAST.AimAssistAction.Clear) return result + " clear";
+        result += " set";
+        if (command.xAngle != undefined) result += " " + command.xAngle;
+        if (command.yAngle != undefined) result += " " + command.yAngle;
+        if (command.maxDistance != undefined) result += " " + command.maxDistance;
+        if (command.targetMode != undefined) result += command.targetMode == MCFunctionAST.AimAssistTargetMode.Angle
+            ? " angle" : " distance";
+        if (command.presetId != undefined && command.presetId.length > 0) result += " " + command.presetId;
+        return result;
     }
 
     /** Command lines have no leading slash in a .mcfunction. */

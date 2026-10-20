@@ -1,7 +1,9 @@
 # Preview compatibility INFO / QueryConfidence — 2026-10-20
 
-Scope: `command_block_coding` 0.0.72 (no version change). Source only;
-actual runtime retest of **this change** remains pending.
+Scope: `command_block_coding` 0.0.72 (no version change).
+Definition diagnostics, details/navigation, and the three read-only query
+handlers below were retested in Minecraft Education 26.32 on 2026-10-20.
+Other paths remain pending as distinguished in the evidence addendum.
 
 ## Reason and evidence
 
@@ -83,5 +85,30 @@ calls (including tick invocation) do not repeatedly emit the warning.
    the runtime warning is shown once. Its boolean result must not be reported
    as a confirmed change to respawn. Do not infer real `.mcfunction` support.
 
-This patch does not commit code, change the extension version, create real
-`.mcfunction` files, or claim an in-game PASS for the newly written diagnostics.
+This patch does not commit code, change the extension version, or create real
+`.mcfunction` files. The in-game PASS scope for diagnostics is recorded below.
+
+## In-game evidence addendum — 2026-10-20 (Education 26.32)
+
+User-provided in-game chat screenshots confirm the following **new** tests
+for the diagnostic compatibility patch. The broader execution limitations
+described above still hold.
+
+| Observed operation | In-game result | Verdict |
+|---|---|---|
+| FunctionFile registration with `PREVIEW_COMPAT_DIAGNOSTICS_0.0.72_MAIN.ts` | `pc72_spawnpoint`, `pc72_tag_list`, `pc72_rule_query`, `pc72_rule_list` each showed `1 info`; `pc72_rule_enum` showed `1 warning`; `pc72_normal` showed `OK`; aggregate `0 error(s), 1 warning(s), 4 info` | PASS: definition diagnostics |
+| `pc72_spawnpoint?` | `E0 W0 I1`, `SPAWNPOINT_PREVIEW_LIMITATION`, `Diagnostic only; not executed` | PASS: detail and nonexecution |
+| `pc72_tag_list?` | `E0 W0 I1`, `TAG_LIST_SESSION_KNOWN` | PASS: detail |
+| `pc72_rule_query?` | `E0 W0 I1`, `GAMERULE_QUERY_OUTPUT_HIDDEN` | PASS: detail |
+| `pc72_rule_list?` | `E0 W0 I1`, `GAMERULE_LIST_REGISTRY_ONLY` | PASS: detail |
+| `pc72_rule_enum?` | `E0 W1 I0`, `GAMERULE_PLAYERWAYPOINTS_PREVIEW_UNSUPPORTED` | PASS: detail |
+| `?`, `?1`, `?2` | `E0 W1 I4`, 14 total diagnostics, paginated 1/2 and 2/2 | PASS: diagnostics navigation |
+| `pc72_rule_query` | `[UNAVAILABLE]` for live `keepinventory`, with direct-chat `/gamerule keepinventory` guidance | PASS: query result provenance |
+| `pc72_rule_list` | `[PARTIAL]`, `GAMERULE Registry 1/7`, names/types explicitly not live world values | PASS: partial Registry guidance |
+| `pc72_tag_list` | No session-tracked tag names; `[SESSION_KNOWN]` warning about possible omissions | PASS: empty-vocabulary result and notice |
+
+**Not yet proven by these screenshots:** nonempty TAG vocabulary/membership
+probing; GAMERULE Query `SESSION_KNOWN` after a reported-successful SET;
+SPAWNPOINT one-time runtime warning; actual change of respawn by any Preview
+bridge; and actual Bedrock Behavior Pack `.mcfunction` execution. Do not
+promote any of those to PASS based on the diagnostics above.

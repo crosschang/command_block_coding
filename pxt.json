@@ -1,6 +1,6 @@
 {
     "name": "command_block_coding",
-    "version": "0.0.74",
+    "version": "0.0.72",
     "description": "Minecraft Education command blocks for MakeCode",
     "dependencies": {
         "core": "*",
@@ -62,6 +62,7 @@
         "commands/summon.ts",
         "commands/teleport.ts",
         "commands/spawnpoint.ts",
+        "commands/b3c1_actions.ts",
         "src/blocks/command_adapter.ts",
         "src/compiler/compiler.ts",
         "src/registry/registry_lookup.generated.ts",
@@ -135,6 +136,7 @@
         "commands/simple_commands.ts",
         "src/blocks/simple_command_blocks.ts",
         "src/blocks/spawnpoint_blocks.ts",
+        "src/blocks/b3c1_blocks.ts",
         "docs/CHANGELOG_SIMPLE_BATCH_0.0.48_2026-10-14.md",
         "commands/camera.ts",
         "src/blocks/camera_blocks.ts"

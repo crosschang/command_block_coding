@@ -34,7 +34,11 @@ namespace MCFunctionAST {
         Camera = 27,
         SpawnPoint = 28,
         SetWorldSpawn = 29,
-        ClearSpawnPoint = 30
+        ClearSpawnPoint = 30,
+        Damage = 31,
+        Event = 32,
+        ControlScheme = 33,
+        AimAssist = 34
     }
 
     export interface CommandNode {

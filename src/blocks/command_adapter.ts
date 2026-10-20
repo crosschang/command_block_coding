@@ -1,5 +1,28 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    /** B3/C1 keep both the named target and Selector AST intact. */
+    export function createDamageCommand(target: MCFunctionAST.PlayerTarget,
+        amount: number, cause?: string, damager?: MCFunctionAST.PlayerTarget,
+        action?: MCFunctionAST.DamageAction): MCFunctionAST.DamageCommand {
+        return MCFunctionAST.createDamageCommand(target, amount, cause, damager, action);
+    }
+    export function createEventCommand(target: MCFunctionAST.PlayerTarget,
+        eventId: string, ownerEntityId?: string): MCFunctionAST.EventCommand {
+        return MCFunctionAST.createEventCommand(target, eventId, ownerEntityId);
+    }
+    export function createControlSchemeCommand(target: MCFunctionAST.PlayerTarget,
+        action: MCFunctionAST.ControlSchemeAction,
+        scheme?: MCFunctionAST.ControlSchemeType): MCFunctionAST.ControlSchemeCommand {
+        return MCFunctionAST.createControlSchemeCommand(target, action, scheme);
+    }
+    export function createAimAssistCommand(target: MCFunctionAST.PlayerTarget,
+        action: MCFunctionAST.AimAssistAction, xAngle?: number, yAngle?: number,
+        maxDistance?: number, targetMode?: MCFunctionAST.AimAssistTargetMode,
+        presetId?: string): MCFunctionAST.AimAssistCommand {
+        return MCFunctionAST.createAimAssistCommand(target, action, xAngle, yAngle,
+            maxDistance, targetMode, presetId);
+    }
+
     /** A8 spawn commands reuse the common target and position ASTs. */
     export function createSpawnPointCommand(mode: MCFunctionAST.SpawnPointMode,
         target?: MCFunctionAST.PlayerTarget,
