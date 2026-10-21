@@ -1,0 +1,1 @@
+{"minecraft:client_entity":{"description":{"identifier":"minecraft:creeper","animations":{"creeper_swelling":"animation.creeper.swelling","creeper_head_controller":"controller.animation.creeper.head","creeper_swelling_controller":"controller.animation.creeper.swelling"}}}}

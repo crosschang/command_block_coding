@@ -7,19 +7,30 @@ const fixture=path.join(__dirname,'fixtures');
 const jsons=['camera_presets','animations','animation_controllers','fogs'];
 const generated=['camera_preset','animation','fog'];
 function hash(file){return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');}
-function fresh(){
+function fresh({copyOwnerLinks=false}={}){
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'b4-reg-'));
  for(const part of ['tools','src/libraries','registry/source/bedrock'])fs.mkdirSync(path.join(dir,part),{recursive:true});
  for(const name of ['generate_b4_registry.cjs','update_b4_registry.cjs'])fs.copyFileSync(path.join(sourceRoot,'tools',name),path.join(dir,'tools',name));
  for(const name of jsons)fs.copyFileSync(path.join(sourceRoot,'registry/source/bedrock',name+'.json'),path.join(dir,'registry/source/bedrock',name+'.json'));
  for(const name of generated)fs.copyFileSync(path.join(sourceRoot,'src/libraries',name+'_library.generated.ts'),path.join(dir,'src/libraries',name+'_library.generated.ts'));
+ // The generated animation reporters depend on official owner links once populated.
+ // Include that derived input ONLY for byte-for-byte generation checks: other tests
+ // must still start without an owner map to verify initial import and failure safety.
+ if(copyOwnerLinks){
+   const from=path.join(sourceRoot,'registry/derived/bedrock/animation_owner_links.json');
+   if(fs.existsSync(from)){
+     const to=path.join(dir,'registry/derived/bedrock/animation_owner_links.json');
+     fs.mkdirSync(path.dirname(to),{recursive:true});
+     fs.copyFileSync(from,to);
+   }
+ }
  fs.writeFileSync(path.join(dir,'src/libraries','legacy_library.generated.ts'),'// LEGACY SENTINEL\n');
  return dir;
 }
 function run(dir,script,args=[]){return spawnSync(process.execPath,[path.join(dir,'tools',script),...args],{encoding:'utf8',timeout:15000});}
 function cleanup(dir){fs.rmSync(dir,{recursive:true,force:true});}
 test('B4 generator reproduces current reporters byte for byte and never alters legacy output',()=>{
- const dir=fresh();try{
+ const dir=fresh({copyOwnerLinks:true});try{
   const before=generated.map(n=>hash(path.join(dir,'src/libraries',n+'_library.generated.ts')));
   const p=run(dir,'generate_b4_registry.cjs',['--check']);assert.equal(p.status,0,p.stderr+p.stdout);
   const gen=run(dir,'generate_b4_registry.cjs');assert.equal(gen.status,0,gen.stderr+p.stdout);
@@ -177,5 +188,73 @@ test('existing large FOG catalog is never reduced by ANIMATION official update',
    'Pre-existing FOG entries must keep their original order');
   assert.equal(hash(path.join(dir,'src/libraries/camera_preset_library.generated.ts')),camHash);
   assert.equal(fs.readFileSync(path.join(dir,'src/libraries','legacy_library.generated.ts'),'utf8'),'// LEGACY SENTINEL\n');
+ }finally{cleanup(dir);}
+});
+
+test('owner-scoped animation / controller categories use official client_entity links and keep legacy block APIs',()=>{
+ const dir=fresh();try{
+  const existing=fs.readFileSync(path.join(dir,'src/libraries/animation_library.generated.ts'),'utf8');
+  const legacyId='mcfunction_animation_controller_reference_creeper_swelling';
+  assert.match(existing,new RegExp(legacyId));
+  const ownerPath=path.join(dir,'registry/derived/bedrock/animation_owner_links.json');
+  let p=run(dir,'update_b4_registry.cjs',['--fixtures',officialFixture]);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  assert.ok(!fs.existsSync(ownerPath),'Dry run must not create owner mapping');
+  p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',officialFixture]);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  const metadata=JSON.parse(fs.readFileSync(ownerPath,'utf8'));
+  assert.deepEqual(metadata.animations['animation.creeper.swelling'],['minecraft:creeper']);
+  assert.deepEqual(metadata.animations['animation.humanoid.attack.rotations'],['minecraft:player','minecraft:zombie']);
+  assert.deepEqual(metadata.controllers['controller.animation.humanoid.attack'],['minecraft:player','minecraft:zombie']);
+  const output=fs.readFileSync(path.join(dir,'src/libraries/animation_library.generated.ts'),'utf8');
+  assert.match(output,/namespace MCFunctionAnimationControllerLibrary \{/);
+  assert.match(output,/\/\/\% group="Creeper"/);
+  assert.match(output,/\/\/\% group="Shared \/ Common"/);
+  assert.match(output,new RegExp(legacyId));
+  assert.match(output,/blockHidden=true[\s\S]*?mcfunction_animation_controller_reference_creeper_swelling/);
+  assert.match(output,/mcfunction_animation_controller_library_creeper_swelling/);
+  assert.match(output,/export function animationControllerCreeperSwelling\(\): ControllerValue/);
+  assert.match(output,/export function animationControllerCreeperSwelling\(\): MCFunctionAnimationLibrary.ControllerValue/);
+  assert.match(output,/mcfunction_animation_reference_creeper_swelling/);
+  const stable=hash(path.join(dir,'src/libraries/animation_library.generated.ts'));
+  p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',officialFixture]);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  assert.equal(hash(path.join(dir,'src/libraries/animation_library.generated.ts')),stable);
+  p=run(dir,'generate_b4_registry.cjs',['--check']);assert.equal(p.status,0,p.stdout+p.stderr);
+ }finally{cleanup(dir);}
+});
+
+test('bad / partial client entity owner source aborts before changing any registry file',()=>{
+ const dir=fresh(),bad=fs.mkdtempSync(path.join(os.tmpdir(),'b4-bad-owners-'));
+ try{
+  fs.cpSync(officialFixture,bad,{recursive:true});
+  const pth=path.join(bad,'entity','creeper.entity.json');
+  fs.writeFileSync(pth,'{"minecraft:client_entity":{"description":{"animations":{}}}}');
+  const tracked=[...jsons.map(n=>path.join(dir,'registry/source/bedrock',n+'.json')),...generated.map(n=>path.join(dir,'src/libraries',n+'_library.generated.ts'))];
+  const before=tracked.map(hash);
+  const p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',bad]);
+  assert.notEqual(p.status,0,p.stdout+p.stderr);
+  assert.deepEqual(tracked.map(hash),before);
+  assert.equal(fs.existsSync(path.join(dir,'registry/derived/bedrock/animation_owner_links.json')),false);
+ }finally{cleanup(dir);cleanup(bad);}
+});
+
+test('existing FOG and owner map survive later local animation-only imports',()=>{
+ const dir=fresh();try{
+  let p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',officialFixture]);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  const owner=path.join(dir,'registry/derived/bedrock/animation_owner_links.json');
+  const originalOwner=hash(owner);
+  const originalFog=hash(path.join(dir,'registry/source/bedrock/fogs.json'));
+  p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',fixture,'--animation-source',path.join(fixture,'animation-pack.json')]);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  assert.equal(hash(owner),originalOwner,'Missing official owner fixture must not erase known official links');
+  // Normal fog fixture update may add new IDs, so only assert no deletions.
+  const fog=JSON.parse(fs.readFileSync(path.join(dir,'registry/source/bedrock/fogs.json'),'utf8')).items;
+  assert.ok(fog.length>=3);
+  assert.ok(originalFog);
+  const output=fs.readFileSync(path.join(dir,'src/libraries/animation_library.generated.ts'),'utf8');
+  assert.match(output,/\/\/\% group="Creeper"/);
+  assert.match(output,/animation\.test\.wave/);
  }finally{cleanup(dir);}
 });

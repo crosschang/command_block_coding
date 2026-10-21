@@ -68,13 +68,51 @@ function camera(entries) {
  });
  lines.push('}','');return lines.join('\n');
 }
-function animation(entries) {
+/** Official client_entity references are authoring hints, not /playanimation capability claims. */
+function ownerCatalog() {
+ const file=path.join(root,'registry/derived/bedrock/animation_owner_links.json');
+ if(!fs.existsSync(file))return {animations:{},controllers:{}};
+ const data=JSON.parse(fs.readFileSync(file,'utf8'));
+ if(data.schemaVersion!==1 || !data.animations || !data.controllers) throw Error('Invalid official animation owner link metadata');
+ for(const group of [data.animations,data.controllers]) {
+   if(typeof group!=='object' || Array.isArray(group))throw Error('Invalid owner ID mapping');
+   for(const [id,owners] of Object.entries(group)) {
+     if(!/^(animation\.|controller\.animation\.)[a-zA-Z0-9_.:\/-]+$/.test(id) || !Array.isArray(owners) || !owners.length || owners.some(o=>typeof o!=='string'||!/^[a-z0-9_.-]+:[a-z0-9_.-]+$/.test(o)) || new Set(owners).size!==owners.length)
+       throw Error('Invalid animation owner mapping for '+id);
+   }
+ }
+ return data;
+}
+function entityGroup(entityId) {
+ return entityId.split(':').slice(1).join(':').split(/[_\-]+/).filter(Boolean).map(s=>s[0].toUpperCase()+s.slice(1)).join(' ');
+}
+function assignedGroup(id,owners) {
+ const set=owners[id]||[];
+ return set.length===1?entityGroup(set[0]):set.length>1?'Shared / Common':'Unmapped';
+}
+function groupList(entries,owners) {
+ return ['Direct Input', ...new Set(entries.map(id=>assignedGroup(id,owners)))].filter(g=>g!=='Shared / Common'&&g!=='Unmapped').concat(
+  entries.some(id=>assignedGroup(id,owners)==='Shared / Common')?['Shared / Common']:[],
+  entries.some(id=>assignedGroup(id,owners)==='Unmapped')?['Unmapped']:[]);
+}
+function groupMetadata(groups) {return "//% groups='"+JSON.stringify(groups)+"'";}
+function ownerChecks(catalog,animations,controllers) {
+ // References may include IDs defined in other RP sources or bundled extensions;
+ // never mistake missing entries for an error or silently invent a catalog item.
+ const knownA=new Set(animations),knownC=new Set(controllers);
+ const mappedA=Object.keys(catalog.animations).filter(id=>knownA.has(id)).length;
+ const mappedC=Object.keys(catalog.controllers).filter(id=>knownC.has(id)).length;
+ if(Object.keys(catalog.animations).length||Object.keys(catalog.controllers).length)
+   console.log(`ANIMATION OWNER LINKS: matched animation ${mappedA}/${animations.length}, controller ${mappedC}/${controllers.length}`);
+}
+function animation(entries, owners) {
  const fn=id=>animationLegacy.get(id)||camel(id);
  const bid=id=>'mcfunction_animation_reference_'+token(id).replace(/^animation_/,'');
  validateNames(entries,fn,bid,'animation');
- const lines=['/** AUTO-GENERATED reference reporter; see registry/source/bedrock/animations.json. */','namespace MCFunctionAnimationLibrary {'];
+ const groups=groupList(entries,owners);
+ const lines=['/** AUTO-GENERATED: original block IDs preserved; grouping derived from Mojang vanilla client_entity references. */',groupMetadata(groups),'namespace MCFunctionAnimationLibrary {'];
  entries.forEach((id,i)=>{
-   lines.push(`    //% group="Reference" weight=${Math.max(50,90-i)}`);
+   lines.push(`    //% group=${JSON.stringify(assignedGroup(id,owners))} weight=${Math.max(50,90-i)}`);
    lines.push(`    //% blockId=${bid(id)}`);
    lines.push(`    //% block="${id}${id==='animation.creeper.swelling'?' (creeper)':''}"`);
    lines.push(`    export function ${fn(id)}(): AnimationValue {`);
@@ -83,17 +121,30 @@ function animation(entries) {
  });
  lines.push('}','');return lines.join('\n');
 }
-function animationControllers(entries) {
+function animationControllers(entries,owners) {
  const fn=id=>{const v=camel(id.replace(/^controller\.animation\./,''));return 'animationController'+v[0].toUpperCase()+v.slice(1);};
- const bid=id=>'mcfunction_animation_controller_reference_'+token(id).replace(/^controller_animation_/,'');
- validateNames(entries,fn,bid,'animation controller');
- const lines=['/** AUTO-GENERATED official Mojang animation controller IDs. */','namespace MCFunctionAnimationLibrary {'];
- entries.forEach((id,i)=>{
-   lines.push(`    //% group="Controllers" weight=${Math.max(50,90-i)}`);
-   lines.push(`    //% blockId=${bid(id)}`);
+ const legacyBid=id=>'mcfunction_animation_controller_reference_'+token(id).replace(/^controller_animation_/,'');
+ const newBid=id=>'mcfunction_animation_controller_library_'+token(id).replace(/^controller_animation_/,'');
+ validateNames(entries,fn,legacyBid,'legacy animation controller');
+ validateNames(entries,fn,newBid,'new animation controller');
+ const groups=groupList(entries,owners);
+ const lines=['/** Backward-compatibility: old controller APIs and block IDs stay callable, but are hidden from the new toolbox. */','namespace MCFunctionAnimationLibrary {'];
+ entries.forEach(id=>{
+   lines.push(`    //% blockHidden=true`);
+   lines.push(`    //% blockId=${legacyBid(id)}`);
    lines.push(`    //% block="${id}"`);
    lines.push(`    export function ${fn(id)}(): ControllerValue {`);
    lines.push(`        return new ControllerValue(${JSON.stringify(id)});`);
+   lines.push('    }');
+ });
+ lines.push('}','');
+ lines.push('/** Separate MakeCode category for official animation controllers. */',groupMetadata(groups),'namespace MCFunctionAnimationControllerLibrary {');
+ entries.forEach((id,i)=>{
+   lines.push(`    //% group=${JSON.stringify(assignedGroup(id,owners))} weight=${Math.max(50,90-i)}`);
+   lines.push(`    //% blockId=${newBid(id)}`);
+   lines.push(`    //% block="${id}"`);
+   lines.push(`    export function ${fn(id)}(): MCFunctionAnimationLibrary.ControllerValue {`);
+   lines.push(`        return new MCFunctionAnimationLibrary.ControllerValue(${JSON.stringify(id)});`);
    lines.push('    }');
  });
  lines.push('}','');return lines.join('\n');
@@ -111,9 +162,13 @@ function fog(entries) {
  });
  lines.push('}','');return lines.join('\n');
 }
+const animations=load('animations.json','animation');
+const controllers=load('animation_controllers.json','controller');
+const ownerMap=ownerCatalog();
+ownerChecks(ownerMap,animations,controllers);
 const plans=[
  ['camera_preset_library.generated.ts',camera(load('camera_presets.json','camera'))],
- ['animation_library.generated.ts',animation(load('animations.json','animation')) + animationControllers(load('animation_controllers.json','controller'))],
+ ['animation_library.generated.ts',animation(animations,ownerMap.animations) + animationControllers(controllers,ownerMap.controllers)],
  ['fog_library.generated.ts',fog(load('fogs.json','fog'))]
 ];
 let changes=0;

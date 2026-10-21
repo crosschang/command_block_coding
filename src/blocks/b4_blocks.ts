@@ -45,7 +45,7 @@ namespace Command {
     //% nextState.shadow="text" nextState.defl="default"
     //% blend.shadow="mcfunction_playanimation_blend_seconds"
     //% stop.shadow="mcfunction_playanimation_stop_expression"
-    //% controller.shadow="mcfunction_animation_controller_id"
+    //% controller.shadow="mcfunction_animation_controller_custom_id"
     export function animationOptions(nextState: string,
         blend?: PlayAnimationBlendValue, stop?: PlayAnimationStopValue,
         controller?: MCFunctionAnimationLibrary.ControllerValue): PlayAnimationOptionsValue {

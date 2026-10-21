@@ -1,0 +1,13 @@
+warning: in the working copy of 'registry/source/bedrock/animations.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/libraries/animation_library.generated.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/libraries/animation_library.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/B4_REGISTRY_SAFE_UPDATE_TEST.cjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tools/generate_b4_registry.cjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tools/update_b4_registry.cjs', LF will be replaced by CRLF the next time Git touches it
+ registry/source/bedrock/animations.json      |  543 [32m+++[m[31m-[m
+ src/libraries/animation_library.generated.ts | 4287 [32m++++++++++++++++++++++++++[m
+ src/libraries/animation_library.ts           |    2 [32m+[m[31m-[m
+ tests/B4_REGISTRY_SAFE_UPDATE_TEST.cjs       |   97 [32m+[m[31m-[m
+ tools/generate_b4_registry.cjs               |   17 [32m+[m[31m-[m
+ tools/update_b4_registry.cjs                 |   88 [32m+[m[31m-[m
+ 6 files changed, 5018 insertions(+), 16 deletions(-)

@@ -1,0 +1,2685 @@
+{
+  "schemaVersion": 1,
+  "source": "https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/entity",
+  "note": "Vanilla client_entity references only, not proof that /playanimation runs or is visible in Minecraft Education.",
+  "animations": {
+    "animation.actor.billboard": [
+      "minecraft:dragon_fireball",
+      "minecraft:egg",
+      "minecraft:ender_pearl",
+      "minecraft:eye_of_ender_signal",
+      "minecraft:fireball",
+      "minecraft:lingering_potion",
+      "minecraft:small_fireball",
+      "minecraft:snowball",
+      "minecraft:splash_potion",
+      "minecraft:xp_bottle",
+      "minecraft:xp_orb"
+    ],
+    "animation.agent.move": [
+      "minecraft:agent"
+    ],
+    "animation.agent.shrug": [
+      "minecraft:agent"
+    ],
+    "animation.agent.swing_arms": [
+      "minecraft:agent"
+    ],
+    "animation.allay.dance": [
+      "minecraft:allay"
+    ],
+    "animation.allay.fly": [
+      "minecraft:allay"
+    ],
+    "animation.allay.hold_item": [
+      "minecraft:allay"
+    ],
+    "animation.allay.hold_item_fly": [
+      "minecraft:allay"
+    ],
+    "animation.allay.idle": [
+      "minecraft:allay"
+    ],
+    "animation.allay.look_at_target.default": [
+      "minecraft:allay"
+    ],
+    "animation.armadillo.baby_peek": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.baby_roll_up": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.baby_rolled_up": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.baby_unroll": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.baby_unroll_fast": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.baby_walk": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.look_at_target": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.peek": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.roll_up": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.rolled_up": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.unroll": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.unroll_fast": [
+      "minecraft:armadillo"
+    ],
+    "animation.armadillo.walk": [
+      "minecraft:armadillo"
+    ],
+    "animation.armor_stand.athena_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.brandish_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.cancan_a_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.cancan_b_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.default_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.entertain_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.hero_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.holding_heavy_core": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.honor_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.no_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.riposte_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.salute_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.solemn_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.wiggle": [
+      "minecraft:armor_stand"
+    ],
+    "animation.armor_stand.zombie_pose": [
+      "minecraft:armor_stand"
+    ],
+    "animation.arrow.move": [
+      "minecraft:arrow"
+    ],
+    "animation.axolotl.baby_idle_floor": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.baby_idle_floor_underwater": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.baby_idle_underwater": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.baby_swim": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.baby_walk_floor": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.baby_walk_floor_underwater": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.idle_floor": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.idle_floor_underwater": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.idle_underwater": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.play_dead": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.swim": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.swim_angle": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.walk_floor": [
+      "minecraft:axolotl"
+    ],
+    "animation.axolotl.walk_floor_underwater": [
+      "minecraft:axolotl"
+    ],
+    "animation.bat.flying": [
+      "minecraft:bat"
+    ],
+    "animation.bat.resting": [
+      "minecraft:bat"
+    ],
+    "animation.bee.fly.bobbing": [
+      "minecraft:bee"
+    ],
+    "animation.bee.flying": [
+      "minecraft:bee"
+    ],
+    "animation.bee.no_stinger": [
+      "minecraft:bee"
+    ],
+    "animation.bee.sting": [
+      "minecraft:bee"
+    ],
+    "animation.blaze.move": [
+      "minecraft:blaze"
+    ],
+    "animation.breeze.idle": [
+      "minecraft:breeze"
+    ],
+    "animation.breeze.idle_ground_particles": [
+      "minecraft:breeze"
+    ],
+    "animation.breeze.idle_ground_sound": [
+      "minecraft:breeze"
+    ],
+    "animation.breeze.jump": [
+      "minecraft:breeze"
+    ],
+    "animation.breeze.shoot": [
+      "minecraft:breeze"
+    ],
+    "animation.breeze.slide": [
+      "minecraft:breeze"
+    ],
+    "animation.breeze.slide_ground_particles": [
+      "minecraft:breeze"
+    ],
+    "animation.breeze.whirl_sound": [
+      "minecraft:breeze"
+    ],
+    "animation.camel.baby_dash": [
+      "minecraft:camel"
+    ],
+    "animation.camel.baby_idle": [
+      "minecraft:camel"
+    ],
+    "animation.camel.baby_sit": [
+      "minecraft:camel"
+    ],
+    "animation.camel.baby_sit_down": [
+      "minecraft:camel"
+    ],
+    "animation.camel.baby_stand_up": [
+      "minecraft:camel"
+    ],
+    "animation.camel.baby_walk": [
+      "minecraft:camel"
+    ],
+    "animation.camel.dash": [
+      "minecraft:camel",
+      "minecraft:camel_husk"
+    ],
+    "animation.camel.dash_sound": [
+      "minecraft:camel",
+      "minecraft:camel_husk"
+    ],
+    "animation.camel.idle": [
+      "minecraft:camel",
+      "minecraft:camel_husk"
+    ],
+    "animation.camel.look_at_target": [
+      "minecraft:camel",
+      "minecraft:camel_husk"
+    ],
+    "animation.camel.sit": [
+      "minecraft:camel",
+      "minecraft:camel_husk"
+    ],
+    "animation.camel.sit_down": [
+      "minecraft:camel",
+      "minecraft:camel_husk"
+    ],
+    "animation.camel.stand_up": [
+      "minecraft:camel",
+      "minecraft:camel_husk"
+    ],
+    "animation.camel.walk": [
+      "minecraft:camel",
+      "minecraft:camel_husk"
+    ],
+    "animation.cat.baby_lie_down": [
+      "minecraft:cat"
+    ],
+    "animation.cat.baby_sit": [
+      "minecraft:cat",
+      "minecraft:ocelot"
+    ],
+    "animation.cat.baby_transform": [
+      "minecraft:cat"
+    ],
+    "animation.cat.lie_down": [
+      "minecraft:cat"
+    ],
+    "animation.cat.sit": [
+      "minecraft:cat"
+    ],
+    "animation.cat.sneak": [
+      "minecraft:cat"
+    ],
+    "animation.cat.sprint": [
+      "minecraft:cat"
+    ],
+    "animation.cat.walk": [
+      "minecraft:cat"
+    ],
+    "animation.chicken.baby_transform": [
+      "minecraft:chicken"
+    ],
+    "animation.chicken.general": [
+      "minecraft:chicken"
+    ],
+    "animation.chicken.general.v1.0": [
+      "minecraft:chicken"
+    ],
+    "animation.chicken.move": [
+      "minecraft:chicken"
+    ],
+    "animation.cod.flop": [
+      "minecraft:cod"
+    ],
+    "animation.cod.swim": [
+      "minecraft:cod"
+    ],
+    "animation.common.look_at_target": [
+      "minecraft:agent",
+      "minecraft:axolotl",
+      "minecraft:blaze",
+      "minecraft:breeze",
+      "minecraft:cat",
+      "minecraft:chicken",
+      "minecraft:copper_golem",
+      "minecraft:cow",
+      "minecraft:creeper",
+      "minecraft:elder_guardian",
+      "minecraft:evocation_illager",
+      "minecraft:fox",
+      "minecraft:frog",
+      "minecraft:guardian",
+      "minecraft:iron_golem",
+      "minecraft:llama",
+      "minecraft:mooshroom",
+      "minecraft:npc",
+      "minecraft:ocelot",
+      "minecraft:panda",
+      "minecraft:parrot",
+      "minecraft:pig",
+      "minecraft:polar_bear",
+      "minecraft:rabbit",
+      "minecraft:ravager",
+      "minecraft:sheep",
+      "minecraft:shulker",
+      "minecraft:sniffer",
+      "minecraft:snow_golem",
+      "minecraft:trader_llama",
+      "minecraft:turtle",
+      "minecraft:villager",
+      "minecraft:villager_v2",
+      "minecraft:wandering_trader",
+      "minecraft:witch",
+      "minecraft:wolf"
+    ],
+    "animation.copper_golem.chest_interaction.put_item": [
+      "minecraft:copper_golem"
+    ],
+    "animation.copper_golem.chest_interaction.put_item_fail": [
+      "minecraft:copper_golem"
+    ],
+    "animation.copper_golem.chest_interaction.take_item": [
+      "minecraft:copper_golem"
+    ],
+    "animation.copper_golem.chest_interaction.take_item_fail": [
+      "minecraft:copper_golem"
+    ],
+    "animation.copper_golem.hold_item": [
+      "minecraft:copper_golem"
+    ],
+    "animation.copper_golem.spin": [
+      "minecraft:copper_golem"
+    ],
+    "animation.copper_golem.spin.oxidized": [
+      "minecraft:copper_golem"
+    ],
+    "animation.copper_golem.spin.weathered": [
+      "minecraft:copper_golem"
+    ],
+    "animation.copper_golem.walk": [
+      "minecraft:copper_golem"
+    ],
+    "animation.copper_golem.walk_holding_item": [
+      "minecraft:copper_golem"
+    ],
+    "animation.cow.baby_transform": [
+      "minecraft:cow"
+    ],
+    "animation.cow.setup": [
+      "minecraft:cow"
+    ],
+    "animation.cow.setup.v1.0": [
+      "minecraft:cow"
+    ],
+    "animation.creaking.attack": [
+      "minecraft:creaking"
+    ],
+    "animation.creaking.look_at_target": [
+      "minecraft:creaking"
+    ],
+    "animation.creaking.sway": [
+      "minecraft:creaking"
+    ],
+    "animation.creaking.twitch": [
+      "minecraft:creaking"
+    ],
+    "animation.creaking.walk": [
+      "minecraft:creaking"
+    ],
+    "animation.creeper.legs": [
+      "minecraft:creeper"
+    ],
+    "animation.creeper.swelling": [
+      "minecraft:creeper"
+    ],
+    "animation.dolphin.move": [
+      "minecraft:dolphin"
+    ],
+    "animation.drowned.attack.baby_rotations": [
+      "minecraft:drowned"
+    ],
+    "animation.drowned.attack.rotations": [
+      "minecraft:drowned"
+    ],
+    "animation.drowned.attack.rotations.v1.0": [
+      "minecraft:drowned"
+    ],
+    "animation.drowned.swimming.v1.0": [
+      "minecraft:drowned"
+    ],
+    "animation.ender_crystal.move": [
+      "minecraft:ender_crystal"
+    ],
+    "animation.ender_dragon.jaw_movement": [
+      "minecraft:ender_dragon"
+    ],
+    "animation.ender_dragon.neck_head_movement": [
+      "minecraft:ender_dragon"
+    ],
+    "animation.ender_dragon.setup": [
+      "minecraft:ender_dragon"
+    ],
+    "animation.ender_dragon.tail_movement": [
+      "minecraft:ender_dragon"
+    ],
+    "animation.ender_dragon.wings_limbs_movement": [
+      "minecraft:ender_dragon"
+    ],
+    "animation.enderman.arms_legs": [
+      "minecraft:enderman"
+    ],
+    "animation.enderman.base_pose": [
+      "minecraft:enderman"
+    ],
+    "animation.enderman.base_pose_v1.0": [
+      "minecraft:enderman"
+    ],
+    "animation.enderman.carrying": [
+      "minecraft:enderman"
+    ],
+    "animation.enderman.scary_face": [
+      "minecraft:enderman"
+    ],
+    "animation.enderman.scary_face_v1.0": [
+      "minecraft:enderman"
+    ],
+    "animation.endermite.move": [
+      "minecraft:endermite"
+    ],
+    "animation.evocation_fang.bite": [
+      "minecraft:evocation_fang"
+    ],
+    "animation.evoker.casting": [
+      "minecraft:evocation_illager"
+    ],
+    "animation.evoker.casting.v1.0": [
+      "minecraft:evocation_illager"
+    ],
+    "animation.evoker.general": [
+      "minecraft:evocation_illager"
+    ],
+    "animation.evoker.general.v1.0": [
+      "minecraft:evocation_illager"
+    ],
+    "animation.evoker.move": [
+      "minecraft:evocation_illager"
+    ],
+    "animation.fireworks_rocket.move": [
+      "minecraft:fireworks_rocket"
+    ],
+    "animation.fox.baby_pounce": [
+      "minecraft:fox"
+    ],
+    "animation.fox.baby_sit": [
+      "minecraft:fox"
+    ],
+    "animation.fox.baby_sleep": [
+      "minecraft:fox"
+    ],
+    "animation.fox.baby_transform": [
+      "minecraft:fox"
+    ],
+    "animation.fox.baby_walk": [
+      "minecraft:fox"
+    ],
+    "animation.fox.baby_wiggle": [
+      "minecraft:fox"
+    ],
+    "animation.fox.crouch": [
+      "minecraft:fox"
+    ],
+    "animation.fox.pounce": [
+      "minecraft:fox"
+    ],
+    "animation.fox.setup": [
+      "minecraft:fox"
+    ],
+    "animation.fox.sit": [
+      "minecraft:fox"
+    ],
+    "animation.fox.sleep": [
+      "minecraft:fox"
+    ],
+    "animation.fox.stuck": [
+      "minecraft:fox"
+    ],
+    "animation.fox.wiggle": [
+      "minecraft:fox"
+    ],
+    "animation.frog.croak": [
+      "minecraft:frog"
+    ],
+    "animation.frog.idle.water": [
+      "minecraft:frog"
+    ],
+    "animation.frog.jump": [
+      "minecraft:frog"
+    ],
+    "animation.frog.swim": [
+      "minecraft:frog"
+    ],
+    "animation.frog.tongue": [
+      "minecraft:frog"
+    ],
+    "animation.frog.walk": [
+      "minecraft:frog"
+    ],
+    "animation.ghast.move": [
+      "minecraft:ghast"
+    ],
+    "animation.ghast.scale": [
+      "minecraft:ghast"
+    ],
+    "animation.goat.attack": [
+      "minecraft:goat"
+    ],
+    "animation.goat.look_at_target": [
+      "minecraft:goat"
+    ],
+    "animation.goat.ram_attack": [
+      "minecraft:goat"
+    ],
+    "animation.goat.walk": [
+      "minecraft:goat"
+    ],
+    "animation.guardian.move_eye": [
+      "minecraft:elder_guardian",
+      "minecraft:guardian"
+    ],
+    "animation.guardian.move_eye.v1.0": [
+      "minecraft:elder_guardian",
+      "minecraft:guardian"
+    ],
+    "animation.guardian.setup": [
+      "minecraft:elder_guardian",
+      "minecraft:guardian"
+    ],
+    "animation.guardian.spikes": [
+      "minecraft:elder_guardian",
+      "minecraft:guardian"
+    ],
+    "animation.guardian.spikes.v1.0": [
+      "minecraft:elder_guardian",
+      "minecraft:guardian"
+    ],
+    "animation.guardian.swim": [
+      "minecraft:elder_guardian",
+      "minecraft:guardian"
+    ],
+    "animation.happy_ghast.move": [
+      "minecraft:happy_ghast"
+    ],
+    "animation.happy_ghast.scale": [
+      "minecraft:happy_ghast"
+    ],
+    "animation.hoglin.attack": [
+      "minecraft:hoglin",
+      "minecraft:zoglin"
+    ],
+    "animation.hoglin.baby_scaling": [
+      "minecraft:hoglin",
+      "minecraft:zoglin"
+    ],
+    "animation.hoglin.look_at_target": [
+      "minecraft:hoglin",
+      "minecraft:zoglin"
+    ],
+    "animation.hoglin.walk": [
+      "minecraft:hoglin",
+      "minecraft:zoglin"
+    ],
+    "animation.horse.baby_transform": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.eat": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.look_at_player": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.mouth": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.setup": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.shake_tail": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.stand": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v2.baby_transform": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v2.eat": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v2.setup": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v2.stand": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v2.tail": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v2.walk": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v3.baby_transform": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v3.eat": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v3.look_at_player": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v3.rear": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v3.tail": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.v3.walk": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.horse.walk": [
+      "minecraft:donkey",
+      "minecraft:horse",
+      "minecraft:mule",
+      "minecraft:skeleton_horse",
+      "minecraft:zombie_horse"
+    ],
+    "animation.humanoid.attack.rotations": [
+      "minecraft:bogged",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.attack.rotations.v1.0": [
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.base_pose": [
+      "minecraft:pillager",
+      "minecraft:player",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.base_pose.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:warden",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.big_head": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.big_head.v1.0": [
+      "minecraft:drowned"
+    ],
+    "animation.humanoid.bob": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.bob.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.bow_and_arrow": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.bow_and_arrow.v1.0": [
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.brandish_spear": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.brandish_spear.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.brushing": [
+      "minecraft:player"
+    ],
+    "animation.humanoid.celebrating": [
+      "minecraft:evocation_illager",
+      "minecraft:pillager",
+      "minecraft:vindicator"
+    ],
+    "animation.humanoid.charging": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.charging.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.damage_nearby_mobs": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.damage_nearby_mobs.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.fishing_rod": [
+      "minecraft:player"
+    ],
+    "animation.humanoid.holding": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.holding_brush": [
+      "minecraft:player"
+    ],
+    "animation.humanoid.holding_spyglass": [
+      "minecraft:player"
+    ],
+    "animation.humanoid.holding.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.look_at_target.default": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:pillager",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:vindicator",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.look_at_target.default.v1.0": [
+      "minecraft:drowned",
+      "minecraft:evocation_illager",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:vindicator",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.look_at_target.gliding": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:pillager",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:vindicator",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.look_at_target.gliding.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:vindicator",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.look_at_target.swimming": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:pillager",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:vindicator",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.look_at_target.swimming.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:vindicator",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.melee_spear_hold": [
+      "minecraft:piglin",
+      "minecraft:player"
+    ],
+    "animation.humanoid.melee_spear_use": [
+      "minecraft:piglin",
+      "minecraft:player"
+    ],
+    "animation.humanoid.move": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.move.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.riding.arms": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.riding.arms.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.riding.body": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:evocation_illager",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vindicator",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.riding.legs": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:evocation_illager",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.riding.legs.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.sneaking": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.sneaking.v1.0": [
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.swimming": [
+      "minecraft:vex",
+      "minecraft:zombie_pigman"
+    ],
+    "animation.humanoid.swimming.v1.0": [
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:warden",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.humanoid.tooting_goat_horn": [
+      "minecraft:player"
+    ],
+    "animation.humanoid.use_item_progress": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.humanoid.use_item_progress.v1.0": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager"
+    ],
+    "animation.iron_golem.attack": [
+      "minecraft:iron_golem"
+    ],
+    "animation.iron_golem.flower": [
+      "minecraft:iron_golem"
+    ],
+    "animation.iron_golem.move": [
+      "minecraft:iron_golem"
+    ],
+    "animation.iron_golem.move_to_target": [
+      "minecraft:iron_golem"
+    ],
+    "animation.iron_golem.walk": [
+      "minecraft:iron_golem"
+    ],
+    "animation.iron_golem.walk_to_target": [
+      "minecraft:iron_golem"
+    ],
+    "animation.llama_spit.setup": [
+      "minecraft:llama_spit"
+    ],
+    "animation.llama.baby_transform": [
+      "minecraft:llama",
+      "minecraft:trader_llama"
+    ],
+    "animation.llama.baby_transform.v1.0": [
+      "minecraft:llama"
+    ],
+    "animation.llama.setup": [
+      "minecraft:llama",
+      "minecraft:trader_llama"
+    ],
+    "animation.llama.setup.v1.0": [
+      "minecraft:llama"
+    ],
+    "animation.magma_cube.move": [
+      "minecraft:magma_cube"
+    ],
+    "animation.minecart.move": [
+      "minecraft:chest_minecart",
+      "minecraft:command_block_minecart",
+      "minecraft:hopper_minecart",
+      "minecraft:tnt_minecart"
+    ],
+    "animation.minecart.move.v1.0": [
+      "minecraft:chest_minecart",
+      "minecraft:command_block_minecart",
+      "minecraft:hopper_minecart",
+      "minecraft:minecart",
+      "minecraft:tnt_minecart"
+    ],
+    "animation.mooshroom.baby_transform": [
+      "minecraft:mooshroom"
+    ],
+    "animation.mooshroom.setup": [
+      "minecraft:mooshroom"
+    ],
+    "animation.mooshroom.setup.v1.0": [
+      "minecraft:mooshroom"
+    ],
+    "animation.nautilus.breathe": [
+      "minecraft:nautilus",
+      "minecraft:zombie_nautilus"
+    ],
+    "animation.nautilus.dashing": [
+      "minecraft:nautilus",
+      "minecraft:zombie_nautilus"
+    ],
+    "animation.nautilus.look_at_target": [
+      "minecraft:nautilus",
+      "minecraft:zombie_nautilus"
+    ],
+    "animation.nautilus.swim": [
+      "minecraft:nautilus",
+      "minecraft:zombie_nautilus"
+    ],
+    "animation.npc.baby_transform": [
+      "minecraft:npc"
+    ],
+    "animation.npc.general": [
+      "minecraft:npc"
+    ],
+    "animation.npc.move": [
+      "minecraft:npc"
+    ],
+    "animation.ocelot_v1.0.baby_transform": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot_v1.0.setup": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot_v1.0.sit": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot_v1.0.sneak": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot_v1.0.sprint": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot_v1.0.walk": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot.baby_transform": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot.sit": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot.sneak": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot.sprint": [
+      "minecraft:ocelot"
+    ],
+    "animation.ocelot.walk": [
+      "minecraft:ocelot"
+    ],
+    "animation.panda.baby_lying": [
+      "minecraft:panda"
+    ],
+    "animation.panda.baby_rolling": [
+      "minecraft:panda"
+    ],
+    "animation.panda.baby_sitting": [
+      "minecraft:panda"
+    ],
+    "animation.panda.baby_transform": [
+      "minecraft:panda"
+    ],
+    "animation.panda.lying": [
+      "minecraft:panda"
+    ],
+    "animation.panda.rolling": [
+      "minecraft:panda"
+    ],
+    "animation.panda.sitting": [
+      "minecraft:panda"
+    ],
+    "animation.panda.sneezing": [
+      "minecraft:panda"
+    ],
+    "animation.panda.unhappy": [
+      "minecraft:panda"
+    ],
+    "animation.parrot.base": [
+      "minecraft:parrot"
+    ],
+    "animation.parrot.dance": [
+      "minecraft:parrot"
+    ],
+    "animation.parrot.flying": [
+      "minecraft:parrot"
+    ],
+    "animation.parrot.moving": [
+      "minecraft:parrot"
+    ],
+    "animation.parrot.sitting": [
+      "minecraft:parrot"
+    ],
+    "animation.parrot.standing": [
+      "minecraft:parrot"
+    ],
+    "animation.phantom.base_pose": [
+      "minecraft:phantom"
+    ],
+    "animation.phantom.move": [
+      "minecraft:phantom"
+    ],
+    "animation.pig.baby_transform": [
+      "minecraft:pig"
+    ],
+    "animation.pig.setup": [
+      "minecraft:pig"
+    ],
+    "animation.pig.setup.v1.0": [
+      "minecraft:pig"
+    ],
+    "animation.piglin.admire": [
+      "minecraft:piglin"
+    ],
+    "animation.piglin.celebrate_hunt": [
+      "minecraft:piglin"
+    ],
+    "animation.piglin.celebrate_hunt_special": [
+      "minecraft:piglin"
+    ],
+    "animation.piglin.crossbow.charge": [
+      "minecraft:piglin",
+      "minecraft:piglin_brute"
+    ],
+    "animation.piglin.crossbow.hold": [
+      "minecraft:piglin",
+      "minecraft:piglin_brute"
+    ],
+    "animation.piglin.hand.attack": [
+      "minecraft:piglin",
+      "minecraft:piglin_brute"
+    ],
+    "animation.piglin.move": [
+      "minecraft:piglin",
+      "minecraft:piglin_brute"
+    ],
+    "animation.piglin.sword.attack": [
+      "minecraft:piglin",
+      "minecraft:piglin_brute"
+    ],
+    "animation.pillager.crossbow.charge": [
+      "minecraft:pillager"
+    ],
+    "animation.pillager.crossbow.hold": [
+      "minecraft:pillager"
+    ],
+    "animation.player.attack.positions": [
+      "minecraft:player"
+    ],
+    "animation.player.attack.rotations": [
+      "minecraft:player"
+    ],
+    "animation.player.bob": [
+      "minecraft:player"
+    ],
+    "animation.player.bow_equipped": [
+      "minecraft:player"
+    ],
+    "animation.player.cape": [
+      "minecraft:player"
+    ],
+    "animation.player.crawl": [
+      "minecraft:player"
+    ],
+    "animation.player.crawl.legs": [
+      "minecraft:player"
+    ],
+    "animation.player.crawl.no_right_arm": [
+      "minecraft:player"
+    ],
+    "animation.player.crossbow_equipped": [
+      "minecraft:player"
+    ],
+    "animation.player.crossbow_hold": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.attack_rotation": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.attack_rotation_item": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.base_pose": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.breathing_bob": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.crossbow_equipped": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.crossbow_hold": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.empty_hand": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.map_hold": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.map_hold_attack": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.map_hold_main_hand": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.map_hold_off_hand": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.melee_spear_attack": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.melee_spear_hold": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.melee_spear_use": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.shield_block": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.swap_item": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.vr_attack_rotation": [
+      "minecraft:player"
+    ],
+    "animation.player.first_person.walk": [
+      "minecraft:player"
+    ],
+    "animation.player.holding": [
+      "minecraft:player"
+    ],
+    "animation.player.holding_heavy_core": [
+      "minecraft:player"
+    ],
+    "animation.player.look_at_target.inverted": [
+      "minecraft:player"
+    ],
+    "animation.player.look_at_target.ui": [
+      "minecraft:player"
+    ],
+    "animation.player.melee_spear_attack": [
+      "minecraft:player"
+    ],
+    "animation.player.move.arms": [
+      "minecraft:player"
+    ],
+    "animation.player.move.legs": [
+      "minecraft:player"
+    ],
+    "animation.player.riding.arms": [
+      "minecraft:player"
+    ],
+    "animation.player.riding.legs": [
+      "minecraft:player"
+    ],
+    "animation.player.riding.root": [
+      "minecraft:player"
+    ],
+    "animation.player.shield_block_main_hand": [
+      "minecraft:player"
+    ],
+    "animation.player.shield_block_off_hand": [
+      "minecraft:player"
+    ],
+    "animation.player.sleeping": [
+      "minecraft:player"
+    ],
+    "animation.player.sneaking": [
+      "minecraft:player"
+    ],
+    "animation.player.swim": [
+      "minecraft:player"
+    ],
+    "animation.player.swim.legs": [
+      "minecraft:player"
+    ],
+    "animation.player.swim.no_right_arm": [
+      "minecraft:player"
+    ],
+    "animation.polarbear.baby_transform": [
+      "minecraft:polar_bear"
+    ],
+    "animation.polarbear.move": [
+      "minecraft:polar_bear"
+    ],
+    "animation.pufferfish.flop": [
+      "minecraft:pufferfish"
+    ],
+    "animation.pufferfish.swim": [
+      "minecraft:pufferfish"
+    ],
+    "animation.quadruped.walk": [
+      "minecraft:cow",
+      "minecraft:fox",
+      "minecraft:llama",
+      "minecraft:mooshroom",
+      "minecraft:panda",
+      "minecraft:pig",
+      "minecraft:polar_bear",
+      "minecraft:sheep",
+      "minecraft:trader_llama"
+    ],
+    "animation.rabbit.baby_transform": [
+      "minecraft:rabbit"
+    ],
+    "animation.rabbit.idle_head_tilt": [
+      "minecraft:rabbit"
+    ],
+    "animation.rabbit.move": [
+      "minecraft:rabbit"
+    ],
+    "animation.rabbit.move.baby": [
+      "minecraft:rabbit"
+    ],
+    "animation.rabbit.move.v2": [
+      "minecraft:rabbit"
+    ],
+    "animation.ravager.biting": [
+      "minecraft:ravager"
+    ],
+    "animation.ravager.idle_mouth": [
+      "minecraft:ravager"
+    ],
+    "animation.ravager.roaring": [
+      "minecraft:ravager"
+    ],
+    "animation.ravager.stunned": [
+      "minecraft:ravager"
+    ],
+    "animation.ravager.walk": [
+      "minecraft:ravager"
+    ],
+    "animation.salmon.flop": [
+      "minecraft:salmon"
+    ],
+    "animation.salmon.swim": [
+      "minecraft:salmon"
+    ],
+    "animation.sheep.baby_transform": [
+      "minecraft:sheep"
+    ],
+    "animation.sheep.grazing": [
+      "minecraft:sheep"
+    ],
+    "animation.sheep.grazing.v2": [
+      "minecraft:sheep"
+    ],
+    "animation.sheep.setup": [
+      "minecraft:sheep"
+    ],
+    "animation.sheep.setup.v2": [
+      "minecraft:sheep"
+    ],
+    "animation.shulker_bullet.move": [
+      "minecraft:shulker_bullet"
+    ],
+    "animation.shulker.facing": [
+      "minecraft:shulker"
+    ],
+    "animation.shulker.facing.v1.0": [
+      "minecraft:shulker"
+    ],
+    "animation.shulker.move": [
+      "minecraft:shulker"
+    ],
+    "animation.shulker.move.v1.0": [
+      "minecraft:shulker"
+    ],
+    "animation.silverfish.move": [
+      "minecraft:silverfish"
+    ],
+    "animation.skeleton.attack": [
+      "minecraft:bogged",
+      "minecraft:parched",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray"
+    ],
+    "animation.skeleton.attack.v1.0": [
+      "minecraft:skeleton"
+    ],
+    "animation.sniffer.baby_transform": [
+      "minecraft:sniffer"
+    ],
+    "animation.sniffer.dig": [
+      "minecraft:sniffer"
+    ],
+    "animation.sniffer.feeling_happy": [
+      "minecraft:sniffer"
+    ],
+    "animation.sniffer.longsniff": [
+      "minecraft:sniffer"
+    ],
+    "animation.sniffer.search": [
+      "minecraft:sniffer"
+    ],
+    "animation.sniffer.sniffsniff": [
+      "minecraft:sniffer"
+    ],
+    "animation.sniffer.stand_up": [
+      "minecraft:sniffer"
+    ],
+    "animation.sniffer.walk": [
+      "minecraft:sniffer"
+    ],
+    "animation.snowgolem.arms": [
+      "minecraft:snow_golem"
+    ],
+    "animation.snowgolem.move": [
+      "minecraft:snow_golem"
+    ],
+    "animation.snowgolem.move.v1.8": [
+      "minecraft:snow_golem"
+    ],
+    "animation.spider.default_leg_pose": [
+      "minecraft:cave_spider",
+      "minecraft:spider"
+    ],
+    "animation.spider.look_at_target": [
+      "minecraft:cave_spider",
+      "minecraft:spider"
+    ],
+    "animation.spider.walk": [
+      "minecraft:cave_spider",
+      "minecraft:spider"
+    ],
+    "animation.squid.move": [
+      "minecraft:glow_squid",
+      "minecraft:squid"
+    ],
+    "animation.squid.rotate": [
+      "minecraft:glow_squid",
+      "minecraft:squid"
+    ],
+    "animation.strider.baby.bristle_flow": [
+      "minecraft:strider"
+    ],
+    "animation.strider.baby.walk": [
+      "minecraft:strider"
+    ],
+    "animation.strider.bristle_flow": [
+      "minecraft:strider"
+    ],
+    "animation.strider.look_at_target.default": [
+      "minecraft:strider"
+    ],
+    "animation.strider.walk": [
+      "minecraft:strider"
+    ],
+    "animation.sulfur_cube.offset": [
+      "minecraft:sulfur_cube"
+    ],
+    "animation.sulfur_cube.swelling": [
+      "minecraft:sulfur_cube"
+    ],
+    "animation.tadpole.swim": [
+      "minecraft:tadpole"
+    ],
+    "animation.tripod_camera.neutral": [
+      "minecraft:tripod_camera"
+    ],
+    "animation.tropicalfish.flop": [
+      "minecraft:tropicalfish"
+    ],
+    "animation.tropicalfish.swim": [
+      "minecraft:tropicalfish"
+    ],
+    "animation.turtle.baby_move": [
+      "minecraft:turtle"
+    ],
+    "animation.turtle.general": [
+      "minecraft:turtle"
+    ],
+    "animation.turtle.ground_move": [
+      "minecraft:turtle"
+    ],
+    "animation.turtle.move": [
+      "minecraft:turtle"
+    ],
+    "animation.vex.attack.rotations.v1.0": [
+      "minecraft:vex"
+    ],
+    "animation.vex.charge": [
+      "minecraft:vex"
+    ],
+    "animation.vex.idle": [
+      "minecraft:vex"
+    ],
+    "animation.vex.move": [
+      "minecraft:vex"
+    ],
+    "animation.villager.baby_transform": [
+      "minecraft:villager",
+      "minecraft:villager_v2"
+    ],
+    "animation.villager.general": [
+      "minecraft:villager",
+      "minecraft:villager_v2",
+      "minecraft:wandering_trader",
+      "minecraft:witch"
+    ],
+    "animation.villager.general.v1.0": [
+      "minecraft:villager",
+      "minecraft:witch"
+    ],
+    "animation.villager.get_in_bed": [
+      "minecraft:villager_v2"
+    ],
+    "animation.villager.get_in_bed_baby": [
+      "minecraft:villager_v2"
+    ],
+    "animation.villager.move": [
+      "minecraft:evocation_illager",
+      "minecraft:villager",
+      "minecraft:villager_v2",
+      "minecraft:wandering_trader",
+      "minecraft:witch"
+    ],
+    "animation.villager.raise_arms": [
+      "minecraft:villager_v2",
+      "minecraft:wandering_trader"
+    ],
+    "animation.vindicator.attack": [
+      "minecraft:vindicator"
+    ],
+    "animation.vindicator.base": [
+      "minecraft:vindicator"
+    ],
+    "animation.vindicator.hand_attack": [
+      "minecraft:vindicator"
+    ],
+    "animation.vindicator.riding.arms": [
+      "minecraft:vindicator"
+    ],
+    "animation.vindicator.riding.legs": [
+      "minecraft:vindicator"
+    ],
+    "animation.vindicator.walk": [
+      "minecraft:vindicator"
+    ],
+    "animation.warden.attack": [
+      "minecraft:warden"
+    ],
+    "animation.warden.bob": [
+      "minecraft:warden"
+    ],
+    "animation.warden.dig": [
+      "minecraft:warden"
+    ],
+    "animation.warden.emerge": [
+      "minecraft:warden"
+    ],
+    "animation.warden.hurt": [
+      "minecraft:warden"
+    ],
+    "animation.warden.look_at_target.default": [
+      "minecraft:warden"
+    ],
+    "animation.warden.move": [
+      "minecraft:warden"
+    ],
+    "animation.warden.roar": [
+      "minecraft:warden"
+    ],
+    "animation.warden.shiver": [
+      "minecraft:warden"
+    ],
+    "animation.warden.sniff": [
+      "minecraft:warden"
+    ],
+    "animation.warden.sonic_boom": [
+      "minecraft:warden"
+    ],
+    "animation.wind_charge.rotate": [
+      "minecraft:breeze_wind_charge_projectile",
+      "minecraft:wind_charge_projectile"
+    ],
+    "animation.witch.general": [
+      "minecraft:witch"
+    ],
+    "animation.wither_boss.look_at_target": [
+      "minecraft:wither"
+    ],
+    "animation.wither_boss.move": [
+      "minecraft:wither"
+    ],
+    "animation.wither_boss.scale": [
+      "minecraft:wither"
+    ],
+    "animation.wither_skeleton.attack": [
+      "minecraft:wither_skeleton"
+    ],
+    "animation.wither_skull.move": [
+      "minecraft:wither_skull",
+      "minecraft:wither_skull_dangerous"
+    ],
+    "animation.wolf.angry": [
+      "minecraft:wolf"
+    ],
+    "animation.wolf.baby_scaling": [
+      "minecraft:wolf"
+    ],
+    "animation.wolf.baby_sitting": [
+      "minecraft:wolf"
+    ],
+    "animation.wolf.head_rot_z": [
+      "minecraft:wolf"
+    ],
+    "animation.wolf.leg_default": [
+      "minecraft:wolf"
+    ],
+    "animation.wolf.setup": [
+      "minecraft:wolf"
+    ],
+    "animation.wolf.shaking": [
+      "minecraft:wolf"
+    ],
+    "animation.wolf.sitting": [
+      "minecraft:wolf"
+    ],
+    "animation.wolf.tail_default": [
+      "minecraft:wolf"
+    ],
+    "animation.zombie.attack_bare_hand": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.zombie.baby_attack_bare_hand": [
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.zombie.melee_spear_hold": [
+      "minecraft:husk",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.zombie.melee_spear_use": [
+      "minecraft:husk",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager_v2"
+    ],
+    "animation.zombie.swimming": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ]
+  },
+  "controllers": {
+    "controller.animation.agent.move": [
+      "minecraft:agent"
+    ],
+    "controller.animation.allay.dancing": [
+      "minecraft:allay"
+    ],
+    "controller.animation.allay.general": [
+      "minecraft:allay"
+    ],
+    "controller.animation.allay.holding": [
+      "minecraft:allay"
+    ],
+    "controller.animation.allay.look_at_target": [
+      "minecraft:allay"
+    ],
+    "controller.animation.armadillo.look_at_target": [
+      "minecraft:armadillo"
+    ],
+    "controller.animation.armadillo.roll_up": [
+      "minecraft:armadillo"
+    ],
+    "controller.animation.armadillo.walk": [
+      "minecraft:armadillo"
+    ],
+    "controller.animation.armor_stand.holding_heavy_core": [
+      "minecraft:armor_stand"
+    ],
+    "controller.animation.armor_stand.pose": [
+      "minecraft:armor_stand"
+    ],
+    "controller.animation.armor_stand.wiggle": [
+      "minecraft:armor_stand"
+    ],
+    "controller.animation.axolotl.general": [
+      "minecraft:axolotl"
+    ],
+    "controller.animation.axolotl.move.v2": [
+      "minecraft:axolotl"
+    ],
+    "controller.animation.bat.move": [
+      "minecraft:bat"
+    ],
+    "controller.animation.bee.drip": [
+      "minecraft:bee"
+    ],
+    "controller.animation.bee.root": [
+      "minecraft:bee"
+    ],
+    "controller.animation.bee.sting": [
+      "minecraft:bee"
+    ],
+    "controller.animation.blaze.flame": [
+      "minecraft:blaze"
+    ],
+    "controller.animation.blaze.move": [
+      "minecraft:blaze"
+    ],
+    "controller.animation.breeze.ground_particles": [
+      "minecraft:breeze"
+    ],
+    "controller.animation.breeze.idle": [
+      "minecraft:breeze"
+    ],
+    "controller.animation.breeze.idle_ground_sound": [
+      "minecraft:breeze"
+    ],
+    "controller.animation.breeze.jump": [
+      "minecraft:breeze"
+    ],
+    "controller.animation.breeze.look_at": [
+      "minecraft:breeze"
+    ],
+    "controller.animation.breeze.move": [
+      "minecraft:breeze"
+    ],
+    "controller.animation.breeze.shoot": [
+      "minecraft:breeze"
+    ],
+    "controller.animation.camel_husk.general": [
+      "minecraft:camel_husk"
+    ],
+    "controller.animation.camel_husk.idle": [
+      "minecraft:camel_husk"
+    ],
+    "controller.animation.camel.general": [
+      "minecraft:camel"
+    ],
+    "controller.animation.camel.idle": [
+      "minecraft:camel"
+    ],
+    "controller.animation.cat.look_at_target": [
+      "minecraft:cat"
+    ],
+    "controller.animation.cat.move": [
+      "minecraft:cat"
+    ],
+    "controller.animation.copper_golem.chest_interaction": [
+      "minecraft:copper_golem"
+    ],
+    "controller.animation.copper_golem.idle": [
+      "minecraft:copper_golem"
+    ],
+    "controller.animation.copper_golem.walk": [
+      "minecraft:copper_golem"
+    ],
+    "controller.animation.creaking.attack": [
+      "minecraft:creaking"
+    ],
+    "controller.animation.creaking.look_at_target": [
+      "minecraft:creaking"
+    ],
+    "controller.animation.creaking.sway": [
+      "minecraft:creaking"
+    ],
+    "controller.animation.creaking.twitch": [
+      "minecraft:creaking"
+    ],
+    "controller.animation.creaking.walk": [
+      "minecraft:creaking"
+    ],
+    "controller.animation.creeper.head": [
+      "minecraft:creeper"
+    ],
+    "controller.animation.creeper.legs": [
+      "minecraft:creeper"
+    ],
+    "controller.animation.creeper.swelling": [
+      "minecraft:creeper"
+    ],
+    "controller.animation.dolphin.general": [
+      "minecraft:dolphin"
+    ],
+    "controller.animation.drowned.attack.rotations": [
+      "minecraft:drowned"
+    ],
+    "controller.animation.enderman.base_pose": [
+      "minecraft:enderman"
+    ],
+    "controller.animation.enderman.carrying": [
+      "minecraft:enderman"
+    ],
+    "controller.animation.enderman.scary_face": [
+      "minecraft:enderman"
+    ],
+    "controller.animation.endermite.move": [
+      "minecraft:endermite"
+    ],
+    "controller.animation.evoker.general": [
+      "minecraft:evocation_illager"
+    ],
+    "controller.animation.evoker.general.v1.0": [
+      "minecraft:evocation_illager"
+    ],
+    "controller.animation.fish.general": [
+      "minecraft:cod",
+      "minecraft:pufferfish",
+      "minecraft:salmon",
+      "minecraft:tropicalfish"
+    ],
+    "controller.animation.fox.move": [
+      "minecraft:fox"
+    ],
+    "controller.animation.frog.croaking": [
+      "minecraft:frog"
+    ],
+    "controller.animation.frog.eat_mob": [
+      "minecraft:frog"
+    ],
+    "controller.animation.frog.general": [
+      "minecraft:frog"
+    ],
+    "controller.animation.ghast.move": [
+      "minecraft:ghast"
+    ],
+    "controller.animation.happy_ghast.move": [
+      "minecraft:happy_ghast"
+    ],
+    "controller.animation.happy_ghast.scale": [
+      "minecraft:happy_ghast"
+    ],
+    "controller.animation.hoglin.attack": [
+      "minecraft:hoglin"
+    ],
+    "controller.animation.hoglin.look_at_target": [
+      "minecraft:hoglin"
+    ],
+    "controller.animation.hoglin.walk": [
+      "minecraft:hoglin"
+    ],
+    "controller.animation.humanoid.attack": [
+      "minecraft:bogged",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.baby_big_head": [
+      "minecraft:husk",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.base_pose": [
+      "minecraft:husk",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.bob": [
+      "minecraft:bogged",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.bow_and_arrow": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.brandish_spear": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.charging": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.damage_nearby_mobs": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.holding": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.look_at_target": [
+      "minecraft:bogged",
+      "minecraft:drowned",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:pillager",
+      "minecraft:player",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:vindicator",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.melee_spear": [
+      "minecraft:husk",
+      "minecraft:piglin",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.move": [
+      "minecraft:bogged",
+      "minecraft:enderman",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.riding": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:piglin",
+      "minecraft:piglin_brute",
+      "minecraft:pillager",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:vindicator",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.riding_legs_only": [
+      "minecraft:evocation_illager"
+    ],
+    "controller.animation.humanoid.sneaking": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.humanoid.swimming": [
+      "minecraft:husk",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman"
+    ],
+    "controller.animation.humanoid.use_item_progress": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:vex",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.iron_golem.arm_movement": [
+      "minecraft:iron_golem"
+    ],
+    "controller.animation.iron_golem.move": [
+      "minecraft:iron_golem"
+    ],
+    "controller.animation.llama.baby": [
+      "minecraft:llama"
+    ],
+    "controller.animation.llama.move": [
+      "minecraft:llama",
+      "minecraft:trader_llama"
+    ],
+    "controller.animation.magma_cube.general": [
+      "minecraft:magma_cube"
+    ],
+    "controller.animation.mooshroom.baby": [
+      "minecraft:mooshroom"
+    ],
+    "controller.animation.mooshroom.move": [
+      "minecraft:mooshroom"
+    ],
+    "controller.animation.mooshroom.setup": [
+      "minecraft:mooshroom"
+    ],
+    "controller.animation.nautilus.general": [
+      "minecraft:nautilus",
+      "minecraft:zombie_nautilus"
+    ],
+    "controller.animation.nautilus.sound": [
+      "minecraft:nautilus",
+      "minecraft:zombie_nautilus"
+    ],
+    "controller.animation.ocelot_v1.0.baby": [
+      "minecraft:ocelot"
+    ],
+    "controller.animation.ocelot_v1.0.look_at_target": [
+      "minecraft:ocelot"
+    ],
+    "controller.animation.ocelot_v1.0.move": [
+      "minecraft:ocelot"
+    ],
+    "controller.animation.ocelot_v1.0.setup": [
+      "minecraft:ocelot"
+    ],
+    "controller.animation.ocelot.look_at_target": [
+      "minecraft:ocelot"
+    ],
+    "controller.animation.ocelot.move": [
+      "minecraft:ocelot"
+    ],
+    "controller.animation.panda.move": [
+      "minecraft:panda"
+    ],
+    "controller.animation.panda.sneezing": [
+      "minecraft:panda"
+    ],
+    "controller.animation.panda.unhappy": [
+      "minecraft:panda"
+    ],
+    "controller.animation.parrot.move": [
+      "minecraft:parrot"
+    ],
+    "controller.animation.parrot.setup": [
+      "minecraft:parrot"
+    ],
+    "controller.animation.persona.blink": [
+      "minecraft:player"
+    ],
+    "controller.animation.phantom.base_pose": [
+      "minecraft:phantom"
+    ],
+    "controller.animation.phantom.move": [
+      "minecraft:phantom"
+    ],
+    "controller.animation.piglin.attack": [
+      "minecraft:piglin",
+      "minecraft:piglin_brute"
+    ],
+    "controller.animation.pillager.attack": [
+      "minecraft:pillager"
+    ],
+    "controller.animation.pillager.root": [
+      "minecraft:pillager"
+    ],
+    "controller.animation.player.base": [
+      "minecraft:player"
+    ],
+    "controller.animation.player.crossbow": [
+      "minecraft:player"
+    ],
+    "controller.animation.player.first_person_attack": [
+      "minecraft:player"
+    ],
+    "controller.animation.player.first_person_map": [
+      "minecraft:player"
+    ],
+    "controller.animation.player.first_person_melee_spear": [
+      "minecraft:player"
+    ],
+    "controller.animation.player.hudplayer": [
+      "minecraft:player"
+    ],
+    "controller.animation.player.melee_spear": [
+      "minecraft:player"
+    ],
+    "controller.animation.player.root": [
+      "minecraft:player"
+    ],
+    "controller.animation.polar_bear.move": [
+      "minecraft:polar_bear"
+    ],
+    "controller.animation.rabbit.baby": [
+      "minecraft:rabbit"
+    ],
+    "controller.animation.rabbit.general": [
+      "minecraft:rabbit"
+    ],
+    "controller.animation.rabbit.general.v2": [
+      "minecraft:rabbit"
+    ],
+    "controller.animation.ravager.head_movement": [
+      "minecraft:ravager"
+    ],
+    "controller.animation.ravager.move": [
+      "minecraft:ravager"
+    ],
+    "controller.animation.sheep.move": [
+      "minecraft:sheep"
+    ],
+    "controller.animation.shulker.facing": [
+      "minecraft:shulker"
+    ],
+    "controller.animation.shulker.move": [
+      "minecraft:shulker"
+    ],
+    "controller.animation.silverfish.move": [
+      "minecraft:silverfish"
+    ],
+    "controller.animation.skeleton.attack": [
+      "minecraft:bogged",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray"
+    ],
+    "controller.animation.sniffer.dig": [
+      "minecraft:sniffer"
+    ],
+    "controller.animation.sniffer.feeling_happy": [
+      "minecraft:sniffer"
+    ],
+    "controller.animation.sniffer.general": [
+      "minecraft:sniffer"
+    ],
+    "controller.animation.sniffer.long_sniff": [
+      "minecraft:sniffer"
+    ],
+    "controller.animation.sniffer.search": [
+      "minecraft:sniffer"
+    ],
+    "controller.animation.sniffer.sniffsniff": [
+      "minecraft:sniffer"
+    ],
+    "controller.animation.sniffer.stand_up": [
+      "minecraft:sniffer"
+    ],
+    "controller.animation.sniffer.walk": [
+      "minecraft:sniffer"
+    ],
+    "controller.animation.snowgolem.move": [
+      "minecraft:snow_golem"
+    ],
+    "controller.animation.snowgolem.move.v1.8": [
+      "minecraft:snow_golem"
+    ],
+    "controller.animation.spider.move": [
+      "minecraft:cave_spider",
+      "minecraft:spider"
+    ],
+    "controller.animation.sulfur_cube.offset": [
+      "minecraft:sulfur_cube"
+    ],
+    "controller.animation.sulfur_cube.swelling": [
+      "minecraft:sulfur_cube"
+    ],
+    "controller.animation.tadpole.general": [
+      "minecraft:tadpole"
+    ],
+    "controller.animation.tripod_camera.base_pose": [
+      "minecraft:tripod_camera"
+    ],
+    "controller.animation.turtle.general": [
+      "minecraft:turtle"
+    ],
+    "controller.animation.turtle.move": [
+      "minecraft:turtle"
+    ],
+    "controller.animation.vex.charge": [
+      "minecraft:vex"
+    ],
+    "controller.animation.vex.idle": [
+      "minecraft:vex"
+    ],
+    "controller.animation.vex.move": [
+      "minecraft:vex"
+    ],
+    "controller.animation.villager_v2.general": [
+      "minecraft:villager_v2"
+    ],
+    "controller.animation.villager_v2.move": [
+      "minecraft:villager_v2"
+    ],
+    "controller.animation.villager_v2.raise_arms": [
+      "minecraft:villager_v2",
+      "minecraft:wandering_trader"
+    ],
+    "controller.animation.villager.baby": [
+      "minecraft:villager"
+    ],
+    "controller.animation.villager.general": [
+      "minecraft:villager",
+      "minecraft:wandering_trader"
+    ],
+    "controller.animation.villager.move": [
+      "minecraft:evocation_illager",
+      "minecraft:villager",
+      "minecraft:wandering_trader",
+      "minecraft:witch"
+    ],
+    "controller.animation.vindicator.base": [
+      "minecraft:vindicator"
+    ],
+    "controller.animation.vindicator.base.v1.0": [
+      "minecraft:vindicator"
+    ],
+    "controller.animation.warden.hurt": [
+      "minecraft:warden"
+    ],
+    "controller.animation.warden.melee_attacking": [
+      "minecraft:warden"
+    ],
+    "controller.animation.warden.roar": [
+      "minecraft:warden"
+    ],
+    "controller.animation.warden.shiver": [
+      "minecraft:warden"
+    ],
+    "controller.animation.warden.sniff": [
+      "minecraft:warden"
+    ],
+    "controller.animation.warden.sonic_boom": [
+      "minecraft:warden"
+    ],
+    "controller.animation.witch.general": [
+      "minecraft:witch"
+    ],
+    "controller.animation.wither_boss.move": [
+      "minecraft:wither"
+    ],
+    "controller.animation.wither_skeleton.attack": [
+      "minecraft:wither_skeleton"
+    ],
+    "controller.animation.wolf.angry": [
+      "minecraft:wolf"
+    ],
+    "controller.animation.wolf.head_rot_z": [
+      "minecraft:wolf"
+    ],
+    "controller.animation.wolf.look_at": [
+      "minecraft:wolf"
+    ],
+    "controller.animation.wolf.setup": [
+      "minecraft:wolf"
+    ],
+    "controller.animation.wolf.shaking": [
+      "minecraft:wolf"
+    ],
+    "controller.animation.wolf.sitting": [
+      "minecraft:wolf"
+    ],
+    "controller.animation.wolf.tail_default": [
+      "minecraft:wolf"
+    ],
+    "controller.animation.zombie.attack_bare_hand": [
+      "minecraft:husk",
+      "minecraft:zombie",
+      "minecraft:zombie_pigman",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ],
+    "controller.animation.zombie.swimming": [
+      "minecraft:bogged",
+      "minecraft:husk",
+      "minecraft:parched",
+      "minecraft:skeleton",
+      "minecraft:stray",
+      "minecraft:wither_skeleton",
+      "minecraft:zombie",
+      "minecraft:zombie_villager",
+      "minecraft:zombie_villager_v2"
+    ]
+  }
+}

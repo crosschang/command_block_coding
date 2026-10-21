@@ -22,7 +22,8 @@ const SOURCE_URL={
   camera:'https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/main/creator/Commands/commands/camera.md',
   fogList:'https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/fogs?ref=main',
   animationsList:'https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/animations?ref=main',
-  controllersList:'https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/animation_controllers?ref=main'
+  controllersList:'https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/animation_controllers?ref=main',
+  clientEntitiesList:'https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/entity?ref=main'
 };
 function read(name){return JSON.parse(fs.readFileSync(path.join(sourceDir,name),'utf8'));}
 function stripJsonComments(input){
@@ -114,6 +115,61 @@ async function getOfficialAnimationIds(subdir,kind,minFiles){
   if(result.length<files.length/2)throw Error(`Mojang ${subdir}: suspiciously few IDs`);
   return result;
 }
+/** Client-side entity definitions provide evidence of which IDs an entity references. */
+function parseClientEntity(text){
+ const data=JSON.parse(stripJsonComments(text));
+ const desc=data['minecraft:client_entity']?.description;
+ if(!desc || typeof desc!=='object' || !/^[a-z0-9_.-]+:[a-z0-9_.-]+$/.test(desc.identifier))
+   throw Error('Mojang client_entity description/identifier missing or invalid');
+ const animations=new Set(),controllers=new Set();
+ const add=id=>{
+   if(typeof id!=='string')return;
+   if(/^animation\.[a-zA-Z0-9_.:\/-]+$/.test(id))animations.add(id);
+   else if(/^controller\.animation\.[a-zA-Z0-9_.:\/-]+$/.test(id))controllers.add(id);
+ };
+ const entries=desc.animations;
+ if(entries!==undefined && (typeof entries!=='object'||!entries||Array.isArray(entries))) throw Error('client_entity animations map invalid for '+desc.identifier);
+ if(entries)for(const val of Object.values(entries))add(val);
+ const legacy=desc.animation_controllers;
+ if(legacy!==undefined && !Array.isArray(legacy) && (typeof legacy!=='object'||!legacy))throw Error('client_entity animation_controllers invalid for '+desc.identifier);
+ function scanControllers(value){
+   if(typeof value==='string'){if(value.startsWith('controller.animation.'))add(value);return;}
+   if(Array.isArray(value)){value.forEach(scanControllers);return;}
+   if(value&&typeof value==='object')Object.values(value).forEach(scanControllers);
+ }
+ if(legacy)scanControllers(legacy);
+ return {entityId:desc.identifier,animations:[...animations],controllers:[...controllers]};
+}
+async function getOfficialOwnerLinks(){
+ let contents=[];
+ if(fixtures){
+   const folder=path.join(fixtures,'entity');
+   if(!fs.existsSync(folder))throw Error('Official animation fixtures must include client entity reference folder: entity/');
+   const names=fs.readdirSync(folder).filter(n=>n.endsWith('.json')).sort();
+   if(!names.length)throw Error('Empty official entity fixture folder');
+   contents=names.map(n=>fs.readFileSync(path.join(folder,n),'utf8'));
+ }else{
+   const files=listJsonFiles(JSON.parse(await fetchText(SOURCE_URL.clientEntitiesList)),'entity',100);
+   for(let start=0;start<files.length;start+=8){
+     contents.push(...await Promise.all(files.slice(start,start+8).map(f=>fetchText(f.download_url))));
+     if((start+8)%40===0 || start+8>=files.length)
+       console.log(`  Mojang entity links: parsed ${Math.min(start+8,files.length)} / ${files.length} JSON files`);
+   }
+ }
+ const a=new Map(),c=new Map();
+ for(const text of contents){
+   const row=parseClientEntity(text);
+   for(const id of row.animations){if(!a.has(id))a.set(id,new Set());a.get(id).add(row.entityId);}
+   for(const id of row.controllers){if(!c.has(id))c.set(id,new Set());c.get(id).add(row.entityId);}
+ }
+ function sorted(map){return Object.fromEntries([...map].sort(([a],[b])=>a.localeCompare(b))
+   .map(([id,owners])=>[id,[...owners].sort()]));}
+ if(!a.size || !c.size)throw Error('Official client entity mapping is suspiciously empty');
+ console.log(`ANIMATION OWNER LINKS: ${contents.length} client entities; ${a.size} animation IDs; ${c.size} controller IDs referenced`);
+ return {schemaVersion:1,source:'https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/entity',
+   note:'Vanilla client_entity references only, not proof that /playanimation runs or is visible in Minecraft Education.',
+   animations:sorted(a),controllers:sorted(c)};
+}
 function merge(cur,ids,label){
   if(!Array.isArray(cur.items) || cur.items.length===0)throw Error(`${label}: existing registry has no items`);
   const combined=Array.from(new Set([...cur.items,...ids]));
@@ -168,6 +224,8 @@ async function main(){
      nextAnimation.note='Discovered animation definition IDs; presence does not guarantee /playanimation succeeds for every entity or Education version.';
      const controller=merge(read('animation_controllers.json'),officialControllers,'ANIMATION CONTROLLERS (Mojang Vanilla RP)');
      next.push(['animation_controllers.json',controller]);
+     const ownerLinks=await getOfficialOwnerLinks();
+     next.push(['@ownerLinks',ownerLinks]);
    }else if(officialAnimations || officialControllers){
      throw Error('Both animation and controller fixture directories must be provided');
    }else{
@@ -181,6 +239,7 @@ async function main(){
  if(nextAnimation!==oldAnimation)next.push(['animations.json',nextAnimation]);
  // Verify all next registries before writing; generation checks duplicate IDs and output naming.
  for(const [file,json] of next){
+   if(file==='@ownerLinks')continue;
    if(json.items.length!==new Set(json.items).size)throw Error(`${file}: duplicate values`);
    for(const id of json.items)if(typeof id!=='string' || !id)throw Error(`${file}: invalid id`);
  }
@@ -197,9 +256,21 @@ async function main(){
      const payload=changed?JSON.stringify(changed[1],null,2)+'\n':fs.readFileSync(path.join(sourceDir,file),'utf8');
      fs.writeFileSync(path.join(stageSources,file),payload,'utf8');
    }
+   const ownerChanged=next.find(([name])=>name==='@ownerLinks');
+   const ownerTarget=path.join(root,'registry/derived/bedrock/animation_owner_links.json');
+   const stageOwner=path.join(stagingRoot,'registry/derived/bedrock/animation_owner_links.json');
+   fs.mkdirSync(path.dirname(stageOwner),{recursive:true});
+   if(ownerChanged)fs.writeFileSync(stageOwner,JSON.stringify(ownerChanged[1],null,2)+'\n','utf8');
+   else if(fs.existsSync(ownerTarget))fs.copyFileSync(ownerTarget,stageOwner);
    const validate=spawnSync(process.execPath,[path.join(__dirname,'generate_b4_registry.cjs'),'--root',stagingRoot],{encoding:'utf8'});
    if(validate.status!==0)throw Error('Generated reporter validation failed: '+(validate.stderr||validate.stdout));
    for(const [file,json] of next){
+     if(file==='@ownerLinks'){
+       const target=ownerTarget,expected=fs.readFileSync(stageOwner);
+       if(fs.existsSync(target)&&fs.readFileSync(target).equals(expected))console.log('UNCHANGED '+path.relative(root,target));
+       else {fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(stageOwner,target);console.log('UPDATED '+path.relative(root,target));}
+       continue;
+     }
      const target=path.join(sourceDir,file);
      const current=JSON.parse(fs.readFileSync(target,'utf8'));
      if(JSON.stringify(current)===JSON.stringify(json)){
