@@ -1,6 +1,59 @@
 [
-  {"minecraft:fog_settings":{"description":{"identifier":"minecraft:fog_default"}}},
-  {"minecraft:fog_settings":{"description":{"identifier":"minecraft:fog_plains"}}},
-  {"minecraft:fog_settings":{"description":{"identifier":"minecraft:fog_desert"}}},
-  {"minecraft:fog_settings":{"description":{"identifier":"minecraft:fog_forest"}}}
+  {
+    "minecraft:fog_settings": {
+      "description": {
+        "identifier": "minecraft:fog_default"
+      }
+    }
+  },
+  {
+    "minecraft:fog_settings": {
+      "description": {
+        "identifier": "minecraft:fog_plains"
+      }
+    }
+  },
+  {
+    "minecraft:fog_settings": {
+      "description": {
+        "identifier": "minecraft:fog_desert"
+      },
+      "distance": {
+        "water": {
+          "fog_start": 0,
+          "fog_end": 60,
+          "fog_color": "#32A598",
+          "render_distance_type": "fixed"
+        }
+      }
+    }
+  },
+  {
+    "minecraft:fog_settings": {
+      "description": {
+        "identifier": "minecraft:fog_forest"
+      },
+      "distance": {
+        "air": {
+          "fog_start": 10,
+          "fog_end": 96,
+          "fog_color": "#330303",
+          "render_distance_type": "fixed"
+        },
+        "weather": {
+          "fog_start": 10,
+          "fog_end": 96,
+          "fog_color": "#330303",
+          "render_distance_type": "fixed"
+        }
+      },
+      "volumetric": {
+        "density": {
+          "air": {
+            "density": 0.01
+          }
+        }
+      }
+    }
+  }
 ]

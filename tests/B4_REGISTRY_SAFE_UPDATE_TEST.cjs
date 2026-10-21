@@ -7,7 +7,7 @@ const fixture=path.join(__dirname,'fixtures');
 const jsons=['camera_presets','animations','animation_controllers','fogs'];
 const generated=['camera_preset','animation','fog'];
 function hash(file){return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');}
-function fresh({copyOwnerLinks=false}={}){
+function fresh({copyOwnerLinks=false,copyFogMedia=false}={}){
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'b4-reg-'));
  for(const part of ['tools','src/libraries','registry/source/bedrock'])fs.mkdirSync(path.join(dir,part),{recursive:true});
  for(const name of ['generate_b4_registry.cjs','update_b4_registry.cjs'])fs.copyFileSync(path.join(sourceRoot,'tools',name),path.join(dir,'tools',name));
@@ -24,13 +24,20 @@ function fresh({copyOwnerLinks=false}={}){
      fs.copyFileSync(from,to);
    }
  }
+ if(copyFogMedia){
+   const source=path.join(sourceRoot,'registry/derived/bedrock/fog_media.json');
+   if(fs.existsSync(source)){
+     const dest=path.join(dir,'registry/derived/bedrock/fog_media.json');
+     fs.mkdirSync(path.dirname(dest),{recursive:true}); fs.copyFileSync(source,dest);
+   }
+ }
  fs.writeFileSync(path.join(dir,'src/libraries','legacy_library.generated.ts'),'// LEGACY SENTINEL\n');
  return dir;
 }
 function run(dir,script,args=[]){return spawnSync(process.execPath,[path.join(dir,'tools',script),...args],{encoding:'utf8',timeout:15000});}
 function cleanup(dir){fs.rmSync(dir,{recursive:true,force:true});}
 test('B4 generator reproduces current reporters byte for byte and never alters legacy output',()=>{
- const dir=fresh({copyOwnerLinks:true});try{
+ const dir=fresh({copyOwnerLinks:true,copyFogMedia:true});try{
   const before=generated.map(n=>hash(path.join(dir,'src/libraries',n+'_library.generated.ts')));
   const p=run(dir,'generate_b4_registry.cjs',['--check']);assert.equal(p.status,0,p.stderr+p.stdout);
   const gen=run(dir,'generate_b4_registry.cjs');assert.equal(gen.status,0,gen.stderr+p.stdout);
@@ -256,5 +263,70 @@ test('existing FOG and owner map survive later local animation-only imports',()=
   const output=fs.readFileSync(path.join(dir,'src/libraries/animation_library.generated.ts'),'utf8');
   assert.match(output,/\/\/\% group="Creeper"/);
   assert.match(output,/animation\.test\.wave/);
+ }finally{cleanup(dir);}
+});
+
+test('FOG media metadata is sourced from official JSON, preserves existing IDs and appears as reporter tooltip',()=>{
+ const dir=fresh();try{
+  const oldFog=JSON.parse(fs.readFileSync(path.join(dir,'registry/source/bedrock/fogs.json'),'utf8')).items;
+  const before=hash(path.join(dir,'src/libraries/camera_preset_library.generated.ts'));
+  const p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',fixture,'--skip-official-animations']);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  const metadata=JSON.parse(fs.readFileSync(path.join(dir,'registry/derived/bedrock/fog_media.json'),'utf8'));
+  assert.deepEqual(metadata.entries['minecraft:fog_desert'].distance,['water']);
+  assert.deepEqual(metadata.entries['minecraft:fog_forest'].distance,['air','weather']);
+  assert.deepEqual(metadata.entries['minecraft:fog_forest'].volumetric,['air']);
+  const fog=JSON.parse(fs.readFileSync(path.join(dir,'registry/source/bedrock/fogs.json'),'utf8')).items;
+  assert.deepEqual(fog.slice(0,oldFog.length),oldFog);
+  const generated=fs.readFileSync(path.join(dir,'src/libraries/fog_library.generated.ts'),'utf8');
+  assert.match(generated,/mcfunction_fog_builtin_desert/);
+  assert.match(generated,/distance: water/);
+  assert.match(generated,/distance: air, weather/);
+  assert.equal(hash(path.join(dir,'src/libraries/camera_preset_library.generated.ts')),before);
+  const oldMeta=hash(path.join(dir,'registry/derived/bedrock/fog_media.json'));
+  const oldGen=hash(path.join(dir,'src/libraries/fog_library.generated.ts'));
+  const repeat=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',fixture,'--skip-official-animations']);
+  assert.equal(repeat.status,0,repeat.stdout+repeat.stderr);
+  assert.equal(hash(path.join(dir,'registry/derived/bedrock/fog_media.json')),oldMeta);
+  assert.equal(hash(path.join(dir,'src/libraries/fog_library.generated.ts')),oldGen);
+  assert.equal(run(dir,'generate_b4_registry.cjs',['--check']).status,0);
+ }finally{cleanup(dir);}
+});
+test('FOG malformed media JSON cannot overwrite live source or derived metadata',()=>{
+ const dir=fresh(),bad=fs.mkdtempSync(path.join(os.tmpdir(),'b4-bad-fog-media-'));
+ try{
+  const fixtureList=JSON.parse(fs.readFileSync(path.join(fixture,'fogs.json'),'utf8'));
+  fixtureList[0]['minecraft:fog_settings'].distance={water:1};
+  fs.writeFileSync(path.join(bad,'fogs.json'),JSON.stringify(fixtureList));
+  fs.copyFileSync(path.join(fixture,'camera.md'),path.join(bad,'camera.md'));
+  const before=hash(path.join(dir,'registry/source/bedrock/fogs.json'));
+  const output=hash(path.join(dir,'src/libraries/fog_library.generated.ts'));
+  const result=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',bad,'--skip-official-animations']);
+  // Incorrect top-level distance shape must abort instead of creating a false metadata hint.
+  assert.notEqual(result.status,0,result.stdout+result.stderr);
+  assert.equal(hash(path.join(dir,'registry/source/bedrock/fogs.json')),before);
+  assert.equal(hash(path.join(dir,'src/libraries/fog_library.generated.ts')),output);
+  assert.ok(!fs.existsSync(path.join(dir,'registry/derived/bedrock/fog_media.json')));
+ }finally{cleanup(dir);cleanup(bad);}
+});
+test('FOG 80-plus IDs are preserved and new media info never deletes older ID metadata',()=>{
+ const dir=fresh();try{
+  const fogPath=path.join(dir,'registry/source/bedrock/fogs.json');
+  const catalog=JSON.parse(fs.readFileSync(fogPath,'utf8'));
+  catalog.items.push(...Array.from({length:77},(_,i)=>`minecraft:fixture_large_${i}`));
+  fs.writeFileSync(fogPath,JSON.stringify(catalog,null,2)+'\n');
+  const metadataFile=path.join(dir,'registry/derived/bedrock/fog_media.json');
+  fs.mkdirSync(path.dirname(metadataFile),{recursive:true});
+  fs.writeFileSync(metadataFile,JSON.stringify({schemaVersion:1,entries:{'minecraft:fixture_large_0':{
+   id:'minecraft:fixture_large_0',distance:['lava'],volumetric:[],volumetricScattering:[]
+  }}}));
+  let p=run(dir,'generate_b4_registry.cjs');assert.equal(p.status,0,p.stdout+p.stderr);
+  p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',fixture,'--skip-official-animations']);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  const media=JSON.parse(fs.readFileSync(metadataFile,'utf8'));
+  assert.deepEqual(media.entries['minecraft:fixture_large_0'].distance,['lava']);
+  const next=JSON.parse(fs.readFileSync(fogPath,'utf8')).items;
+  for(const id of catalog.items)assert.ok(next.includes(id),`Existing FOG lost: ${id}`);
+  assert.equal(run(dir,'generate_b4_registry.cjs',['--check']).status,0);
  }finally{cleanup(dir);}
 });

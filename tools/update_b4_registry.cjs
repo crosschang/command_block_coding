@@ -48,11 +48,38 @@ function parseCamera(markdown){
   if(new Set(ids).size<4)throw Error('Too few official camera preset IDs; refusing update');
   return Array.from(new Set(ids));
 }
+/** Keep the official fog media fields as authoring metadata, not a claim that the
+ *  resource pack is installed or that a given Education version renders it. */
+const FOG_MEDIA_FIELDS=['air','weather','water','lava','lava_resistance','powder_snow'];
 function parseFogDoc(doc){
   const parsed=JSON.parse(stripJsonComments(doc));
-  const id=parsed['minecraft:fog_settings']?.description?.identifier;
-  if(typeof id!=='string' || !/^[a-z0-9_.-]+:[a-z0-9_.\/-]+$/.test(id)) throw Error('Missing valid fog description.identifier');
-  return id;
+  const entry=parsed['minecraft:fog_settings'];
+  const id=entry?.description?.identifier;
+  if(typeof id!=='string' || !/^[a-z0-9_.-]+:[a-z0-9_.\/-]+$/.test(id))
+    throw Error('Missing valid fog description.identifier');
+  function mediaTypes(obj,label){
+    if(obj===undefined)return [];
+    if(!obj || typeof obj!=='object' || Array.isArray(obj)) throw Error(`Invalid fog ${label} for ${id}`);
+    const known=FOG_MEDIA_FIELDS.filter(key=>obj[key]!==undefined && obj[key]!==null);
+    for(const key of known){if(typeof obj[key]!=='object' || Array.isArray(obj[key]))
+      throw Error(`Invalid fog ${label}.${key} for ${id}`);}
+    return known;
+  }
+  const distance=mediaTypes(entry?.distance,'distance');
+  const volumetric=mediaTypes(entry?.volumetric?.density,'volumetric.density');
+  const volumetricScattering=mediaTypes(entry?.volumetric?.media_coefficients,'volumetric.media_coefficients');
+  return {id,distance,volumetric,volumetricScattering};
+}
+function mergeFogMedia(previous,found){
+  const metadata={...(previous?.entries||{})};
+  for(const row of found){
+    if(metadata[row.id] && JSON.stringify(metadata[row.id])===JSON.stringify(row))continue;
+    metadata[row.id]=row;
+  }
+  return {schemaVersion:1,
+    source:'https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/fogs',
+    note:'Vanilla fog definition fields only; NOT proof the ID is active in Minecraft Education. Missing fields can inherit lower-priority fog settings.',
+    entries:Object.fromEntries(Object.entries(metadata).sort(([a],[b])=>a.localeCompare(b)))};
 }
 function parseAnimationPack(text){
   const json=JSON.parse(stripJsonComments(text));
@@ -189,30 +216,35 @@ async function getFogIds(){
   if(fixtures){
     const docs=JSON.parse(fs.readFileSync(path.join(fixtures,'fogs.json'),'utf8'));
     if(!Array.isArray(docs))throw Error('Fixture fogs.json must be an array of fog objects');
-    const ids=docs.map(d=>parseFogDoc(JSON.stringify(d)));
-    if(ids.length<3)throw Error('Fog fixture under minimum confidence threshold (3)');
-    return ids;
+    const entries=docs.map(d=>parseFogDoc(JSON.stringify(d)));
+    if(entries.length<3)throw Error('Fog fixture under minimum confidence threshold (3)');
+    return entries;
   }
   const listing=JSON.parse(await fetchText(SOURCE_URL.fogList));
   if(!Array.isArray(listing))throw Error('Mojang fog directory listing not an array');
   const files=listing.filter(x=>x.type==='file' && /^[-\w.]+\.json$/.test(x.name) && x.download_url?.startsWith('https://raw.githubusercontent.com/Mojang/bedrock-samples/'));
   if(files.length<3)throw Error('Mojang fog listing is incomplete or absent');
   // Fetch all before any write; an API outage cannot leave partial local updates.
-  const ids=[];
+  const entries=[];
   for(let index=0;index<files.length;index+=6){
     const batch=files.slice(index,index+6);
     const docs=await Promise.all(batch.map(f=>fetchText(f.download_url)));
-    for(const doc of docs) ids.push(parseFogDoc(doc));
+    for(const doc of docs)entries.push(parseFogDoc(doc));
   }
-  if(new Set(ids).size<3)throw Error('Too few valid fog IDs from Mojang; refusing update');
-  return Array.from(new Set(ids));
+  if(new Set(entries.map(x=>x.id)).size<3)throw Error('Too few valid fog IDs from Mojang; refusing update');
+  if(new Set(entries.map(x=>x.id)).size!==entries.length)throw Error('Duplicate fog identifier in official source');
+  return entries;
 }
 async function main(){
  const oldCamera=read('camera_presets.json'),oldFog=read('fogs.json');
  const cameraText=fixtures?fs.readFileSync(path.join(fixtures,'camera.md'),'utf8'):await fetchText(SOURCE_URL.camera);
  const cameraIds=parseCamera(cameraText);
- const fogIds=await getFogIds();
- const next=[['camera_presets.json',merge(oldCamera,cameraIds,'CAMERA')],['fogs.json',merge(oldFog,fogIds,'FOG')]];
+ const fogEntries=await getFogIds();
+ const fogMediaTarget=path.join(root,'registry/derived/bedrock/fog_media.json');
+ const previousFogMedia=fs.existsSync(fogMediaTarget)?JSON.parse(fs.readFileSync(fogMediaTarget,'utf8')):null;
+ const nextFogMedia=mergeFogMedia(previousFogMedia,fogEntries);
+ const next=[['camera_presets.json',merge(oldCamera,cameraIds,'CAMERA')],
+   ['fogs.json',merge(oldFog,fogEntries.map(x=>x.id),'FOG')],['@fogMedia',nextFogMedia]];
  const oldAnimation=read('animations.json');
  let nextAnimation=oldAnimation;
  if(!skipOfficialAnimations){
@@ -239,7 +271,7 @@ async function main(){
  if(nextAnimation!==oldAnimation)next.push(['animations.json',nextAnimation]);
  // Verify all next registries before writing; generation checks duplicate IDs and output naming.
  for(const [file,json] of next){
-   if(file==='@ownerLinks')continue;
+   if(file==='@ownerLinks'||file==='@fogMedia')continue;
    if(json.items.length!==new Set(json.items).size)throw Error(`${file}: duplicate values`);
    for(const id of json.items)if(typeof id!=='string' || !id)throw Error(`${file}: invalid id`);
  }
@@ -262,13 +294,20 @@ async function main(){
    fs.mkdirSync(path.dirname(stageOwner),{recursive:true});
    if(ownerChanged)fs.writeFileSync(stageOwner,JSON.stringify(ownerChanged[1],null,2)+'\n','utf8');
    else if(fs.existsSync(ownerTarget))fs.copyFileSync(ownerTarget,stageOwner);
+   const fogMediaChanged=next.find(([name])=>name==='@fogMedia');
+   const stageFogMedia=path.join(stagingRoot,'registry/derived/bedrock/fog_media.json');
+   fs.mkdirSync(path.dirname(stageFogMedia),{recursive:true});
+   if(fogMediaChanged)fs.writeFileSync(stageFogMedia,JSON.stringify(fogMediaChanged[1],null,2)+'\n','utf8');
+   else if(fs.existsSync(fogMediaTarget))fs.copyFileSync(fogMediaTarget,stageFogMedia);
    const validate=spawnSync(process.execPath,[path.join(__dirname,'generate_b4_registry.cjs'),'--root',stagingRoot],{encoding:'utf8'});
    if(validate.status!==0)throw Error('Generated reporter validation failed: '+(validate.stderr||validate.stdout));
    for(const [file,json] of next){
-     if(file==='@ownerLinks'){
-       const target=ownerTarget,expected=fs.readFileSync(stageOwner);
+     if(file==='@ownerLinks'||file==='@fogMedia'){
+       const target=file==='@ownerLinks'?ownerTarget:fogMediaTarget;
+       const from=file==='@ownerLinks'?stageOwner:stageFogMedia;
+       const expected=fs.readFileSync(from);
        if(fs.existsSync(target)&&fs.readFileSync(target).equals(expected))console.log('UNCHANGED '+path.relative(root,target));
-       else {fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(stageOwner,target);console.log('UPDATED '+path.relative(root,target));}
+       else {fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(from,target);console.log('UPDATED '+path.relative(root,target));}
        continue;
      }
      const target=path.join(sourceDir,file);

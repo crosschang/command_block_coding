@@ -149,15 +149,42 @@ function animationControllers(entries,owners) {
  });
  lines.push('}','');return lines.join('\n');
 }
+/** Optional official fog media metadata: never synthesize a field from the ID name. */
+function fogMediaCatalog(){
+ const file=path.join(root,'registry/derived/bedrock/fog_media.json');
+ if(!fs.existsSync(file))return {};
+ const data=JSON.parse(fs.readFileSync(file,'utf8'));
+ if(data.schemaVersion!==1 || !data.entries || typeof data.entries!=='object' || Array.isArray(data.entries))
+   throw Error('Invalid fog media registry metadata');
+ const valid=['air','weather','water','lava','lava_resistance','powder_snow'];
+ for(const [id,row] of Object.entries(data.entries)){
+   if(id!==row?.id || !/^[a-z0-9_.-]+:[a-z0-9_.\/-]+$/.test(id))throw Error('Invalid fog media ID: '+id);
+   for(const field of ['distance','volumetric','volumetricScattering']){
+     if(!Array.isArray(row[field]) || row[field].some(x=>!valid.includes(x)) || new Set(row[field]).size!==row[field].length)
+       throw Error('Invalid fog media field for '+id+': '+field);
+   }
+ }
+ return data.entries;
+}
+function fogTooltip(id,metadata){
+ const row=metadata[id];
+ if(!row)return 'Mojang usage metadata unavailable; check the installed resource pack and game version.';
+ const toText=list=>list.length?list.join(', '):'none specified';
+ return 'Mojang Vanilla RP; distance: '+toText(row.distance)+'; volumetric density: '+
+   toText(row.volumetric)+'; media coefficients: '+toText(row.volumetricScattering)+
+   '. These are JSON fields, not proof of in-game rendering; missing types can inherit another fog layer.';
+}
 function fog(entries) {
  const fn=id=>fogLegacy.get(id)||camel(id);
  const bid=id=>'mcfunction_fog_builtin_'+token(id).replace(/^fog_/,'');
  validateNames(entries,fn,bid,'fog');
+ const media=fogMediaCatalog();
  const lines=['/** AUTO-GENERATED reporters from registry/source/bedrock/fogs.json. */','namespace MCFunctionFogLibrary {'];
  entries.forEach((id,i)=>{
    lines.push(`    //% group="Built-in" weight=${Math.max(50,90-i)}`);
    lines.push(`    //% blockId=${bid(id)}`);
    lines.push(`    //% block="fog ${id}"`);
+   if(media[id])lines.push(`    //% tooltip=${JSON.stringify(fogTooltip(id,media))}`);
    lines.push(`    export function ${fn(id)}(): FogValue { return new FogValue(${JSON.stringify(id)}); }`);
  });
  lines.push('}','');return lines.join('\n');
