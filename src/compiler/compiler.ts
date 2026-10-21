@@ -2,6 +2,10 @@
 namespace MCFunctionCompiler {
     export function compileCommand(command: MCFunctionAST.CommandNode): string {
         switch (command.kind) {
+            case MCFunctionAST.CommandKind.PlayAnimation:
+                return compilePlayAnimation(<MCFunctionAST.PlayAnimationCommand>command);
+            case MCFunctionAST.CommandKind.Fog:
+                return compileFog(<MCFunctionAST.FogCommand>command);
             case MCFunctionAST.CommandKind.Damage:
                 return compileDamage(<MCFunctionAST.DamageCommand>command);
             case MCFunctionAST.CommandKind.Event:
@@ -101,6 +105,32 @@ namespace MCFunctionCompiler {
             default:
                 return "";
         }
+    }
+
+    function compileB4String(value: string): string {
+        if (value.indexOf(" ") >= 0 || value.indexOf("\t") >= 0 ||
+            value.indexOf('"') >= 0 || value.indexOf("\\") >= 0) {
+            return quoteCommandString(value);
+        }
+        return value;
+    }
+    function compilePlayAnimation(command: MCFunctionAST.PlayAnimationCommand): string {
+        let result = "playanimation " + compilePlayerTarget(command.target) +
+            " " + compileB4String(command.animationId);
+        if (command.nextState != undefined) result += " " + compileB4String(command.nextState);
+        if (command.blendOutTime != undefined) result += " " + command.blendOutTime;
+        if (command.stopExpression != undefined) result += " " +
+            quoteCommandString(command.stopExpression);
+        if (command.controllerId != undefined) result += " " + compileB4String(command.controllerId);
+        return result;
+    }
+    function compileFog(command: MCFunctionAST.FogCommand): string {
+        let result = "fog " + compilePlayerTarget(command.target);
+        if (command.action == MCFunctionAST.FogAction.Push) {
+            return result + " push " + command.fogId + " " + command.userProvidedId;
+        }
+        if (command.action == MCFunctionAST.FogAction.Pop) return result + " pop " + command.userProvidedId;
+        return result + " remove " + command.userProvidedId;
     }
 
     function compileDamage(command: MCFunctionAST.DamageCommand): string {

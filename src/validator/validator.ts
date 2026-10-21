@@ -1974,6 +1974,79 @@ namespace MCFunctionValidator {
         return issues;
     }
 
+    function isB4SingleLineString(value: string): boolean {
+        if (!value || value.trim().length == 0) return false;
+        for (let i = 0; i < value.length; i++) {
+            let c = value.charCodeAt(i);
+            if (c < 32 || c == 127) return false;
+        }
+        return true;
+    }
+    /** B4: resource-pack-dependent IDs are validated syntactically, not whitelisted. */
+    export function validatePlayAnimationCommand(command: MCFunctionAST.PlayAnimationCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        appendIssues(issues, validatePlayerReference(command.target, true));
+        if (!isB4SingleLineString(command.animationId)) {
+            addIssue(issues, ValidationLevel.Error, "PLAYANIMATION_ID_INVALID",
+                "Animation ID must be a nonempty single-line string.");
+        }
+        if (command.nextState != undefined && !isB4SingleLineString(command.nextState)) {
+            addIssue(issues, ValidationLevel.Error, "PLAYANIMATION_NEXT_STATE_INVALID",
+                "Next state must be a nonempty single-line string.");
+        }
+        if (command.blendOutTime != undefined) {
+            if (command.nextState == undefined) addIssue(issues, ValidationLevel.Error,
+                "PLAYANIMATION_NEXT_STATE_REQUIRED", "Blend time requires next state first.");
+            if (command.blendOutTime - command.blendOutTime != 0 || command.blendOutTime < 0) {
+                addIssue(issues, ValidationLevel.Error, "PLAYANIMATION_BLEND_INVALID",
+                    "Blend out time must be a finite nonnegative number.");
+            }
+        }
+        if (command.stopExpression != undefined) {
+            if (command.blendOutTime == undefined) addIssue(issues, ValidationLevel.Error,
+                "PLAYANIMATION_BLEND_REQUIRED", "Stop expression requires blend time first.");
+            if (command.stopExpression.length == 0 ||
+                command.stopExpression.indexOf("\n") >= 0 || command.stopExpression.indexOf("\r") >= 0) {
+                addIssue(issues, ValidationLevel.Error, "PLAYANIMATION_STOP_INVALID",
+                    "Stop expression must be a nonempty single-line Molang expression.");
+            }
+        }
+        if (command.controllerId != undefined) {
+            if (command.stopExpression == undefined) addIssue(issues, ValidationLevel.Error,
+                "PLAYANIMATION_STOP_REQUIRED", "Controller requires preceding stop expression.");
+            if (!isB4SingleLineString(command.controllerId)) addIssue(issues, ValidationLevel.Error,
+                "PLAYANIMATION_CONTROLLER_INVALID", "Controller must be a nonempty single-line string.");
+        }
+        if (command.animationId && command.animationId.length > 0) {
+            addIssue(issues, ValidationLevel.Info, "PLAYANIMATION_RESOURCE_DEPENDENT",
+                "Animation playback depends on the target entity and installed resource packs.");
+        }
+        return issues;
+    }
+    export function validateFogCommand(command: MCFunctionAST.FogCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        appendIssues(issues, validatePlayerReference(command.target));
+        if (command.action != MCFunctionAST.FogAction.Push &&
+            command.action != MCFunctionAST.FogAction.Pop &&
+            command.action != MCFunctionAST.FogAction.Remove) {
+            addIssue(issues, ValidationLevel.Error, "FOG_ACTION_INVALID", "Unknown fog mode.");
+        }
+        if (!isSafeCommandId(command.userProvidedId)) {
+            addIssue(issues, ValidationLevel.Error, "FOG_USER_ID_INVALID",
+                "User-provided fog stack ID must be a safe nonempty token.");
+        }
+        if (command.action == MCFunctionAST.FogAction.Push) {
+            if (!isSafeCommandId(command.fogId)) addIssue(issues, ValidationLevel.Error,
+                "FOG_RESOURCE_ID_INVALID", "Push requires a valid fog resource ID.");
+            else addIssue(issues, ValidationLevel.Info, "FOG_RESOURCE_DEPENDENT",
+                "Fog resource ID must exist in the active resource packs; Preview cannot prove visibility.");
+        } else if (command.fogId != undefined) {
+            addIssue(issues, ValidationLevel.Error, "FOG_UNEXPECTED_RESOURCE_ID",
+                "Pop/remove take only the user-provided stack ID, not a fog resource ID.");
+        }
+        return issues;
+    }
+
     /** B3: /damage accepts an integer amount and a fixed Bedrock cause enum. */
     export function validateDamageCommand(command: MCFunctionAST.DamageCommand): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
@@ -2125,6 +2198,12 @@ namespace MCFunctionValidator {
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
 
+        if (command.kind == MCFunctionAST.CommandKind.PlayAnimation) {
+            appendIssues(issues, validatePlayAnimationCommand(<MCFunctionAST.PlayAnimationCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Fog) {
+            appendIssues(issues, validateFogCommand(<MCFunctionAST.FogCommand>command));
+        }
         if (command.kind == MCFunctionAST.CommandKind.Damage) {
             appendIssues(issues, validateDamageCommand(<MCFunctionAST.DamageCommand>command));
         }

@@ -5,7 +5,7 @@
                    "kind":  "command-enum-entitytype-with-listing-fallback",
                    "provider":  "MicrosoftDocs/minecraft-creator",
                    "url":  "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/refs/heads/main/creator/Commands/enums/EntityType.md",
-                   "fetchedAtUtc":  "2026-10-10T08:30:50.6639615Z"
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.6019666Z"
                },
     "notes":  [
                   "Primary source is the official EntityType command enum.",

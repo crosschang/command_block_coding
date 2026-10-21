@@ -5,7 +5,7 @@
                    "kind":  "command-enum-item",
                    "provider":  "MicrosoftDocs/minecraft-creator",
                    "url":  "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/refs/heads/main/creator/Commands/enums/Item.md",
-                   "fetchedAtUtc":  "2026-10-10T08:30:50.6059476Z"
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.5289508Z"
                },
     "notes":  [
                   "Canonical minecraft:* item IDs only."

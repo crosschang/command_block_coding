@@ -5,7 +5,7 @@
                    "kind":  "command-enum-block",
                    "provider":  "MicrosoftDocs/minecraft-creator",
                    "url":  "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/refs/heads/main/creator/Commands/enums/Block.md",
-                   "fetchedAtUtc":  "2026-10-10T08:30:50.6459569Z"
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.5729606Z"
                },
     "notes":  [
                   "Canonical minecraft:* block IDs only."

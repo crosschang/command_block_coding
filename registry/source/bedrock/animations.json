@@ -1,0 +1,5 @@
+{
+  "source": "https://learn.microsoft.com/en-us/minecraft/creator/scriptapi/minecraft/server/entity",
+  "note": "Reference example, NOT an exhaustive list. Animation validity depends on the entity and resource pack.",
+  "items": ["animation.creeper.swelling"]
+}

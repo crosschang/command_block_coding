@@ -6,7 +6,7 @@
                    "kind":  "vanilla-block-metadata-usage-derived",
                    "provider":  "Mojang/bedrock-samples",
                    "url":  "https://raw.githubusercontent.com/Mojang/bedrock-samples/main/metadata/vanilladata_modules/mojang-blocks.json",
-                   "fetchedAtUtc":  "2026-10-10T08:30:50.7019701Z"
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.6309738Z"
                },
     "notes":  [
                   "Maps every parsed vanilla block data_item to the block properties actually attached to that block.",

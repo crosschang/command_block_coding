@@ -1,0 +1,6 @@
+[
+  {"minecraft:fog_settings":{"description":{"identifier":"minecraft:fog_default"}}},
+  {"minecraft:fog_settings":{"description":{"identifier":"minecraft:fog_plains"}}},
+  {"minecraft:fog_settings":{"description":{"identifier":"minecraft:fog_desert"}}},
+  {"minecraft:fog_settings":{"description":{"identifier":"minecraft:fog_forest"}}}
+]

@@ -5,7 +5,7 @@
                    "kind":  "vanilla-resource-pack-particle-identifiers",
                    "provider":  "Mojang/bedrock-samples",
                    "url":  "https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/particles?ref=main",
-                   "fetchedAtUtc":  "2026-10-10T08:30:50.6709637Z"
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.6069683Z"
                },
     "notes":  [
                   "Identifiers parsed from particle_effect.description.identifier in Mojang bedrock-samples.",

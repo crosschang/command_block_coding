@@ -5,7 +5,7 @@
                    "kind":  "vanilla-behavior-entity-events-derived",
                    "provider":  "Mojang/bedrock-samples",
                    "url":  "https://api.github.com/repos/Mojang/bedrock-samples/contents/behavior_pack/entities?ref=main",
-                   "fetchedAtUtc":  "2026-10-10T08:30:50.6869669Z"
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.6189713Z"
                },
     "notes":  [
                   "Used by the EVENT Library for /event entity \u003ctarget\u003e \u003ceventName\u003e.",

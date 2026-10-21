@@ -1,0 +1,8 @@
+{
+  "source": "https://learn.microsoft.com/en-us/minecraft/creator/commands/commands/camera",
+  "note": "Bedrock documented built-in IDs. Individual Education availability requires in-game tests. Custom Behavior Pack IDs remain allowed.",
+  "items": [
+    "minecraft:first_person", "minecraft:third_person", "minecraft:third_person_front", "minecraft:free",
+    "minecraft:fixed_boom", "minecraft:follow_orbit", "minecraft:control_scheme_camera"
+  ]
+}

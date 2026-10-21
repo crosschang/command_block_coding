@@ -1,5 +1,17 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    export function createPlayAnimationCommand(target: MCFunctionAST.PlayerTarget,
+        animationId: string, nextState?: string, blendOutTime?: number,
+        stopExpression?: string, controllerId?: string): MCFunctionAST.PlayAnimationCommand {
+        return MCFunctionAST.createPlayAnimationCommand(target, animationId,
+            nextState, blendOutTime, stopExpression, controllerId);
+    }
+    export function createFogCommand(target: MCFunctionAST.PlayerTarget,
+        action: MCFunctionAST.FogAction, userProvidedId: string,
+        fogId?: string): MCFunctionAST.FogCommand {
+        return MCFunctionAST.createFogCommand(target, action, userProvidedId, fogId);
+    }
+
     /** B3/C1 keep both the named target and Selector AST intact. */
     export function createDamageCommand(target: MCFunctionAST.PlayerTarget,
         amount: number, cause?: string, damager?: MCFunctionAST.PlayerTarget,

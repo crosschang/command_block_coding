@@ -6,7 +6,7 @@
                    "kind":  "vanilla-block-metadata-used-properties-derived",
                    "provider":  "Mojang/bedrock-samples",
                    "url":  "https://raw.githubusercontent.com/Mojang/bedrock-samples/main/metadata/vanilladata_modules/mojang-blocks.json",
-                   "fetchedAtUtc":  "2026-10-10T08:30:50.6969692Z"
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.6279731Z"
                },
     "notes":  [
                   "Contains only block properties actually referenced by vanilla data_items; Add-on-only definitions are not imported merely because a Creator schema defines them.",

@@ -38,7 +38,9 @@ namespace MCFunctionAST {
         Damage = 31,
         Event = 32,
         ControlScheme = 33,
-        AimAssist = 34
+        AimAssist = 34,
+        PlayAnimation = 35,
+        Fog = 36
     }
 
     export interface CommandNode {
