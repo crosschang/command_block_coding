@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),cryp
 const {spawnSync}=require('node:child_process');
 const sourceRoot=path.resolve(__dirname,'..');
 const fixture=path.join(__dirname,'fixtures');
-const jsons=['camera_presets','animations','fogs'];
+const jsons=['camera_presets','animations','animation_controllers','fogs'];
 const generated=['camera_preset','animation','fog'];
 function hash(file){return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');}
 function fresh(){
@@ -31,14 +31,19 @@ test('dry run makes no changes and staged update adds fog and optional pack anim
  const dir=fresh();try{
   const files=[...jsons.map(x=>path.join(dir,'registry/source/bedrock',x+'.json')),...generated.map(x=>path.join(dir,'src/libraries',x+'_library.generated.ts'))];
   const before=files.map(hash);
+  const originalFog=JSON.parse(fs.readFileSync(path.join(dir,'registry/source/bedrock/fogs.json'),'utf8')).items;
+  const fixtureFogIds=JSON.parse(fs.readFileSync(path.join(fixture,'fogs.json'),'utf8'))
+   .map(doc=>doc['minecraft:fog_settings'].description.identifier);
   let p=run(dir,'update_b4_registry.cjs',['--fixtures',fixture,'--animation-source',path.join(fixture,'animation-pack.json')]);
   assert.equal(p.status,0,p.stderr+p.stdout);assert.deepEqual(files.map(hash),before);
   p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',fixture,'--animation-source',path.join(fixture,'animation-pack.json')]);
   assert.equal(p.status,0,p.stderr+p.stdout);
   const fog=JSON.parse(fs.readFileSync(path.join(dir,'registry/source/bedrock/fogs.json'),'utf8'));
-  assert.equal(fog.items.at(-1),'minecraft:fog_forest');
+  assert.deepEqual(fog.items,[...new Set([...originalFog,...fixtureFogIds])],
+   'Update must preserve the entire existing FOG catalog and append only new fixture IDs');
+  assert.ok(fog.items.includes('minecraft:fog_forest'),'Fixture FOG ID must be retained');
   const animations=JSON.parse(fs.readFileSync(path.join(dir,'registry/source/bedrock/animations.json'),'utf8'));
-  assert.equal(animations.items.at(-1),'animation.test.wave');
+  assert.ok(animations.items.includes('animation.test.wave'),'Pack animation must be imported');
   const cam=fs.readFileSync(path.join(dir,'src/libraries/camera_preset_library.generated.ts'),'utf8');
   assert.match(cam,/mcfunction_camera_library_control_scheme_camera/);
   const fogSource=fs.readFileSync(path.join(dir,'src/libraries/fog_library.generated.ts'),'utf8');
@@ -87,4 +92,90 @@ test('collision during B4 upstream update is rejected before any snapshot write'
   assert.notEqual(p.status,0);
   assert.deepEqual(['camera_presets','animations','fogs'].map(n=>hash(path.join(dir,'registry/source/bedrock',n+'.json'))),first);
  }finally{cleanup(dir);cleanup(bad);}
+});
+
+const officialFixture=path.join(__dirname,'fixtures','official_animation');
+test('official Mojang animation + controller fixture imports two distinct catalogs without changing legacy IDs',()=>{
+ const dir=fresh();try{
+  const all=[...jsons.map(n=>path.join(dir,'registry/source/bedrock',n+'.json')),...generated.map(n=>path.join(dir,'src/libraries',n+'_library.generated.ts'))];
+  const oldHash=all.map(hash);
+  let p=run(dir,'update_b4_registry.cjs',['--fixtures',officialFixture]);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  assert.match(p.stdout,/ANIMATION \(Mojang Vanilla RP\)/);
+  assert.deepEqual(all.map(hash),oldHash,'Dry run must never write snapshots or reporter files');
+  p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',officialFixture]);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  const a=JSON.parse(fs.readFileSync(path.join(dir,'registry/source/bedrock/animations.json'),'utf8'));
+  const c=JSON.parse(fs.readFileSync(path.join(dir,'registry/source/bedrock/animation_controllers.json'),'utf8'));
+  assert.ok(a.items.includes('animation.humanoid.attack.rotations'));
+  assert.ok(a.items.includes('animation.creeper.swelling'));
+  assert.ok(c.items.includes('controller.animation.creeper.head'));
+  assert.ok(c.items.includes('controller.animation.humanoid.attack'));
+  const reporters=fs.readFileSync(path.join(dir,'src/libraries/animation_library.generated.ts'),'utf8');
+  assert.match(reporters,/mcfunction_animation_reference_creeper_swelling/);
+  assert.match(reporters,/export function creeperSwelling\(\)/);
+  assert.match(reporters,/mcfunction_animation_controller_reference_creeper_swelling/);
+  assert.match(reporters,/export function animationControllerCreeperSwelling\(\)/);
+  assert.match(reporters,/animation\.humanoid\.attack\.rotations/);
+  assert.match(reporters,/controller\.animation\.humanoid\.attack/);
+  assert.equal(fs.readFileSync(path.join(dir,'src/libraries','legacy_library.generated.ts'),'utf8'),'// LEGACY SENTINEL\n');
+  const state=all.map(hash);
+  p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',officialFixture]);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+  assert.deepEqual(all.map(hash),state,'Re-running identical official source must produce zero modifications');
+  p=run(dir,'generate_b4_registry.cjs',['--check']);
+  assert.equal(p.status,0,p.stdout+p.stderr);
+ }finally{cleanup(dir);}
+});
+test('invalid or partial Mojang JSON halts before touching any B4 snapshot or reporters',()=>{
+ const dir=fresh(),bad=fs.mkdtempSync(path.join(os.tmpdir(),'b4-bad-official-'));
+ try{
+  fs.mkdirSync(path.join(bad,'animations'));fs.mkdirSync(path.join(bad,'animation_controllers'));
+  fs.copyFileSync(path.join(officialFixture,'camera.md'),path.join(bad,'camera.md'));
+  fs.copyFileSync(path.join(officialFixture,'fogs.json'),path.join(bad,'fogs.json'));
+  fs.writeFileSync(path.join(bad,'animations','invalid.json'),'not JSON');
+  fs.writeFileSync(path.join(bad,'animation_controllers','valid.json'),JSON.stringify({animation_controllers:{'controller.animation.creeper.swelling':{states:{}}}}));
+  const all=[...jsons.map(n=>path.join(dir,'registry/source/bedrock',n+'.json')),...generated.map(n=>path.join(dir,'src/libraries',n+'_library.generated.ts'))];
+  const before=all.map(hash);
+  const p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',bad]);
+  assert.notEqual(p.status,0,p.stdout+p.stderr);
+  assert.deepEqual(all.map(hash),before);
+ }finally{cleanup(dir);cleanup(bad);}
+});
+test('incomplete fixture layout cannot silently import one official category',()=>{
+ const dir=fresh(),bad=fs.mkdtempSync(path.join(os.tmpdir(),'b4-incomplete-official-'));
+ try{
+  fs.mkdirSync(path.join(bad,'animations'));
+  fs.copyFileSync(path.join(officialFixture,'camera.md'),path.join(bad,'camera.md'));
+  fs.copyFileSync(path.join(officialFixture,'fogs.json'),path.join(bad,'fogs.json'));
+  fs.copyFileSync(path.join(officialFixture,'animations','creeper.animation.json'),path.join(bad,'animations','creeper.animation.json'));
+  const f=path.join(dir,'registry/source/bedrock/animations.json'),before=hash(f);
+  const p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',bad]);
+  assert.notEqual(p.status,0,p.stdout+p.stderr);
+  assert.equal(hash(f),before);
+ }finally{cleanup(dir);cleanup(bad);}
+});
+
+test('existing large FOG catalog is never reduced by ANIMATION official update',()=>{
+ const dir=fresh();try{
+  const fogPath=path.join(dir,'registry/source/bedrock/fogs.json');
+  const fog=JSON.parse(fs.readFileSync(fogPath,'utf8'));
+  const originalFog=fog.items.slice();
+  const syntheticFogIds=Array.from({length:77},(_,i)=>`minecraft:fixture_fog_${i}`);
+  fog.items.push(...syntheticFogIds);
+  const fixtureFogIds=JSON.parse(fs.readFileSync(path.join(officialFixture,'fogs.json'),'utf8'))
+   .map(doc=>doc['minecraft:fog_settings'].description.identifier);
+  const expectedFog=[...new Set([...originalFog,...syntheticFogIds,...fixtureFogIds])];
+  fs.writeFileSync(fogPath,JSON.stringify(fog,null,2)+'\n');
+  let p=run(dir,'generate_b4_registry.cjs');assert.equal(p.status,0,p.stdout+p.stderr);
+  const camHash=hash(path.join(dir,'src/libraries/camera_preset_library.generated.ts'));
+  p=run(dir,'update_b4_registry.cjs',['--apply','--fixtures',officialFixture]);assert.equal(p.status,0,p.stdout+p.stderr);
+  const after=JSON.parse(fs.readFileSync(fogPath,'utf8'));
+  assert.deepEqual(after.items,expectedFog,
+   'All existing FOG IDs and 77 added fixtures must survive the ANIMATION update without duplicates');
+  assert.deepEqual(after.items.slice(0,originalFog.length),originalFog,
+   'Pre-existing FOG entries must keep their original order');
+  assert.equal(hash(path.join(dir,'src/libraries/camera_preset_library.generated.ts')),camHash);
+  assert.equal(fs.readFileSync(path.join(dir,'src/libraries','legacy_library.generated.ts'),'utf8'),'// LEGACY SENTINEL\n');
+ }finally{cleanup(dir);}
 });

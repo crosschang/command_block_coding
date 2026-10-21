@@ -83,6 +83,21 @@ function animation(entries) {
  });
  lines.push('}','');return lines.join('\n');
 }
+function animationControllers(entries) {
+ const fn=id=>{const v=camel(id.replace(/^controller\.animation\./,''));return 'animationController'+v[0].toUpperCase()+v.slice(1);};
+ const bid=id=>'mcfunction_animation_controller_reference_'+token(id).replace(/^controller_animation_/,'');
+ validateNames(entries,fn,bid,'animation controller');
+ const lines=['/** AUTO-GENERATED official Mojang animation controller IDs. */','namespace MCFunctionAnimationLibrary {'];
+ entries.forEach((id,i)=>{
+   lines.push(`    //% group="Controllers" weight=${Math.max(50,90-i)}`);
+   lines.push(`    //% blockId=${bid(id)}`);
+   lines.push(`    //% block="${id}"`);
+   lines.push(`    export function ${fn(id)}(): ControllerValue {`);
+   lines.push(`        return new ControllerValue(${JSON.stringify(id)});`);
+   lines.push('    }');
+ });
+ lines.push('}','');return lines.join('\n');
+}
 function fog(entries) {
  const fn=id=>fogLegacy.get(id)||camel(id);
  const bid=id=>'mcfunction_fog_builtin_'+token(id).replace(/^fog_/,'');
@@ -98,7 +113,7 @@ function fog(entries) {
 }
 const plans=[
  ['camera_preset_library.generated.ts',camera(load('camera_presets.json','camera'))],
- ['animation_library.generated.ts',animation(load('animations.json','animation'))],
+ ['animation_library.generated.ts',animation(load('animations.json','animation')) + animationControllers(load('animation_controllers.json','controller'))],
  ['fog_library.generated.ts',fog(load('fogs.json','fog'))]
 ];
 let changes=0;

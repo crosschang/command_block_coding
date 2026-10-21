@@ -1,6 +1,6 @@
 /** Animation and controller IDs remain open to resource-pack/add-on definitions. */
 //% color="#895DA0" weight=82 icon="\uf008" block="ANIMATION ID"
-//% groups='["Direct Input", "Reference"]'
+//% groups='["Direct Input", "Reference", "Controllers"]'
 namespace MCFunctionAnimationLibrary {
     export class AnimationValue {
         id: string;

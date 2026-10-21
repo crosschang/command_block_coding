@@ -8,18 +8,21 @@ const { spawnSync }=require('node:child_process');
 const root=path.resolve(__dirname,'..');
 const sourceDir=path.join(root,'registry/source/bedrock');
 const argv=process.argv.slice(2);
-let apply=false,skipGenerate=false,fixtures=null,animationSource=null;
+let apply=false,skipGenerate=false,fixtures=null,animationSource=null,skipOfficialAnimations=false;
 for(let i=0;i<argv.length;i++){
   const a=argv[i];
   if(a==='--apply')apply=true;
   else if(a==='--skip-generate')skipGenerate=true;
   else if(a==='--fixtures')fixtures=path.resolve(argv[++i]||'');
   else if(a==='--animation-source')animationSource=path.resolve(argv[++i]||'');
-  else {console.error('Usage: node tools/update_b4_registry.cjs [--apply] [--skip-generate] [--animation-source path] [--fixtures directory]');process.exit(2);}
+  else if(a==='--skip-official-animations')skipOfficialAnimations=true;
+  else {console.error('Usage: node tools/update_b4_registry.cjs [--apply] [--skip-generate] [--animation-source path] [--skip-official-animations] [--fixtures directory]');process.exit(2);}
 }
 const SOURCE_URL={
   camera:'https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/main/creator/Commands/commands/camera.md',
-  fogList:'https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/fogs?ref=main'
+  fogList:'https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/fogs?ref=main',
+  animationsList:'https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/animations?ref=main',
+  controllersList:'https://api.github.com/repos/Mojang/bedrock-samples/contents/resource_pack/animation_controllers?ref=main'
 };
 function read(name){return JSON.parse(fs.readFileSync(path.join(sourceDir,name),'utf8'));}
 function stripJsonComments(input){
@@ -58,6 +61,58 @@ function parseAnimationPack(text){
   else throw Error('Animation import requires {"animations":{"animation.*":{...}}} or {"items":[...]}.');
   if(ids.some(s=>typeof s!=='string'|| !/^[A-Za-z0-9_.:\/-]+$/.test(s)))throw Error('Animation source contains unsupported identifiers');
   return Array.from(new Set(ids));
+}
+/** Mojang Vanilla RP: an animation and an animation controller are separate IDs. */
+function parseOfficialDefinition(text, kind){
+  const doc=JSON.parse(stripJsonComments(text));
+  const key=kind==='animation'?'animations':'animation_controllers';
+  const prefix=kind==='animation'?'animation.':'controller.animation.';
+  const values=doc[key];
+  if(!values || typeof values!=='object' || Array.isArray(values))throw Error(`Mojang ${kind}: missing ${key} map`);
+  const ids=Object.keys(values);
+  if(!ids.length)throw Error(`Mojang ${kind}: empty ${key} map`);
+  for(const id of ids){
+    if(!id.startsWith(prefix) || !/^[a-zA-Z0-9_.:\/-]+$/.test(id))throw Error(`Mojang ${kind}: invalid ID ${id}`);
+    if(!values[id] || typeof values[id]!=='object' || Array.isArray(values[id]))throw Error(`Mojang ${kind}: invalid definition ${id}`);
+  }
+  return ids;
+}
+function listJsonFiles(list,subdir,min){
+  if(!Array.isArray(list))throw Error(`Mojang ${subdir}: invalid directory listing`);
+  const base=`https://raw.githubusercontent.com/Mojang/bedrock-samples/`;
+  const files=list.filter(x=>x.type==='file' && /^[\w.-]+\.json$/.test(x.name) &&
+    typeof x.download_url==='string' && x.download_url.startsWith(base) &&
+    x.download_url.includes(`/resource_pack/${subdir}/`)).sort((a,b)=>a.name.localeCompare(b.name));
+  if(files.length<min)throw Error(`Mojang ${subdir}: only ${files.length} files (minimum ${min}); refusing incomplete update`);
+  return files;
+}
+async function getOfficialAnimationIds(subdir,kind,minFiles){
+  // Offline fixtures must be explicitly populated. Legacy fixture tests intentionally
+  // omit them and retain their previous behavior.
+  if(fixtures){
+    const folder=path.join(fixtures,subdir);
+    if(!fs.existsSync(folder))return null;
+    const paths=fs.readdirSync(folder).filter(n=>n.endsWith('.json')).sort();
+    if(!paths.length)throw Error(`Empty official ${kind} fixture folder`);
+    let ids=[];
+    for(const name of paths)ids.push(...parseOfficialDefinition(fs.readFileSync(path.join(folder,name),'utf8'),kind));
+    return Array.from(new Set(ids));
+  }
+  const url=kind==='animation'?SOURCE_URL.animationsList:SOURCE_URL.controllersList;
+  const files=listJsonFiles(JSON.parse(await fetchText(url)),subdir,minFiles);
+  const ids=[];
+  // Entire official directory fetched BEFORE writing registry snapshots. Any failed
+  // source request aborts the update rather than silently creating a partial list.
+  for(let start=0;start<files.length;start+=8){
+    const batch=files.slice(start,start+8);
+    const docs=await Promise.all(batch.map(f=>fetchText(f.download_url)));
+    for(const doc of docs)ids.push(...parseOfficialDefinition(doc,kind));
+    if((start+8)%40===0 || start+8>=files.length)
+      console.log(`  Mojang ${subdir}: parsed ${Math.min(start+8,files.length)} / ${files.length} JSON files`);
+  }
+  const result=Array.from(new Set(ids));
+  if(result.length<files.length/2)throw Error(`Mojang ${subdir}: suspiciously few IDs`);
+  return result;
 }
 function merge(cur,ids,label){
   if(!Array.isArray(cur.items) || cur.items.length===0)throw Error(`${label}: existing registry has no items`);
@@ -102,11 +157,28 @@ async function main(){
  const cameraIds=parseCamera(cameraText);
  const fogIds=await getFogIds();
  const next=[['camera_presets.json',merge(oldCamera,cameraIds,'CAMERA')],['fogs.json',merge(oldFog,fogIds,'FOG')]];
+ const oldAnimation=read('animations.json');
+ let nextAnimation=oldAnimation;
+ if(!skipOfficialAnimations){
+   const officialAnimations=await getOfficialAnimationIds('animations','animation',100);
+   const officialControllers=await getOfficialAnimationIds('animation_controllers','controller',40);
+   if(officialAnimations && officialControllers){
+     nextAnimation=merge(nextAnimation,officialAnimations,'ANIMATION (Mojang Vanilla RP)');
+     nextAnimation.source='https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/animations';
+     nextAnimation.note='Discovered animation definition IDs; presence does not guarantee /playanimation succeeds for every entity or Education version.';
+     const controller=merge(read('animation_controllers.json'),officialControllers,'ANIMATION CONTROLLERS (Mojang Vanilla RP)');
+     next.push(['animation_controllers.json',controller]);
+   }else if(officialAnimations || officialControllers){
+     throw Error('Both animation and controller fixture directories must be provided');
+   }else{
+     console.log('ANIMATION: no official animation fixture present; retaining existing catalog');
+   }
+ }else console.log('ANIMATION: official harvesting disabled by --skip-official-animations');
  if(animationSource){
-   const oldAnimation=read('animations.json');
    const animationIds=parseAnimationPack(fs.readFileSync(animationSource,'utf8'));
-   next.push(['animations.json',merge(oldAnimation,animationIds,'ANIMATION (explicit local source)')]);
- } else {console.log('ANIMATION: unchanged (no complete universal built-in list; pass --animation-source to import local resource-pack IDs)');}
+   nextAnimation=merge(nextAnimation,animationIds,'ANIMATION (explicit local source)');
+ }
+ if(nextAnimation!==oldAnimation)next.push(['animations.json',nextAnimation]);
  // Verify all next registries before writing; generation checks duplicate IDs and output naming.
  for(const [file,json] of next){
    if(json.items.length!==new Set(json.items).size)throw Error(`${file}: duplicate values`);
@@ -120,7 +192,7 @@ async function main(){
    const stageSources=path.join(stagingRoot,'registry/source/bedrock');
    const stageOut=path.join(stagingRoot,'src/libraries');
    fs.mkdirSync(stageSources,{recursive:true});fs.mkdirSync(stageOut,{recursive:true});
-   for(const file of ['camera_presets.json','animations.json','fogs.json']){
+   for(const file of ['camera_presets.json','animations.json','animation_controllers.json','fogs.json']){
      const changed=next.find(([name])=>name===file);
      const payload=changed?JSON.stringify(changed[1],null,2)+'\n':fs.readFileSync(path.join(sourceDir,file),'utf8');
      fs.writeFileSync(path.join(stageSources,file),payload,'utf8');
@@ -130,7 +202,7 @@ async function main(){
    for(const [file,json] of next){
      const target=path.join(sourceDir,file);
      const current=JSON.parse(fs.readFileSync(target,'utf8'));
-     if(JSON.stringify(current.items)===JSON.stringify(json.items)){
+     if(JSON.stringify(current)===JSON.stringify(json)){
        console.log('UNCHANGED '+path.relative(root,target));continue;
      }
      fs.copyFileSync(path.join(stageSources,file),target);

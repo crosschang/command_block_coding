@@ -1,0 +1,7 @@
+{
+ "format_version":"1.10.0",
+ "animation_controllers":{
+  "controller.animation.creeper.head":{"states":{"default":{}}},
+  "controller.animation.creeper.swelling":{"states":{"default":{}}}
+ }
+}
