@@ -174,14 +174,33 @@ function fogTooltip(id,metadata){
    toText(row.volumetric)+'; media coefficients: '+toText(row.volumetricScattering)+
    '. These are JSON fields, not proof of in-game rendering; missing types can inherit another fog layer.';
 }
+/* B4 FOG ENVIRONMENT GROUPS v1 — grouped once per ID; existing block IDs preserved. */
+const FOG_ENVIRONMENT_GROUPS = ['Direct Input','Air','Water','Weather','Lava / Lava Resistance',
+  'Powder Snow','Mixed','Other / Unknown'];
+/** Official JSON media fields are metadata, not runtime compatibility guarantees. */
+function fogEnvironmentGroup(id,media) {
+ const row=media[id];
+ if(!row)return 'Other / Unknown';
+ const all=[...row.distance,...row.volumetric,...row.volumetricScattering];
+ const env=new Set(all.map(x=>x==='lava'||x==='lava_resistance'?'Lava / Lava Resistance':
+   x==='air'?'Air':x==='water'?'Water':x==='weather'?'Weather':
+   x==='powder_snow'?'Powder Snow':null).filter(x=>x!==null));
+ if(env.size===0)return 'Other / Unknown';
+ if(env.size>1)return 'Mixed';
+ return [...env][0];
+}
 function fog(entries) {
  const fn=id=>fogLegacy.get(id)||camel(id);
  const bid=id=>'mcfunction_fog_builtin_'+token(id).replace(/^fog_/,'');
  validateNames(entries,fn,bid,'fog');
  const media=fogMediaCatalog();
- const lines=['/** AUTO-GENERATED reporters from registry/source/bedrock/fogs.json. */','namespace MCFunctionFogLibrary {'];
+ const activeGroups=new Set(entries.map(id=>fogEnvironmentGroup(id,media)));
+ const orderedGroups=FOG_ENVIRONMENT_GROUPS.filter(group=>group==='Direct Input'||activeGroups.has(group));
+ const lines=['/** AUTO-GENERATED reporters from registry/source/bedrock/fogs.json. */',
+   groupMetadata(orderedGroups), 'namespace MCFunctionFogLibrary {'];
  entries.forEach((id,i)=>{
-   lines.push(`    //% group="Built-in" weight=${Math.max(50,90-i)}`);
+   const group=fogEnvironmentGroup(id,media);
+   lines.push(`    //% group=${JSON.stringify(group)} weight=${Math.max(50,90-i)}`);
    lines.push(`    //% blockId=${bid(id)}`);
    lines.push(`    //% block="fog ${id}"`);
    if(media[id])lines.push(`    //% tooltip=${JSON.stringify(fogTooltip(id,media))}`);
