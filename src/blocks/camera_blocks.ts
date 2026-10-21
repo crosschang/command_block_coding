@@ -17,6 +17,7 @@ namespace Command {
     }
 
     //% blockId=mcfunction_camera_preset_builtin
+    //% blockHidden=true
     //% group="CAMERA" weight=96
     //% block="camera preset $preset"
     export function cameraPresetBuiltin(preset: CameraPresetChoice): CameraPresetValue {
@@ -39,7 +40,7 @@ namespace Command {
     //% block="CAMERA target $target set $preset"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_selector_self"
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     export function cameraSet(target: MCFunctionFields.SelectorValue, preset: CameraPresetValue): void {
         executeAudioCommand(MCFunctionBlocks.createCameraSetCommand(
             target ? target.selector : undefined,
@@ -52,7 +53,7 @@ namespace Command {
     //% block="CAMERA target $target set $preset position $position rotation $rotation"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_selector_self"
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     //% position.shadow="mcfunction_position_absolute"
     //% rotation.shadow="mcfunction_rotation_absolute"
     export function cameraSetAdvanced(
@@ -130,7 +131,7 @@ namespace Command {
     //% block="CAMERA target $target set $preset position $position facing $facing"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_selector_self"
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     //% position.shadow="mcfunction_position_absolute"
     //% facing.shadow="mcfunction_camera_facing_position"
     export function cameraSetFacing(target: MCFunctionFields.SelectorValue, preset: CameraPresetValue,
@@ -146,7 +147,7 @@ namespace Command {
     //% block="CAMERA target $target set $preset ease $ease position $position rotation $rotation"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_selector_self"
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     //% ease.shadow="mcfunction_camera_ease"
     //% position.shadow="mcfunction_position_absolute"
     //% rotation.shadow="mcfunction_rotation_absolute"
@@ -165,7 +166,7 @@ namespace Command {
     //% block="CAMERA target $target set $preset ease $ease position $position facing $facing"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_selector_self"
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     //% ease.shadow="mcfunction_camera_ease"
     //% position.shadow="mcfunction_position_absolute"
     //% facing.shadow="mcfunction_camera_facing_position"
@@ -183,7 +184,7 @@ namespace Command {
     //% group="CAMERA" weight=88
     //% block="CAMERA target $target set $preset default"
     //% target.shadow="mcfunction_selector_self"
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     export function cameraSetDefault(target: MCFunctionFields.SelectorValue, preset: CameraPresetValue): void {
         executeAudioCommand(MCFunctionBlocks.createCameraSetOptionsCommand(
             target ? target.selector : undefined, preset ? preset.presetId : undefined,
@@ -195,7 +196,7 @@ namespace Command {
     //% group="CAMERA" weight=87
     //% block="CAMERA target $target set $preset ease $ease default"
     //% target.shadow="mcfunction_selector_self"
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     //% ease.shadow="mcfunction_camera_ease"
     export function cameraSetEaseDefault(target: MCFunctionFields.SelectorValue, preset: CameraPresetValue,
         ease: CameraEaseValue): void {
@@ -293,7 +294,7 @@ namespace Command {
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
     //% target.shadow="mcfunction_selector_self"
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     //% ease.shadow="mcfunction_camera_ease"
     //% position.shadow="mcfunction_position_absolute"
     //% orientation.shadow="mcfunction_camera_orientation_rotation"
@@ -408,7 +409,7 @@ namespace Command {
     //% block="set $preset || ease $ease position $position orientation $orientation mode $mode view offset $viewOffset entity offset $entityOffset"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     //% ease.shadow="mcfunction_camera_ease"
     //% position.shadow="mcfunction_position_absolute"
     //% orientation.shadow="mcfunction_camera_orientation_rotation"
@@ -476,7 +477,7 @@ namespace Command {
     //% block="set $preset || settings $settings"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     //% settings.shadow="mcfunction_camera_set_options"
     export function cameraActionSetCompact(preset: CameraPresetValue,
         settings?: CameraSetOptionsValue): CameraActionValue {
@@ -589,7 +590,7 @@ namespace Command {
     //% block="set $preset || ease $ease settings $settings"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     // No optional shadows: expanding the block must not silently enable ease/settings.
     export function cameraActionSetComposed(preset: CameraPresetValue,
         ease?: CameraEaseValue, settings?: CameraSetOptionsValue): CameraActionValue {
@@ -615,7 +616,7 @@ namespace Command {
     //% block="set $preset || option $setting"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     // No setting shadow: leaving the socket empty is preset-only, not default.
     export function cameraActionSetGrammar(preset: CameraPresetValue,
         setting?: CameraSetOptionsValue): CameraActionValue {
@@ -925,7 +926,7 @@ namespace Command {
     //% group="CAMERA" weight=119
     //% block="set $preset|options $options"
     //% inlineInputMode=external
-    //% preset.shadow="mcfunction_camera_preset_builtin"
+    //% preset.shadow="mcfunction_camera_library_first_person"
     //% options.shadow="mcfunction_camera_set_chain_end"
     export function cameraActionSetChain(preset: CameraPresetValue,
         options: CameraSetChainValue): CameraActionValue {
