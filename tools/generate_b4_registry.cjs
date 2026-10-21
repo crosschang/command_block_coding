@@ -174,20 +174,24 @@ function fogTooltip(id,metadata){
    toText(row.volumetric)+'; media coefficients: '+toText(row.volumetricScattering)+
    '. These are JSON fields, not proof of in-game rendering; missing types can inherit another fog layer.';
 }
-/* B4 FOG ENVIRONMENT GROUPS v1 — grouped once per ID; existing block IDs preserved. */
-const FOG_ENVIRONMENT_GROUPS = ['Direct Input','Air','Water','Weather','Lava / Lava Resistance',
-  'Powder Snow','Mixed','Other / Unknown'];
-/** Official JSON media fields are metadata, not runtime compatibility guarantees. */
+/* B4 FOG ENVIRONMENT GROUPS v2 — exact media combinations, one reporter per ID. */
+const FOG_ENVIRONMENT_GROUPS = ['Direct Input','Air + Water','Water Only',
+  'Air + Water + Weather','Lava Included','Powder Snow','Other / Unknown'];
+/** Official resource JSON fields are authoring metadata, not evidence of Education rendering. */
 function fogEnvironmentGroup(id,media) {
  const row=media[id];
  if(!row)return 'Other / Unknown';
- const all=[...row.distance,...row.volumetric,...row.volumetricScattering];
- const env=new Set(all.map(x=>x==='lava'||x==='lava_resistance'?'Lava / Lava Resistance':
-   x==='air'?'Air':x==='water'?'Water':x==='weather'?'Weather':
-   x==='powder_snow'?'Powder Snow':null).filter(x=>x!==null));
- if(env.size===0)return 'Other / Unknown';
- if(env.size>1)return 'Mixed';
- return [...env][0];
+ const set=new Set([...row.distance,...row.volumetric,...row.volumetricScattering]);
+ const exact=(fields)=>set.size===fields.length&&fields.every(field=>set.has(field));
+ if(exact(['water']))return 'Water Only';
+ if(exact(['powder_snow']))return 'Powder Snow';
+ if(exact(['air','water']))return 'Air + Water';
+ if(exact(['air','water','weather']))return 'Air + Water + Weather';
+ const lavaTypes=['air','water','weather','lava','lava_resistance'];
+ if((set.has('lava')||set.has('lava_resistance')) &&
+     [...set].every(field=>lavaTypes.includes(field))) return 'Lava Included';
+ // Preserve unsupported/future combinations without guessing their intended environment.
+ return 'Other / Unknown';
 }
 function fog(entries) {
  const fn=id=>fogLegacy.get(id)||camel(id);

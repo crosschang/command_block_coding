@@ -3,102 +3,135 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const {spawnSync}=require('node:child_process');
 const root=path.resolve(__dirname,'..');
-const source=path.join(root,'registry/source/bedrock');
-const groups=['Direct Input','Air','Water','Weather','Lava / Lava Resistance','Powder Snow','Mixed','Other / Unknown'];
-const fogFile=path.join(root,'src/libraries/fog_library.generated.ts');
+const groups=['Direct Input','Air + Water','Water Only','Air + Water + Weather',
+  'Lava Included','Powder Snow','Other / Unknown'];
 const generator=path.join(root,'tools/generate_b4_registry.cjs');
-function run(script,args=[]){return spawnSync(process.execPath,[script,...args],{encoding:'utf8'});}
-function loadJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
-function tempRoot(){
- const dir=fs.mkdtempSync(path.join(os.tmpdir(),'cbc-fog-group-test-'));
- const paths=['tools/generate_b4_registry.cjs','src/libraries/fog_library.ts',
+const idsRel='registry/source/bedrock/fogs.json';
+function run(file,args=[]){return spawnSync(process.execPath,[file,...args],{encoding:'utf8',cwd:root});}
+function copyWorkspace(){
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'cbc-fog-5-groups-'));
+ for(const rel of ['tools/generate_b4_registry.cjs','src/libraries/fog_library.ts',
    'registry/source/bedrock/camera_presets.json','registry/source/bedrock/animations.json',
-   'registry/source/bedrock/animation_controllers.json','registry/source/bedrock/fogs.json'];
- for(const rel of paths){const dest=path.join(dir,rel);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,rel),dest);}
- const meta=['registry/derived/bedrock/fog_media.json','registry/derived/bedrock/animation_owner_links.json'];
- for(const rel of meta){const src=path.join(root,rel);if(fs.existsSync(src)){let dst=path.join(dir,rel);fs.mkdirSync(path.dirname(dst),{recursive:true});fs.copyFileSync(src,dst);}}
+   'registry/source/bedrock/animation_controllers.json',idsRel]){
+   const dest=path.join(dir,rel);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,rel),dest);
+ }
+ for(const rel of ['registry/derived/bedrock/fog_media.json','registry/derived/bedrock/animation_owner_links.json']){
+   if(fs.existsSync(path.join(root,rel))){const dst=path.join(dir,rel);fs.mkdirSync(path.dirname(dst),{recursive:true});fs.copyFileSync(path.join(root,rel),dst)}
+ }
  return dir;
 }
-function expectedGroup(id){
- const row={
-  'minecraft:fog_test_air':'Air','minecraft:fog_test_water':'Water',
-  'minecraft:fog_test_weather':'Weather','minecraft:fog_test_lava':'Lava / Lava Resistance',
-  'minecraft:fog_test_lava_resistance':'Lava / Lava Resistance',
-  'minecraft:fog_test_powder_snow':'Powder Snow',
-  'minecraft:fog_test_mixed':'Mixed','minecraft:fog_test_mixed_volumetric':'Mixed',
-  'minecraft:fog_test_none':'Other / Unknown','minecraft:fog_test_missing':'Other / Unknown'
- };
- return row[id];
-}
-function getFunctionBlock(text,id){
+function generate(dir){return run(generator,['--root',dir])}
+function fogOut(dir){return fs.readFileSync(path.join(dir,'src/libraries/fog_library.generated.ts'),'utf8')}
+function getGroupForId(data,id){
  const escaped=id.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
- const m=text.match(new RegExp('(\\/\\/% group="[^"\\n]+" weight=\\d+\\n\\s*\\/\\/% blockId=[^\\n]+\\n\\s*\\/\\/% block="fog '+escaped+'"[\\s\\S]*?)(?=\\n\\s*\\/\\/% group=|\\n})'));
- assert.ok(m,'Missing reporter: '+id);return m[1];
+ const re=new RegExp('//% group="([^"\\n]+)" weight=\\d+\\s+//% blockId=(mcfunction_fog_builtin_[^\\s]+)\\s+//% block="fog '+escaped+'"');
+ const match=data.match(re);assert.ok(match,'Missing FOG reporter '+id);return {group:match[1],blockId:match[2]};
 }
-test('FOG category declares environment groups without changing existing custom ID/block ID',()=>{
+function config(dir,combos){
+ const fogFile=path.join(dir,idsRel);let data=JSON.parse(fs.readFileSync(fogFile,'utf8'));
+ const entries={};const ids=[];
+ for(const [suffix,media] of combos){const id='minecraft:fog_test_'+suffix;ids.push(id);
+   if(media!==null)entries[id]={id,distance:media[0],volumetric:media[1]||[],volumetricScattering:media[2]||[]};
+ }
+ data.items=ids;fs.writeFileSync(fogFile,JSON.stringify(data,null,2)+'\n');
+ const meta=path.join(dir,'registry/derived/bedrock/fog_media.json');
+ fs.mkdirSync(path.dirname(meta),{recursive:true});fs.writeFileSync(meta,JSON.stringify({schemaVersion:1,entries}));
+ return ids;
+}
+test('FOG namespaces declare five media combination groups, with original Custom ID preserved',()=>{
  const s=fs.readFileSync(path.join(root,'src/libraries/fog_library.ts'),'utf8');
  const g=fs.readFileSync(generator,'utf8');
+ assert.ok(s.includes(`//% groups='${JSON.stringify(groups)}'`));
  assert.match(s,/blockId=mcfunction_fog_custom_id/);
  assert.match(s,/\/\/% group="Direct Input" weight=99/);
- assert.match(g,/FOG ENVIRONMENT GROUPS v1/);
- assert.match(g,/fogEnvironmentGroup\(id,media\)/);
- assert.ok(s.includes(`//% groups='${JSON.stringify(groups)}'`));
+ assert.match(g,/B4 FOG ENVIRONMENT GROUPS v2/);
+ assert.ok(!g.includes("return 'Mixed'"));
 });
-test('each ID appears in exactly one correct environment group; same block IDs preserved',()=>{
- const dir=tempRoot();try{
-  const fogs=['air','water','weather','lava','lava_resistance','powder_snow','mixed','mixed_volumetric','none','missing'].map(x=>'minecraft:fog_test_'+x);
-  const fogJson=path.join(dir,'registry/source/bedrock/fogs.json');
-  const data=loadJson(fogJson);data.items=fogs;
-  fs.writeFileSync(fogJson,JSON.stringify(data));
-  const entries={};const mk=(id,d=[],v=[],vs=[])=>entries[id]={id,distance:d,volumetric:v,volumetricScattering:vs};
-  mk(fogs[0],['air']); mk(fogs[1],['water']);mk(fogs[2],['weather']);
-  mk(fogs[3],['lava']);mk(fogs[4],['lava','lava_resistance']);mk(fogs[5],['powder_snow']);
-  mk(fogs[6],['air','water']);mk(fogs[7],['water'],['weather']);mk(fogs[8]);
-  const mediaFile=path.join(dir,'registry/derived/bedrock/fog_media.json');
-  fs.mkdirSync(path.dirname(mediaFile),{recursive:true});
-  fs.writeFileSync(mediaFile,JSON.stringify({schemaVersion:1,entries}));
-  const p=run(generator,['--root',dir]);assert.equal(p.status,0,p.stdout+p.stderr);
-  const output=fs.readFileSync(path.join(dir,'src/libraries/fog_library.generated.ts'),'utf8');
-  assert.ok(output.includes(`//% groups='${JSON.stringify(groups)}'`));
-  const ids=[...output.matchAll(/\/\/% blockId=(mcfunction_fog_builtin_[^\s]+)/g)].map(m=>m[1]);
-  assert.equal(ids.length,fogs.length);assert.equal(new Set(ids).size,ids.length);
-  for(const id of fogs){
-    const block=getFunctionBlock(output,id);
-    assert.ok(block.includes(`//% group="${expectedGroup(id)}"`),id+': '+block.slice(0,120));
-    const expectedId='mcfunction_fog_builtin_'+id.split(':')[1].replace(/^fog_/,'').replace(/[^a-z0-9]+/g,'_');
-    assert.ok(block.includes('blockId='+expectedId),id+': original blockId must be stable');
-  }
-  assert.ok(getFunctionBlock(output,fogs[6]).includes('distance: air, water'));
-  assert.equal(run(generator,['--root',dir,'--check']).status,0);
- }finally{fs.rmSync(dir,{recursive:true,force:true});}
-});
-test('CAMERA/ANIMATION generated bytes and original registry source remain unchanged by FOG grouping',()=>{
- const dir=tempRoot();try{
-   const before=['camera_presets','animations','animation_controllers','fogs'].map(x=>fs.readFileSync(path.join(dir,'registry/source/bedrock',x+'.json'),'utf8'));
-   let p=run(generator,['--root',dir]);assert.equal(p.status,0,p.stdout+p.stderr);
-   const snapshot=['camera_preset_library.generated.ts','animation_library.generated.ts'].map(x=>
-     fs.readFileSync(path.join(dir,'src/libraries',x),'utf8'));
-   const fogs=loadJson(path.join(dir,'registry/source/bedrock/fogs.json')).items;
-   const fog=fs.readFileSync(path.join(dir,'src/libraries/fog_library.generated.ts'),'utf8');
-   // When a fixture has no media metadata, omit empty environment headings.
-   if(!fs.existsSync(path.join(dir,'registry/derived/bedrock/fog_media.json'))){
-     assert.ok(fog.includes('\"Direct Input\",\"Other / Unknown\"'));
-     assert.ok(!fog.includes('\"Air\"'));
+test('FOG group matches exact official media combinations and sends future combinations to Other',()=>{
+ const dir=copyWorkspace();
+ try{
+   const cases=[
+      ['air_water',[['air','water']],'Air + Water'],
+      ['water',[['water']],'Water Only'],
+      ['air_water_weather',[['air','water','weather']],'Air + Water + Weather'],
+      ['lava',[['air','water','weather','lava','lava_resistance']],'Lava Included'],
+      ['lava_resistance',[['lava_resistance']],'Lava Included'],
+      ['powder_snow',[['powder_snow']],'Powder Snow'],
+      ['air_only',[['air']],'Other / Unknown'],
+      ['weather_only',[['weather']],'Other / Unknown'],
+      ['odd_mix',[['air','powder_snow']],'Other / Unknown'],
+      ['missing',null,'Other / Unknown'],
+      ['distributed',[['water'],['air'],[]],'Air + Water'],
+      ['distributed_weather',[['water'],['weather'],['air']],'Air + Water + Weather']
+   ];
+   const ids=config(dir,cases.map(([n,m])=>[n,m]));const r=generate(dir);assert.equal(r.status,0,r.stdout+r.stderr);
+   const data=fogOut(dir);
+   assert.equal((data.match(/\/\/% blockId=mcfunction_fog_builtin_/g)||[]).length,ids.length);
+   for(let i=0;i<cases.length;i++){
+      const {group,blockId}=getGroupForId(data,ids[i]);assert.equal(group,cases[i][2],ids[i]);
+      assert.equal(blockId,'mcfunction_fog_builtin_'+ids[i].split(':')[1].replace(/^fog_/,'').replace(/[^a-z0-9]+/g,'_'));
    }
-   assert.equal((fog.match(/\/\/% blockId=mcfunction_fog_builtin_/g)||[]).length,fogs.length);
-   assert.equal(new Set([...fog.matchAll(/\/\/% blockId=(mcfunction_fog_builtin_\S+)/g)].map(m=>m[1])).size,fogs.length);
-   p=run(generator,['--root',dir]);assert.equal(p.status,0,p.stdout+p.stderr);
-   snapshot.forEach((value,i)=>assert.equal(fs.readFileSync(path.join(dir,'src/libraries',
-     ['camera_preset_library.generated.ts','animation_library.generated.ts'][i]),'utf8'),value));
-   before.forEach((value,i)=>assert.equal(fs.readFileSync(path.join(dir,'registry/source/bedrock',
-     ['camera_presets','animations','animation_controllers','fogs'][i]+'.json'),'utf8'),value));
+   assert.ok(data.includes('"Air + Water"'));
+   assert.ok(data.includes('"Water Only"'));
    assert.equal(run(generator,['--root',dir,'--check']).status,0);
- }finally{fs.rmSync(dir,{recursive:true,force:true});}
+ }finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
-test('patch is idempotent and dry-run leaves sources untouched',()=>{
- const tool=path.join(root,'tools/patch_b4_fog_environment_groups.cjs');
- const g=fs.readFileSync(generator,'utf8');const l=fs.readFileSync(path.join(root,'src/libraries/fog_library.ts'),'utf8');
- const p=run(tool,['--check']);assert.equal(p.status,0,p.stdout+p.stderr);
- assert.equal(fs.readFileSync(generator,'utf8'),g);
- assert.equal(fs.readFileSync(path.join(root,'src/libraries/fog_library.ts'),'utf8'),l);
+test('80-item regression distribution 42/24/7/6/1; reporter IDs unique',()=>{
+ const dir=copyWorkspace();
+ try{
+   const cases=[];
+   for(const [label,n,media] of [
+     ['aw',42,[['air','water']]],['w',24,[['water']]],
+     ['aww',7,[['air','water','weather']]],
+     ['lava',6,[['air','water','weather','lava','lava_resistance']]],
+     ['snow',1,[['powder_snow']]]]){
+       for(let i=0;i<n;i++)cases.push([label+'_'+String(i).padStart(2,'0'),media]);
+   }
+   const ids=config(dir,cases);
+   const genFile=path.join(dir,'tools/generate_b4_registry.cjs');
+   const currentGen=fs.readFileSync(genFile,'utf8').replace(/\r\n/g,'\n');
+   const assets=path.join(root,'tools/patch_assets');
+   const v1Header=fs.readFileSync(path.join(assets,'fog_group_v1_header.txt'),'utf8').trimEnd();
+   const v2Header=fs.readFileSync(path.join(assets,'fog_group_v2_header.txt'),'utf8').trimEnd();
+   assert.ok(currentGen.includes(v2Header));
+   fs.writeFileSync(genFile,currentGen.replace(v2Header,v1Header));
+   const old=generate(dir);assert.equal(old.status,0,old.stdout+old.stderr);
+   const oldData=fogOut(dir);
+   fs.writeFileSync(genFile,currentGen);
+   const r=generate(dir);assert.equal(r.status,0,r.stdout+r.stderr);
+   const data=fogOut(dir);const counts={};const blockIds=[];
+   const reporterSignature=content=>[...content.matchAll(/export function ([A-Za-z0-9_$]+)\(\): FogValue \{ return new FogValue\("([^"]+)"\); \}/g)]
+      .map(m=>m[1]+':'+m[2]).sort();
+   assert.deepEqual(reporterSignature(data),reporterSignature(oldData),'Reporter functions and returned IDs must remain unchanged');
+   for(const id of ids)assert.equal(getGroupForId(oldData,id).blockId,getGroupForId(data,id).blockId);
+   for(const id of ids){const row=getGroupForId(data,id);counts[row.group]=(counts[row.group]||0)+1;blockIds.push(row.blockId)}
+   assert.deepEqual(counts,{'Air + Water':42,'Water Only':24,'Air + Water + Weather':7,'Lava Included':6,'Powder Snow':1});
+   assert.equal(new Set(blockIds).size,80);
+   assert.ok(!data.includes('//% group="Mixed"'));
+   assert.equal(run(generator,['--root',dir,'--check']).status,0);
+ }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+test('FOG generation preserves CAMERA/ANIMATION generated bytes, all Registry JSON, and is repeatable',()=>{
+ const dir=copyWorkspace();
+ try{
+   const ids=config(dir,[['basic',[['air','water']]],['water',[['water']]]]);
+   const sources=['camera_presets','animations','animation_controllers','fogs'].map(name=>fs.readFileSync(path.join(dir,'registry/source/bedrock',name+'.json'),'utf8'));
+   const first=generate(dir);assert.equal(first.status,0,first.stdout+first.stderr);
+   const lib=path.join(dir,'src/libraries');
+   const files=['camera_preset_library.generated.ts','animation_library.generated.ts','fog_library.generated.ts'];
+   const before=files.map(f=>fs.readFileSync(path.join(lib,f),'utf8'));
+   const second=generate(dir);assert.equal(second.status,0,second.stdout+second.stderr);
+   const after=files.map(f=>fs.readFileSync(path.join(lib,f),'utf8'));
+   assert.deepEqual(after,before);
+   for(let i=0;i<sources.length;i++)assert.equal(fs.readFileSync(path.join(dir,'registry/source/bedrock',['camera_presets','animations','animation_controllers','fogs'][i]+'.json'),'utf8'),sources[i]);
+   assert.equal(run(generator,['--root',dir,'--check']).status,0);
+ }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+test('patch --check is read-only and --apply is idempotent on updated source',()=>{
+ const files=['tools/generate_b4_registry.cjs','src/libraries/fog_library.ts','tests/B4_FOG_ENVIRONMENT_GROUPS_TEST.cjs'];
+ const before=files.map(rel=>fs.readFileSync(path.join(root,rel),'utf8'));
+ const tool=path.join(root,'tools/patch_b4_fog_five_groups.cjs');
+ const c=run(tool,['--check']);assert.equal(c.status,0,c.stdout+c.stderr);
+ const a=run(tool,['--apply']);assert.equal(a.status,0,a.stdout+a.stderr);
+ assert.deepEqual(files.map(rel=>fs.readFileSync(path.join(root,rel),'utf8')),before);
 });

@@ -1,0 +1,15 @@
+/* B4 FOG ENVIRONMENT GROUPS v1 — grouped once per ID; existing block IDs preserved. */
+const FOG_ENVIRONMENT_GROUPS = ['Direct Input','Air','Water','Weather','Lava / Lava Resistance',
+  'Powder Snow','Mixed','Other / Unknown'];
+/** Official JSON media fields are metadata, not runtime compatibility guarantees. */
+function fogEnvironmentGroup(id,media) {
+ const row=media[id];
+ if(!row)return 'Other / Unknown';
+ const all=[...row.distance,...row.volumetric,...row.volumetricScattering];
+ const env=new Set(all.map(x=>x==='lava'||x==='lava_resistance'?'Lava / Lava Resistance':
+   x==='air'?'Air':x==='water'?'Water':x==='weather'?'Weather':
+   x==='powder_snow'?'Powder Snow':null).filter(x=>x!==null));
+ if(env.size===0)return 'Other / Unknown';
+ if(env.size>1)return 'Mixed';
+ return [...env][0];
+}
