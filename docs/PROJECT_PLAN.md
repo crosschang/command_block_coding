@@ -1,3 +1,24 @@
+# command_block_coding — Current Plan (updated 2026-10-22)
+
+**현재 단계:** MakeCode/PXT AST 기반 명령 구현·실게임 대표 검증. GitHub master `0.0.77`(버전 커밋은 `pxt.json`만 수정); B4 실제 검증은 0.0.76 동일 기능 소스. **Parser/Converter·`.mcfunction` 실제 파일 Export/Import는 완료되지 않음.**
+
+## 빠른 현재 현황
+- B4 **PLAYANIMATION 대표 고급 인수**와 **FOG 지상·수중·스택**: 사용자 Minecraft Education 26.32 시각 PASS. 세부 범위와 미검증은 `docs/B4_TEST_EVIDENCE_2026-10-22.md`.
+- CAMERA 주요 명령 대표 실게임 및 7개 CAMERA PRESET Library UI 확인. CAMERA 특수 기능 전체 완료는 아님.
+- B3 Damage/Event, C1 ControlScheme/AimAssist 대표 경로 사용자 PASS 기록. C1 Ride/Dialogue는 현재 미완료.
+- FOG 80개 ID 최신 5개 그룹 42/24/7/6/1; Animation 536, Controller 179, CAMERA PRESET 7. 전체 Education 런타임 호환성 보증 아님.
+- **다음 후보:** Ride/Dialogue → Scoreboard AST → Modern Execute AST → RawText Tellraw/Titleraw → 실제 `.mcfunction` 양방향 Converter. CAMERA 고급 미완료는 별도 backlog.
+
+## 현재 읽을 문서
+1. `docs/HANDOFF_BLOCK_COMMAND_MAKER_0.0.77_2026-10-22.md`
+2. `docs/COMMAND_IMPLEMENTATION_ROADMAP_2026-10-22.md`
+3. `docs/B4_TEST_EVIDENCE_2026-10-22.md`
+
+## 역사적 계획 원문 보존
+아래는 초창기 `PROJECT_PLAN.md` 원문이며, `give`, `tp`를 다음 작업으로 지칭하는 등 **현재 개발 단계와 달라진 항목이 있다.** 최신 작업 순서는 위 2026-10-22 섹션을 따른다.
+
+---
+
 # command_block_coding — Current Plan
 
 ## Confirmed runtime structure
