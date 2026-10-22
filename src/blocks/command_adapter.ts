@@ -1,5 +1,19 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    export function createRideCommand(action: MCFunctionAST.RideAction,
+        actor: MCFunctionAST.PlayerTarget, mount?: MCFunctionAST.PlayerTarget,
+        entityType?: string, teleportRule?: MCFunctionAST.RideTeleportRule,
+        fillType?: MCFunctionAST.RideFillType,
+        rideRule?: MCFunctionAST.RideSummonRule,
+        spawnEvent?: string, nameTag?: string): MCFunctionAST.RideCommand {
+        return MCFunctionAST.createRideCommand(action, actor, mount, entityType,
+            teleportRule, fillType, rideRule, spawnEvent, nameTag);
+    }
+    export function createDialogueCommand(action: MCFunctionAST.DialogueAction,
+        npc: MCFunctionAST.PlayerTarget, player?: MCFunctionAST.PlayerTarget,
+        sceneName?: string): MCFunctionAST.DialogueCommand {
+        return MCFunctionAST.createDialogueCommand(action, npc, player, sceneName);
+    }
     export function createPlayAnimationCommand(target: MCFunctionAST.PlayerTarget,
         animationId: string, nextState?: string, blendOutTime?: number,
         stopExpression?: string, controllerId?: string): MCFunctionAST.PlayAnimationCommand {

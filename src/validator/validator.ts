@@ -2195,8 +2195,123 @@ namespace MCFunctionValidator {
         return issues;
     }
 
+    /** One command token; accept custom IDs, but reject argument injection. */
+    function c1Token(value: string): boolean { return isSafeCommandId(value); }
+    function c1OptionalName(value: string): boolean {
+        return value != undefined && value.length > 0 &&
+            value.indexOf("\r") < 0 && value.indexOf("\n") < 0;
+    }
+    function c1NoExtraRide(cmd: MCFunctionAST.RideCommand): boolean {
+        return cmd.mount == undefined && cmd.entityType == undefined &&
+            cmd.teleportRule == undefined && cmd.fillType == undefined &&
+            cmd.rideRule == undefined && cmd.spawnEvent == undefined && cmd.nameTag == undefined;
+    }
+    export function validateRideCommand(cmd: MCFunctionAST.RideCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        appendIssues(issues, validatePlayerReference(cmd.actor, true));
+        if (cmd.action == MCFunctionAST.RideAction.StartRiding) {
+            appendIssues(issues, validatePlayerReference(cmd.mount, true));
+            if (cmd.entityType != undefined || cmd.rideRule != undefined ||
+                cmd.spawnEvent != undefined || cmd.nameTag != undefined) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_START_EXTRA", "start_riding takes two targets and optional teleport/fill rules only.");
+            }
+            if (cmd.teleportRule != undefined &&
+                cmd.teleportRule != MCFunctionAST.RideTeleportRule.TeleportRider &&
+                cmd.teleportRule != MCFunctionAST.RideTeleportRule.TeleportRide) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_TELEPORT_RULE_INVALID", "Unknown teleport rule.");
+            }
+            if (cmd.fillType != undefined &&
+                cmd.fillType != MCFunctionAST.RideFillType.UntilFull &&
+                cmd.fillType != MCFunctionAST.RideFillType.IfGroupFits) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_FILL_RULE_INVALID", "Unknown fill rule.");
+            }
+            if (cmd.fillType != undefined && cmd.teleportRule == undefined) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_FILL_REQUIRES_TELEPORT_RULE", "Supply teleportRule before fillType in the positional command.");
+            }
+        } else if (cmd.action == MCFunctionAST.RideAction.StopRiding ||
+                   cmd.action == MCFunctionAST.RideAction.EvictRiders) {
+            if (!c1NoExtraRide(cmd)) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_NO_ARGUMENT_ACTION_EXTRA", "stop_riding and evict_riders cannot take extra parameters.");
+            }
+        } else if (cmd.action == MCFunctionAST.RideAction.SummonRider ||
+                   cmd.action == MCFunctionAST.RideAction.SummonRide) {
+            if (cmd.mount != undefined || cmd.teleportRule != undefined || cmd.fillType != undefined) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_SUMMON_EXTRA", "Summon forms cannot take start_riding arguments.");
+            }
+            if (!c1Token(cmd.entityType)) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_ENTITY_ID_INVALID", "Summoned entity type must be a safe ID token.");
+            }
+            if (cmd.action == MCFunctionAST.RideAction.SummonRider && cmd.rideRule != undefined) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_RIDER_RULE_UNEXPECTED", "summon_rider does not take rideRules.");
+            }
+            if (cmd.rideRule != undefined &&
+                cmd.rideRule != MCFunctionAST.RideSummonRule.NoRideChange &&
+                cmd.rideRule != MCFunctionAST.RideSummonRule.ReassignRides &&
+                cmd.rideRule != MCFunctionAST.RideSummonRule.SkipRiders) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_SUMMON_RULE_INVALID", "Unknown rideRules enum.");
+            }
+            if (cmd.spawnEvent != undefined && !c1Token(cmd.spawnEvent)) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_SPAWN_EVENT_INVALID", "Spawn event must be a safe single token.");
+            }
+            if (cmd.nameTag != undefined && !c1OptionalName(cmd.nameTag)) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_NAME_INVALID", "Name tag must be a nonempty single-line string.");
+            }
+            if (cmd.nameTag != undefined && cmd.spawnEvent == undefined) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_NAME_REQUIRES_EVENT", "Supply spawnEvent before nameTag in the positional command.");
+            }
+            if (cmd.action == MCFunctionAST.RideAction.SummonRide &&
+                cmd.spawnEvent != undefined && cmd.rideRule == undefined) {
+                addIssue(issues, ValidationLevel.Error, "RIDE_EVENT_REQUIRES_RULE", "Supply rideRules before spawnEvent in summon_ride.");
+            }
+        } else {
+            addIssue(issues, ValidationLevel.Error, "RIDE_ACTION_INVALID", "Unknown ride command action.");
+        }
+        addIssue(issues, ValidationLevel.Info, "RIDE_CAPACITY_GAME_DEPENDENT",
+            "Valid command syntax does not guarantee an entity can ride: seat/capacity/rideable rules and Education runtime vary.");
+        return issues;
+    }
+    export function validateDialogueCommand(cmd: MCFunctionAST.DialogueCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        appendIssues(issues, validatePlayerReference(cmd.npc, true));
+        // Official DIALOGUE grammar requires an NPC entity selector, not a player name.
+        if (cmd.npc && cmd.npc.kind == MCFunctionAST.PlayerTargetKind.Name) {
+            addIssue(issues, ValidationLevel.Error, "DIALOGUE_NPC_SELECTOR_REQUIRED",
+                "NPC must be an entity selector (for example @e[type=npc]), not a player name.");
+        }
+        if (cmd.npc && cmd.npc.kind == MCFunctionAST.PlayerTargetKind.Selector && cmd.npc.selector &&
+            (cmd.npc.selector.base == MCFunctionAST.SelectorBase.AllPlayers ||
+             cmd.npc.selector.base == MCFunctionAST.SelectorBase.NearestPlayer ||
+             cmd.npc.selector.base == MCFunctionAST.SelectorBase.RandomPlayer ||
+             cmd.npc.selector.base == MCFunctionAST.SelectorBase.Initiator)) {
+            addIssue(issues, ValidationLevel.Error, "DIALOGUE_NPC_PLAYER_SELECTOR", "NPC target cannot use player-only selectors.");
+        }
+        if (cmd.action == MCFunctionAST.DialogueAction.Open) {
+            appendIssues(issues, validatePlayerReference(cmd.player));
+        } else if (cmd.action == MCFunctionAST.DialogueAction.Change) {
+            if (cmd.player != undefined) appendIssues(issues, validatePlayerReference(cmd.player));
+            if (cmd.sceneName == undefined) {
+                addIssue(issues, ValidationLevel.Error, "DIALOGUE_SCENE_REQUIRED", "change requires a scene tag.");
+            }
+        } else {
+            addIssue(issues, ValidationLevel.Error, "DIALOGUE_ACTION_INVALID", "Unknown dialogue action.");
+        }
+        if (cmd.sceneName != undefined && !c1Token(cmd.sceneName)) {
+            addIssue(issues, ValidationLevel.Error, "DIALOGUE_SCENE_INVALID", "sceneName must be a single scene tag token.");
+        }
+        addIssue(issues, ValidationLevel.Info, "DIALOGUE_NPC_RUNTIME_REQUIRED",
+            "NPC must exist in a loaded/ticking area; scene tags require a matching behavior-pack dialogue file.");
+        return issues;
+    }
+
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
+        if (command.kind == MCFunctionAST.CommandKind.Ride) {
+            appendIssues(issues, validateRideCommand(<MCFunctionAST.RideCommand>command));
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Dialogue) {
+            appendIssues(issues, validateDialogueCommand(<MCFunctionAST.DialogueCommand>command));
+        }
+
 
         if (command.kind == MCFunctionAST.CommandKind.PlayAnimation) {
             appendIssues(issues, validatePlayAnimationCommand(<MCFunctionAST.PlayAnimationCommand>command));

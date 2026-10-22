@@ -40,7 +40,9 @@ namespace MCFunctionAST {
         ControlScheme = 33,
         AimAssist = 34,
         PlayAnimation = 35,
-        Fog = 36
+        Fog = 36,
+        Ride = 37,
+        Dialogue = 38
     }
 
     export interface CommandNode {

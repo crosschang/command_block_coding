@@ -2,6 +2,10 @@
 namespace MCFunctionCompiler {
     export function compileCommand(command: MCFunctionAST.CommandNode): string {
         switch (command.kind) {
+            case MCFunctionAST.CommandKind.Ride:
+                return compileRide(<MCFunctionAST.RideCommand>command);
+            case MCFunctionAST.CommandKind.Dialogue:
+                return compileDialogue(<MCFunctionAST.DialogueCommand>command);
             case MCFunctionAST.CommandKind.PlayAnimation:
                 return compilePlayAnimation(<MCFunctionAST.PlayAnimationCommand>command);
             case MCFunctionAST.CommandKind.Fog:
@@ -105,6 +109,47 @@ namespace MCFunctionCompiler {
             default:
                 return "";
         }
+    }
+
+    /** Official Bedrock /ride five-action grammar. No leading slash. */
+    function compileRide(command: MCFunctionAST.RideCommand): string {
+        let base = "ride " + compilePlayerTarget(command.actor);
+        if (command.action == MCFunctionAST.RideAction.StopRiding) return base + " stop_riding";
+        if (command.action == MCFunctionAST.RideAction.EvictRiders) return base + " evict_riders";
+        if (command.action == MCFunctionAST.RideAction.StartRiding) {
+            let result = base + " start_riding " + compilePlayerTarget(command.mount);
+            if (command.teleportRule != undefined) {
+                result += command.teleportRule == MCFunctionAST.RideTeleportRule.TeleportRide
+                    ? " teleport_ride" : " teleport_rider";
+            }
+            if (command.fillType != undefined) {
+                result += command.fillType == MCFunctionAST.RideFillType.IfGroupFits
+                    ? " if_group_fits" : " until_full";
+            }
+            return result;
+        }
+        let result = base + (command.action == MCFunctionAST.RideAction.SummonRider
+            ? " summon_rider " : " summon_ride ") + command.entityType;
+        if (command.action == MCFunctionAST.RideAction.SummonRide && command.rideRule != undefined) {
+            let rules = ["no_ride_change", "reassign_rides", "skip_riders"];
+            result += " " + rules[<number>command.rideRule];
+        }
+        if (command.spawnEvent != undefined) result += " " + command.spawnEvent;
+        if (command.nameTag != undefined) result += " " + quoteCommandString(command.nameTag);
+        return result;
+    }
+    /** /dialogue open and change intentionally have different parameter order. */
+    function compileDialogue(command: MCFunctionAST.DialogueCommand): string {
+        let result = "dialogue " + (command.action == MCFunctionAST.DialogueAction.Open ? "open " : "change ") +
+            compilePlayerTarget(command.npc);
+        if (command.action == MCFunctionAST.DialogueAction.Open) {
+            result += " " + compilePlayerTarget(command.player);
+            if (command.sceneName != undefined) result += " " + command.sceneName;
+        } else {
+            result += " " + command.sceneName;
+            if (command.player != undefined) result += " " + compilePlayerTarget(command.player);
+        }
+        return result;
     }
 
     function compileB4String(value: string): string {
