@@ -2361,7 +2361,7 @@ namespace MCFunctionValidator {
         if (a == MCFunctionAST.ScoreboardAction.PlayerSet ||
             a == MCFunctionAST.ScoreboardAction.PlayerAdd ||
             a == MCFunctionAST.ScoreboardAction.PlayerRemove) {
-            if (cmd.count == undefined || !isFinite(cmd.count) ||
+            if (cmd.count == undefined ||
                 Math.floor(cmd.count) != cmd.count ||
                 cmd.count < -2147483648 || cmd.count > 2147483647) {
                 addIssue(issues, ValidationLevel.Error, "SCOREBOARD_COUNT_INVALID", "Score count must be a signed 32-bit integer.");
