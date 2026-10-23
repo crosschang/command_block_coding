@@ -45,6 +45,27 @@ namespace MCFunctionPreview {
                     message: "Preview checks live tag membership only for tag names seen through this extension in the current session; other names may be missing."
                 });
             }
+        } else if (command.kind == MCFunctionAST.CommandKind.Scoreboard) {
+            let score = <MCFunctionAST.ScoreboardCommand>command;
+            if (score.action == MCFunctionAST.ScoreboardAction.ObjectiveList) {
+                issues.push({
+                    level: MCFunctionValidator.ValidationLevel.Info,
+                    code: "SCOREBOARD_OBJECTIVES_LIST_SESSION_KNOWN",
+                    message: "Preview knows only objectives added through this extension this run; use direct /scoreboard objectives list for the complete live list."
+                });
+            } else if (score.action == MCFunctionAST.ScoreboardAction.PlayerList) {
+                issues.push({
+                    level: MCFunctionValidator.ValidationLevel.Info,
+                    code: "SCOREBOARD_PLAYERS_LIST_PARTIAL",
+                    message: "Preview lists known holders/objectives and attempts live rawtext.score rendering; it cannot enumerate every world score."
+                });
+            } else if (score.action == MCFunctionAST.ScoreboardAction.PlayerTest) {
+                issues.push({
+                    level: MCFunctionValidator.ValidationLevel.Info,
+                    code: "SCOREBOARD_TEST_PREVIEW_OUTPUT",
+                    message: "Preview uses an optional native execute-if-score feedback path; direct /scoreboard players test remains authoritative."
+                });
+            }
         } else if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
             let rule = <MCFunctionAST.GameRuleCommand>command;
             if (rule.action == MCFunctionAST.GameRuleAction.Query) {
@@ -172,6 +193,11 @@ namespace MCFunctionPreview {
             return;
         }
 
+        if (command.kind == MCFunctionAST.CommandKind.Scoreboard) {
+            if (success) observeScoreboardCommand(<MCFunctionAST.ScoreboardCommand>command);
+            return;
+        }
+
         if (command.kind != MCFunctionAST.CommandKind.Tag) return;
 
         let tagCommand = <MCFunctionAST.TagCommand>command;
@@ -195,6 +221,9 @@ namespace MCFunctionPreview {
         }
         if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
             return handleGameRulePreview(<MCFunctionAST.GameRuleCommand>command);
+        }
+        if (command.kind == MCFunctionAST.CommandKind.Scoreboard) {
+            return handleScoreboardPreview(<MCFunctionAST.ScoreboardCommand>command);
         }
         if (command.kind != MCFunctionAST.CommandKind.Tag) {
             return unhandledQuery();
@@ -276,6 +305,179 @@ namespace MCFunctionPreview {
             return handledQuery(QueryConfidence.Unavailable, "playerwaypoints Preview compatibility limitation");
         }
         return unhandledQuery();
+    }
+
+    /** C2 Preview tracker: stores only vocabulary, never fabricated score values. */
+    function observeScoreboardCommand(command: MCFunctionAST.ScoreboardCommand): void {
+        let a = command.action;
+        if (a == MCFunctionAST.ScoreboardAction.ObjectiveAdd) {
+            rememberScoreboardObjective(command.objective, command.displayName || "");
+            return;
+        }
+        if (a == MCFunctionAST.ScoreboardAction.ObjectiveRemove) {
+            forgetScoreboardObjective(command.objective);
+            return;
+        }
+        if (a == MCFunctionAST.ScoreboardAction.PlayerReset) {
+            let resetName = scoreboardPreviewSingleHolderName(command.target);
+            if (resetName.length > 0) forgetScoreboardHolder(resetName, command.objective || "");
+            return;
+        }
+        if (a == MCFunctionAST.ScoreboardAction.PlayerSet ||
+            a == MCFunctionAST.ScoreboardAction.PlayerAdd ||
+            a == MCFunctionAST.ScoreboardAction.PlayerRemove ||
+            a == MCFunctionAST.ScoreboardAction.PlayerRandom ||
+            a == MCFunctionAST.ScoreboardAction.PlayerOperation) {
+            rememberScoreboardTarget(command.target, command.objective);
+            if (a == MCFunctionAST.ScoreboardAction.PlayerOperation) {
+                rememberScoreboardTarget(command.source, command.sourceObjective);
+            }
+        }
+    }
+
+    /** Named/fake player or plain @s only; do not turn broad selectors into one player. */
+    function scoreboardPreviewSingleHolderName(target: MCFunctionAST.PlayerTarget): string {
+        if (!target) return "";
+        if (target.kind == MCFunctionAST.PlayerTargetKind.Name) return target.name || "";
+        if (target.kind == MCFunctionAST.PlayerTargetKind.Selector && target.selector &&
+            target.selector.base == MCFunctionAST.SelectorBase.Self &&
+            target.selector.filters.length == 0 &&
+            target.selector.scores.length == 0 &&
+            target.selector.hasItems.length == 0) return "@s";
+        return "";
+    }
+
+    function rememberScoreboardTarget(target: MCFunctionAST.PlayerTarget, objective: string): void {
+        let name = scoreboardPreviewSingleHolderName(target);
+        if (name.length > 0 && objective && objective.length > 0) {
+            rememberScoreboardHolder(name, objective);
+        }
+    }
+
+    function handleScoreboardPreview(command: MCFunctionAST.ScoreboardCommand): QueryResult {
+        if (command.action == MCFunctionAST.ScoreboardAction.ObjectiveList) {
+            let ids = getScoreboardKnownObjectiveIds();
+            let labels = getScoreboardKnownObjectiveLabels();
+            if (ids.length == 0) {
+                previewSay("INFO [SESSION_KNOWN] SCOREBOARD objectives: none observed by this Preview session. " +
+                    "NOT the live world list. Use /scoreboard objectives list in game chat.");
+            } else {
+                let summary = "INFO [SESSION_KNOWN] SCOREBOARD objectives added in Preview " +
+                    "(NOT the complete/live world list):";
+                let shown = ids.length;
+                if (shown > 6) shown = 6;
+                for (let i = 0; i < shown; i++) {
+                    summary += "\n" + ids[i];
+                    if (labels[i].length > 0) summary += " (" + labels[i] + ")";
+                }
+                if (ids.length > shown) summary += "\n... additional session entries omitted";
+                summary += "\nLive: /scoreboard objectives list";
+                previewSay(summary);
+            }
+            return handledQuery(QueryConfidence.SessionKnown, "Preview-known objective IDs only");
+        }
+        if (command.action == MCFunctionAST.ScoreboardAction.PlayerList) {
+            return handleScoreboardPlayersListPreview(command);
+        }
+        if (command.action == MCFunctionAST.ScoreboardAction.PlayerTest) {
+            return handleScoreboardPlayersTestPreview(command);
+        }
+        return unhandledQuery();
+    }
+
+    /**
+     * Use Bedrock rawtext.score to ASK THE GAME to render actual scores.
+     * This never calculates/cache-estimates a number in JavaScript. For Edition
+     * compatibility, visible rendering still requires a real in-game test.
+     */
+    function scoreboardPreviewShowLiveScore(name: string, objective: string): boolean {
+        let encodedName = previewEscapeJsonText(name);
+        let encodedObjective = previewEscapeJsonText(objective);
+        let label = previewEscapeJsonText("[Preview] [LIVE_RAWTEXT] " + name + " / " + objective + " = ");
+        let json = "{\"rawtext\":[{\"text\":\"" + label + "\"}," +
+            "{\"score\":{\"name\":\"" + encodedName + "\",\"objective\":\"" +
+            encodedObjective + "\"}}]}";
+        return player.execute("tellraw @s " + json);
+    }
+
+    /** Covers session-known holders; never claims a complete scoreboard enumeration. */
+    function handleScoreboardPlayersListPreview(command: MCFunctionAST.ScoreboardCommand): QueryResult {
+        let requested = "";
+        if (command.target) {
+            requested = scoreboardPreviewSingleHolderName(command.target);
+            if (requested.length == 0) {
+                previewSay("INFO [UNAVAILABLE] SCOREBOARD players list for a broad/filtered selector " +
+                    "cannot be enumerated reliably by Preview. Use the direct /scoreboard players list command.");
+                return handledQuery(QueryConfidence.Unavailable, "non-single target preview unavailable");
+            }
+        }
+        let names = getScoreboardKnownHolderNames();
+        let objectives = getScoreboardKnownHolderObjectives();
+        let shown = 0;
+        for (let i = 0; i < names.length; i++) {
+            if (requested.length > 0 && requested != names[i]) continue;
+            if (shown == 0) {
+                previewSay("INFO [PARTIAL] SCOREBOARD players list: session-tracked holders/objectives only. " +
+                    "Following values are rendered by the GAME via rawtext.score (not cached numbers). " +
+                    "Blank values may mean missing score/unsupported Education rendering.");
+            }
+            if (shown >= 6) {
+                previewSay("INFO [PARTIAL] More session entries omitted; direct /scoreboard players list for full world data.");
+                break;
+            }
+            if (!scoreboardPreviewShowLiveScore(names[i], objectives[i])) {
+                previewSay("INFO [UNAVAILABLE] rawtext.score was not accepted by Preview for " +
+                    names[i] + " / " + objectives[i] + ". Live: /scoreboard players list");
+            }
+            shown++;
+        }
+        if (shown == 0) {
+            previewSay("INFO [SESSION_KNOWN] No matching holder/objective pair observed by this Preview. " +
+                "This does NOT mean the live world has none. Use /scoreboard players list in game chat.");
+        }
+        return handledQuery(QueryConfidence.Partial, "session known score holders; native rawtext.score attempted");
+    }
+
+    /**
+     * For a known single target, use native Bedrock execute score predicates.
+     * Mismatch and a missing/untracked score cannot be distinguished by unless;
+     * never report absence as a definite numeric mismatch.
+     */
+    function handleScoreboardPlayersTestPreview(command: MCFunctionAST.ScoreboardCommand): QueryResult {
+        let name = scoreboardPreviewSingleHolderName(command.target);
+        if (name.length == 0) {
+            previewSay("INFO [UNAVAILABLE] SCOREBOARD players test selected multiple/filtered entities. " +
+                "Preview cannot safely report one combined result. Run the command in direct game chat.");
+            return handledQuery(QueryConfidence.Unavailable, "multi-target test unavailable");
+        }
+        let minimum = command.minimum || "*";
+        let maximum = command.maximum || "*";
+        let range = "-2147483648..2147483647";
+        if (minimum != "*" && maximum != "*") {
+            range = minimum == maximum ? minimum : minimum + ".." + maximum;
+        } else if (minimum != "*") {
+            range = minimum + "..";
+        } else if (maximum != "*") {
+            range = ".." + maximum;
+        }
+        let target = MCFunctionCompiler.compilePlayerTarget(command.target);
+        let objective = command.objective;
+        let explanation = "SCOREBOARD TEST " + name + " / " + objective + " in " + range;
+        let trueText = previewEscapeJsonText("[Preview] [LIVE_PREDICATE] MATCH: " + explanation);
+        let falseText = previewEscapeJsonText("[Preview] [LIVE_PREDICATE] NOT MATCH OR SCORE MISSING: " + explanation);
+        // No interpolation of raw user content without JSON escaping.
+        let yes = "execute if score " + target + " " + objective + " matches " + range +
+            " run tellraw @s {\"rawtext\":[{\"text\":\"" + trueText + "\"}]}";
+        let no = "execute unless score " + target + " " + objective + " matches " + range +
+            " run tellraw @s {\"rawtext\":[{\"text\":\"" + falseText + "\"}]}";
+        let yesAccepted = player.execute(yes);
+        let noAccepted = player.execute(no);
+        if (!yesAccepted && !noAccepted) {
+            previewSay("INFO [UNAVAILABLE] SCOREBOARD test conditional feedback was not reported successful " +
+                "by Preview. Direct game chat: /" + MCFunctionCompiler.compileCommand(command));
+        }
+        return handledQuery(QueryConfidence.Partial,
+            "native execute-if-score feedback attempted; Edition visibility requires runtime check");
     }
 
     function executeTagListQuery(

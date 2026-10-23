@@ -63,4 +63,94 @@ namespace MCFunctionPreview {
         return result;
     }
 
+    // C2 SCOREBOARD Preview vocabulary, not the complete or authoritative world.
+    // Only API-reported successful extension operations enter this session index.
+    // Never cache calculated numeric scores: /random, /operation, /execute,
+    // other packs and game chat can change the live value at any time.
+    let scoreboardKnownObjectiveIds: string[] = [];
+    let scoreboardKnownObjectiveLabels: string[] = [];
+    let scoreboardKnownHolderNames: string[] = [];
+    let scoreboardKnownHolderObjectives: string[] = [];
+
+    export function rememberScoreboardObjective(id: string, displayName: string): void {
+        if (!id) return;
+        for (let i = 0; i < scoreboardKnownObjectiveIds.length; i++) {
+            if (scoreboardKnownObjectiveIds[i] == id) {
+                scoreboardKnownObjectiveLabels[i] = displayName;
+                return;
+            }
+        }
+        scoreboardKnownObjectiveIds.push(id);
+        scoreboardKnownObjectiveLabels.push(displayName);
+    }
+
+    export function forgetScoreboardObjective(id: string): void {
+        let ids: string[] = [];
+        let labels: string[] = [];
+        for (let i = 0; i < scoreboardKnownObjectiveIds.length; i++) {
+            if (scoreboardKnownObjectiveIds[i] != id) {
+                ids.push(scoreboardKnownObjectiveIds[i]);
+                labels.push(scoreboardKnownObjectiveLabels[i]);
+            }
+        }
+        scoreboardKnownObjectiveIds = ids;
+        scoreboardKnownObjectiveLabels = labels;
+        let holders: string[] = [];
+        let objectives: string[] = [];
+        for (let i = 0; i < scoreboardKnownHolderNames.length; i++) {
+            if (scoreboardKnownHolderObjectives[i] != id) {
+                holders.push(scoreboardKnownHolderNames[i]);
+                objectives.push(scoreboardKnownHolderObjectives[i]);
+            }
+        }
+        scoreboardKnownHolderNames = holders;
+        scoreboardKnownHolderObjectives = objectives;
+    }
+
+    export function getScoreboardKnownObjectiveIds(): string[] {
+        let result: string[] = [];
+        for (let i = 0; i < scoreboardKnownObjectiveIds.length; i++) result.push(scoreboardKnownObjectiveIds[i]);
+        return result;
+    }
+
+    export function getScoreboardKnownObjectiveLabels(): string[] {
+        let result: string[] = [];
+        for (let i = 0; i < scoreboardKnownObjectiveLabels.length; i++) result.push(scoreboardKnownObjectiveLabels[i]);
+        return result;
+    }
+
+    export function rememberScoreboardHolder(name: string, objective: string): void {
+        if (!name || !objective) return;
+        for (let i = 0; i < scoreboardKnownHolderNames.length; i++) {
+            if (scoreboardKnownHolderNames[i] == name && scoreboardKnownHolderObjectives[i] == objective) return;
+        }
+        scoreboardKnownHolderNames.push(name);
+        scoreboardKnownHolderObjectives.push(objective);
+    }
+
+    export function forgetScoreboardHolder(name: string, objective: string): void {
+        let holders: string[] = [];
+        let objectives: string[] = [];
+        for (let i = 0; i < scoreboardKnownHolderNames.length; i++) {
+            if (scoreboardKnownHolderNames[i] == name &&
+                (!objective || objective == scoreboardKnownHolderObjectives[i])) continue;
+            holders.push(scoreboardKnownHolderNames[i]);
+            objectives.push(scoreboardKnownHolderObjectives[i]);
+        }
+        scoreboardKnownHolderNames = holders;
+        scoreboardKnownHolderObjectives = objectives;
+    }
+
+    export function getScoreboardKnownHolderNames(): string[] {
+        let result: string[] = [];
+        for (let i = 0; i < scoreboardKnownHolderNames.length; i++) result.push(scoreboardKnownHolderNames[i]);
+        return result;
+    }
+
+    export function getScoreboardKnownHolderObjectives(): string[] {
+        let result: string[] = [];
+        for (let i = 0; i < scoreboardKnownHolderObjectives.length; i++) result.push(scoreboardKnownHolderObjectives[i]);
+        return result;
+    }
+
 }
