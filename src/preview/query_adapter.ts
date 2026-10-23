@@ -63,7 +63,7 @@ namespace MCFunctionPreview {
                 issues.push({
                     level: MCFunctionValidator.ValidationLevel.Info,
                     code: "SCOREBOARD_TEST_PREVIEW_OUTPUT",
-                    message: "Preview uses an optional native execute-if-score feedback path; direct /scoreboard players test remains authoritative."
+                    message: "Education MakeCode player.execute cannot use the newer execute-if-score form. Preview shows a live rawtext score (when available) and labeled last-set session guidance; direct /scoreboard players test remains authoritative."
                 });
             }
         } else if (command.kind == MCFunctionAST.CommandKind.Gamerule) {
@@ -316,18 +316,42 @@ namespace MCFunctionPreview {
         }
         if (a == MCFunctionAST.ScoreboardAction.ObjectiveRemove) {
             forgetScoreboardObjective(command.objective);
+            forgetScoreboardLastSetForObjective(command.objective);
             return;
         }
         if (a == MCFunctionAST.ScoreboardAction.PlayerReset) {
             let resetName = scoreboardPreviewSingleHolderName(command.target);
             if (resetName.length > 0) forgetScoreboardHolder(resetName, command.objective || "");
+            // An unset objective means reset ALL objectives for this target.
+            // A broad selector cannot safely be reduced to one holder.
+            if (resetName.length > 0 && command.objective && command.objective.length > 0) {
+                forgetScoreboardLastSet(resetName, command.objective);
+            } else {
+                clearScoreboardLastSetValues();
+            }
             return;
         }
-        if (a == MCFunctionAST.ScoreboardAction.PlayerSet ||
-            a == MCFunctionAST.ScoreboardAction.PlayerAdd ||
+        if (a == MCFunctionAST.ScoreboardAction.PlayerSet) {
+            let setName = scoreboardPreviewSingleHolderName(command.target);
+            // Only a direct integer SET for one known target gets a session hint.
+            // API success is NOT proof of a current, authoritative world score.
+            if (setName.length > 0 && command.objective && command.objective.length > 0 &&
+                command.count != undefined && command.count % 1 == 0) {
+                rememberScoreboardLastSet(setName, command.objective, command.count);
+            } else {
+                clearScoreboardLastSetValues();
+            }
+            rememberScoreboardTarget(command.target, command.objective);
+            return;
+        }
+        if (a == MCFunctionAST.ScoreboardAction.PlayerAdd ||
             a == MCFunctionAST.ScoreboardAction.PlayerRemove ||
             a == MCFunctionAST.ScoreboardAction.PlayerRandom ||
             a == MCFunctionAST.ScoreboardAction.PlayerOperation) {
+            // Arithmetic, random and multi-target mutations can change values
+            // without yielding a result. Invalidate all numeric hints rather
+            // than making a stale or fabricated MATCH claim.
+            clearScoreboardLastSetValues();
             rememberScoreboardTarget(command.target, command.objective);
             if (a == MCFunctionAST.ScoreboardAction.PlayerOperation) {
                 rememberScoreboardTarget(command.source, command.sourceObjective);
@@ -439,45 +463,48 @@ namespace MCFunctionPreview {
     }
 
     /**
-     * For a known single target, use native Bedrock execute score predicates.
-     * Mismatch and a missing/untracked score cannot be distinguished by unless;
-     * never report absence as a definite numeric mismatch.
+     * Education MakeCode player.execute() in the tested runtime rejects the
+     * current Bedrock `execute if/unless score` grammar. Never send it here.
+     *
+     * Native /scoreboard players test is valid when typed in GAME chat, but
+     * player.execute() cannot expose its conditional result text. Instead:
+     * - ask the game to render the LIVE numeric value via rawtext.score;
+     * - optionally show an explicitly NON-LIVE last-set session comparison;
+     * - direct game chat remains authoritative for MATCH/NOT MATCH.
      */
     function handleScoreboardPlayersTestPreview(command: MCFunctionAST.ScoreboardCommand): QueryResult {
         let name = scoreboardPreviewSingleHolderName(command.target);
         if (name.length == 0) {
-            previewSay("INFO [UNAVAILABLE] SCOREBOARD players test selected multiple/filtered entities. " +
-                "Preview cannot safely report one combined result. Run the command in direct game chat.");
-            return handledQuery(QueryConfidence.Unavailable, "multi-target test unavailable");
+            previewSay("INFO [UNAVAILABLE] SCOREBOARD players test targets multiple/filtered entities. " +
+                "No single live number or match can be inferred. Use direct game chat: /" +
+                MCFunctionCompiler.compileCommand(command));
+            return handledQuery(QueryConfidence.Unavailable, "multi-target score test not readable by Preview");
         }
         let minimum = command.minimum || "*";
         let maximum = command.maximum || "*";
-        let range = "-2147483648..2147483647";
-        if (minimum != "*" && maximum != "*") {
-            range = minimum == maximum ? minimum : minimum + ".." + maximum;
-        } else if (minimum != "*") {
-            range = minimum + "..";
-        } else if (maximum != "*") {
-            range = ".." + maximum;
+        let range = minimum + " to " + maximum;
+        previewSay("INFO [OUTPUT_HIDDEN] SCOREBOARD TEST " + name + " / " + command.objective +
+            " range " + range + ". Education MakeCode cannot return the test result text; " +
+            "no modern execute conditional will be attempted.");
+        if (!scoreboardPreviewShowLiveScore(name, command.objective)) {
+            previewSay("INFO [UNAVAILABLE] LIVE_RAWTEXT score was not accepted by Preview. " +
+                "Use direct /scoreboard players test in game chat.");
         }
-        let target = MCFunctionCompiler.compilePlayerTarget(command.target);
-        let objective = command.objective;
-        let explanation = "SCOREBOARD TEST " + name + " / " + objective + " in " + range;
-        let trueText = previewEscapeJsonText("[Preview] [LIVE_PREDICATE] MATCH: " + explanation);
-        let falseText = previewEscapeJsonText("[Preview] [LIVE_PREDICATE] NOT MATCH OR SCORE MISSING: " + explanation);
-        // No interpolation of raw user content without JSON escaping.
-        let yes = "execute if score " + target + " " + objective + " matches " + range +
-            " run tellraw @s {\"rawtext\":[{\"text\":\"" + trueText + "\"}]}";
-        let no = "execute unless score " + target + " " + objective + " matches " + range +
-            " run tellraw @s {\"rawtext\":[{\"text\":\"" + falseText + "\"}]}";
-        let yesAccepted = player.execute(yes);
-        let noAccepted = player.execute(no);
-        if (!yesAccepted && !noAccepted) {
-            previewSay("INFO [UNAVAILABLE] SCOREBOARD test conditional feedback was not reported successful " +
-                "by Preview. Direct game chat: /" + MCFunctionCompiler.compileCommand(command));
+        let last = getScoreboardLastSet(name, command.objective);
+        if (last.hasValue) {
+            let matchesMinimum = minimum == "*" || last.value >= parseInt(minimum, 10);
+            let matchesMaximum = maximum == "*" || last.value <= parseInt(maximum, 10);
+            let result = matchesMinimum && matchesMaximum ? "MATCH" : "NOT MATCH";
+            previewSay("INFO [SESSION_KNOWN] " + result + " for last API-reported SET " +
+                last.value + " (NOT a live test result). " +
+                "Other commands, packs or players may have changed it.");
+        } else {
+            previewSay("INFO [UNAVAILABLE] No unmodified last-set numeric hint for this holder/objective. " +
+                "LIVE_RAWTEXT above is for viewing only, not programmatic comparison.");
         }
+        previewSay("INFO [DIRECT] Definitive test: /" + MCFunctionCompiler.compileCommand(command));
         return handledQuery(QueryConfidence.Partial,
-            "native execute-if-score feedback attempted; Edition visibility requires runtime check");
+            "live rawtext display plus clearly labeled last-set session hint; no modern execute");
     }
 
     function executeTagListQuery(

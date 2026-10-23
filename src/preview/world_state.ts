@@ -63,6 +63,77 @@ namespace MCFunctionPreview {
         return result;
     }
 
+    /**
+     * Numeric hint limited to the last API-reported successful, single-target
+     * SCOREBOARD PLAYERS SET. It is not an authoritative world read.
+     * Any score mutation whose new value is not known invalidates the hints.
+     */
+    export interface ScoreboardLastSetHint {
+        hasValue: boolean;
+        value: number;
+    }
+    let scoreboardLastSetNames: string[] = [];
+    let scoreboardLastSetObjectives: string[] = [];
+    let scoreboardLastSetNumbers: number[] = [];
+
+    export function rememberScoreboardLastSet(name: string, objective: string, value: number): void {
+        if (!name || !objective) return;
+        for (let i = 0; i < scoreboardLastSetNames.length; i++) {
+            if (scoreboardLastSetNames[i] == name && scoreboardLastSetObjectives[i] == objective) {
+                scoreboardLastSetNumbers[i] = value;
+                return;
+            }
+        }
+        scoreboardLastSetNames.push(name);
+        scoreboardLastSetObjectives.push(objective);
+        scoreboardLastSetNumbers.push(value);
+    }
+
+    export function getScoreboardLastSet(name: string, objective: string): ScoreboardLastSetHint {
+        for (let i = 0; i < scoreboardLastSetNames.length; i++) {
+            if (scoreboardLastSetNames[i] == name && scoreboardLastSetObjectives[i] == objective) {
+                return {hasValue: true, value: scoreboardLastSetNumbers[i]};
+            }
+        }
+        return {hasValue: false, value: 0};
+    }
+
+    export function clearScoreboardLastSetValues(): void {
+        scoreboardLastSetNames = [];
+        scoreboardLastSetObjectives = [];
+        scoreboardLastSetNumbers = [];
+    }
+
+    export function forgetScoreboardLastSet(name: string, objective: string): void {
+        let names: string[] = [];
+        let objectives: string[] = [];
+        let numbers: number[] = [];
+        for (let i = 0; i < scoreboardLastSetNames.length; i++) {
+            if (scoreboardLastSetNames[i] == name && scoreboardLastSetObjectives[i] == objective) continue;
+            names.push(scoreboardLastSetNames[i]);
+            objectives.push(scoreboardLastSetObjectives[i]);
+            numbers.push(scoreboardLastSetNumbers[i]);
+        }
+        scoreboardLastSetNames = names;
+        scoreboardLastSetObjectives = objectives;
+        scoreboardLastSetNumbers = numbers;
+    }
+
+    export function forgetScoreboardLastSetForObjective(objective: string): void {
+        let names: string[] = [];
+        let objectives: string[] = [];
+        let numbers: number[] = [];
+        for (let i = 0; i < scoreboardLastSetNames.length; i++) {
+            if (scoreboardLastSetObjectives[i] == objective) continue;
+            names.push(scoreboardLastSetNames[i]);
+            objectives.push(scoreboardLastSetObjectives[i]);
+            numbers.push(scoreboardLastSetNumbers[i]);
+        }
+        scoreboardLastSetNames = names;
+        scoreboardLastSetObjectives = objectives;
+        scoreboardLastSetNumbers = numbers;
+    }
+
     // C2 SCOREBOARD Preview vocabulary, not the complete or authoritative world.
     // Only API-reported successful extension operations enter this session index.
     // Never cache calculated numeric scores: /random, /operation, /execute,
