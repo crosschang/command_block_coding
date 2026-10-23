@@ -2303,8 +2303,117 @@ namespace MCFunctionValidator {
         return issues;
     }
 
+    /** C2 SCOREBOARD Validator: syntax and context without inspecting mutable world state. */
+    export function validateScoreboardCommand(cmd: MCFunctionAST.ScoreboardCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        let a = cmd.action;
+        if (a < MCFunctionAST.ScoreboardAction.ObjectiveAdd ||
+            a > MCFunctionAST.ScoreboardAction.PlayerRandom) {
+            addIssue(issues, ValidationLevel.Error, "SCOREBOARD_ACTION_INVALID", "Unsupported scoreboard action.");
+            return issues;
+        }
+        let isObjectiveAction = a <= MCFunctionAST.ScoreboardAction.ObjectiveDisplay;
+        if (!isObjectiveAction && a != MCFunctionAST.ScoreboardAction.PlayerList) {
+            if (a != MCFunctionAST.ScoreboardAction.PlayerReset ||
+                cmd.objective != undefined && cmd.objective.length > 0) {
+                if (!isSafeCommandId(cmd.objective)) {
+                    addIssue(issues, ValidationLevel.Error, "SCOREBOARD_OBJECTIVE_INVALID",
+                        "Scoreboard objective must be a single, nonempty command token.");
+                }
+            }
+        }
+        if (isObjectiveAction) {
+            if (a == MCFunctionAST.ScoreboardAction.ObjectiveAdd ||
+                a == MCFunctionAST.ScoreboardAction.ObjectiveRemove ||
+                (a == MCFunctionAST.ScoreboardAction.ObjectiveDisplay && cmd.objective != undefined && cmd.objective.length > 0)) {
+                if (!isSafeCommandId(cmd.objective)) {
+                    addIssue(issues, ValidationLevel.Error, "SCOREBOARD_OBJECTIVE_INVALID",
+                        "Objective name must be a single command token.");
+                }
+            }
+            if (a == MCFunctionAST.ScoreboardAction.ObjectiveDisplay) {
+                if (cmd.slot == undefined || cmd.slot < 0 || cmd.slot > 2) {
+                    addIssue(issues, ValidationLevel.Error, "SCOREBOARD_SLOT_INVALID", "Choose sidebar, list, or belowname.");
+                }
+                if (cmd.sortOrder != undefined &&
+                    (cmd.sortOrder < 0 || cmd.sortOrder > 1 ||
+                    cmd.slot == MCFunctionAST.ScoreboardDisplaySlot.BelowName || !cmd.objective)) {
+                    addIssue(issues, ValidationLevel.Error, "SCOREBOARD_SORT_INVALID",
+                        "Sort needs sidebar/list and a selected objective.");
+                }
+            }
+            // The compact add/remove UI keeps its optional display name visible.
+            // Never silently discard a display name when "remove" is selected.
+            if (a != MCFunctionAST.ScoreboardAction.ObjectiveAdd &&
+                cmd.displayName != undefined && cmd.displayName.length > 0) {
+                addIssue(issues, ValidationLevel.Error, "SCOREBOARD_DISPLAYNAME_NOT_APPLICABLE",
+                    "Display name only applies to objectives add, not remove or list.");
+            }
+            if (a == MCFunctionAST.ScoreboardAction.ObjectiveAdd &&
+                cmd.displayName != undefined && (cmd.displayName.indexOf("\r") >= 0 || cmd.displayName.indexOf("\n") >= 0)) {
+                addIssue(issues, ValidationLevel.Error, "SCOREBOARD_DISPLAY_NAME_INVALID",
+                    "Display name cannot contain line breaks.");
+            }
+            return issues;
+        }
+        if (a == MCFunctionAST.ScoreboardAction.PlayerList && !cmd.target) return issues;
+        appendIssues(issues, validatePlayerReference(cmd.target, true));
+        if (a == MCFunctionAST.ScoreboardAction.PlayerSet ||
+            a == MCFunctionAST.ScoreboardAction.PlayerAdd ||
+            a == MCFunctionAST.ScoreboardAction.PlayerRemove) {
+            if (cmd.count == undefined || !isFinite(cmd.count) ||
+                Math.floor(cmd.count) != cmd.count ||
+                cmd.count < -2147483648 || cmd.count > 2147483647) {
+                addIssue(issues, ValidationLevel.Error, "SCOREBOARD_COUNT_INVALID", "Score count must be a signed 32-bit integer.");
+            }
+        }
+        if (a == MCFunctionAST.ScoreboardAction.PlayerOperation) {
+            appendIssues(issues, validatePlayerReference(cmd.source, true));
+            if (!isSafeCommandId(cmd.sourceObjective)) {
+                addIssue(issues, ValidationLevel.Error, "SCOREBOARD_SOURCE_OBJECTIVE_INVALID", "Source objective must be a command token.");
+            }
+            if (cmd.operator == undefined || cmd.operator < 0 || cmd.operator > 8) {
+                addIssue(issues, ValidationLevel.Error, "SCOREBOARD_OPERATOR_INVALID", "Invalid scoreboard operator.");
+            }
+            if (cmd.operator == MCFunctionAST.ScoreboardMathOperator.Divide ||
+                cmd.operator == MCFunctionAST.ScoreboardMathOperator.Modulo) {
+                addIssue(issues, ValidationLevel.Info, "SCOREBOARD_DIVISION_RUNTIME",
+                    "Division or modulo by a zero score must be tested against world state.");
+            }
+        }
+        if (a == MCFunctionAST.ScoreboardAction.PlayerTest ||
+            a == MCFunctionAST.ScoreboardAction.PlayerRandom) {
+            if (!isWildcardScoreNumber(cmd.minimum) ||
+                (cmd.maximum != undefined && !isWildcardScoreNumber(cmd.maximum)) ||
+                (a == MCFunctionAST.ScoreboardAction.PlayerRandom && cmd.maximum == undefined)) {
+                addIssue(issues, ValidationLevel.Error, "SCOREBOARD_RANGE_INVALID",
+                    "Test/random bounds must be signed integers or the * wildcard.");
+            } else if (cmd.minimum != "*" && cmd.maximum != undefined && cmd.maximum != "*" &&
+                +cmd.minimum > +cmd.maximum) {
+                addIssue(issues, ValidationLevel.Error, "SCOREBOARD_RANGE_REVERSED", "Minimum cannot exceed maximum.");
+            }
+        }
+        return issues;
+    }
+
+    function isWildcardScoreNumber(value: string): boolean {
+        if (value == "*") return true;
+        if (!value || value.length == 0) return false;
+        let start = value.charAt(0) == "-" ? 1 : 0;
+        if (start == value.length) return false;
+        for (let i = start; i < value.length; i++) {
+            let ch = value.charAt(i);
+            if (ch < "0" || ch > "9") return false;
+        }
+        let numeric = +value;
+        return numeric >= -2147483648 && numeric <= 2147483647;
+    }
+
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
         let issues: ValidationIssue[] = [];
+        if (command.kind == MCFunctionAST.CommandKind.Scoreboard) {
+            appendIssues(issues, validateScoreboardCommand(<MCFunctionAST.ScoreboardCommand>command));
+        }
         if (command.kind == MCFunctionAST.CommandKind.Ride) {
             appendIssues(issues, validateRideCommand(<MCFunctionAST.RideCommand>command));
         }

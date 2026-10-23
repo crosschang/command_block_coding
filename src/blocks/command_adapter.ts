@@ -1,5 +1,12 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    export function createScoreboardCommand(
+        source: MCFunctionAST.ScoreboardCommand): MCFunctionAST.ScoreboardCommand {
+        // Block reporter has already captured the typed semantic command.
+        // This adapter retains a central boundary for future project validation.
+        return source;
+    }
+
     export function createRideCommand(action: MCFunctionAST.RideAction,
         actor: MCFunctionAST.PlayerTarget, mount?: MCFunctionAST.PlayerTarget,
         entityType?: string, teleportRule?: MCFunctionAST.RideTeleportRule,

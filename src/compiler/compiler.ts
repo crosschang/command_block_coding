@@ -2,6 +2,8 @@
 namespace MCFunctionCompiler {
     export function compileCommand(command: MCFunctionAST.CommandNode): string {
         switch (command.kind) {
+            case MCFunctionAST.CommandKind.Scoreboard:
+                return compileScoreboard(<MCFunctionAST.ScoreboardCommand>command);
             case MCFunctionAST.CommandKind.Ride:
                 return compileRide(<MCFunctionAST.RideCommand>command);
             case MCFunctionAST.CommandKind.Dialogue:
@@ -109,6 +111,68 @@ namespace MCFunctionCompiler {
             default:
                 return "";
         }
+    }
+
+    /** Official Bedrock scoreboard commands. AST is never assembled by block UI. */
+    function compileScoreboard(command: MCFunctionAST.ScoreboardCommand): string {
+        let a = command.action;
+        if (a == MCFunctionAST.ScoreboardAction.ObjectiveList) return "scoreboard objectives list";
+        if (a == MCFunctionAST.ScoreboardAction.ObjectiveAdd) {
+            let line = "scoreboard objectives add " + command.objective + " dummy";
+            if (command.displayName != undefined && command.displayName.length > 0) {
+                line += " " + quoteCommandString(command.displayName);
+            }
+            return line;
+        }
+        if (a == MCFunctionAST.ScoreboardAction.ObjectiveRemove) {
+            return "scoreboard objectives remove " + command.objective;
+        }
+        if (a == MCFunctionAST.ScoreboardAction.ObjectiveDisplay) {
+            let slot = command.slot == MCFunctionAST.ScoreboardDisplaySlot.Sidebar ? "sidebar" :
+                command.slot == MCFunctionAST.ScoreboardDisplaySlot.List ? "list" : "belowname";
+            let line = "scoreboard objectives setdisplay " + slot;
+            if (command.objective != undefined && command.objective.length > 0) {
+                line += " " + command.objective;
+                if (command.sortOrder != undefined && slot != "belowname") {
+                    line += command.sortOrder == MCFunctionAST.ScoreboardSortOrder.Ascending
+                        ? " ascending" : " descending";
+                }
+            }
+            return line;
+        }
+        if (a == MCFunctionAST.ScoreboardAction.PlayerList) {
+            return "scoreboard players list" + (command.target ? " " + compilePlayerTarget(command.target) : "");
+        }
+        let target = compilePlayerTarget(command.target);
+        if (a == MCFunctionAST.ScoreboardAction.PlayerReset) {
+            return "scoreboard players reset " + target +
+                (command.objective != undefined && command.objective.length > 0 ? " " + command.objective : "");
+        }
+        let head = "scoreboard players ";
+        if (a == MCFunctionAST.ScoreboardAction.PlayerOperation) {
+            let op = "=";
+            if (command.operator == MCFunctionAST.ScoreboardMathOperator.Add) op = "+=";
+            if (command.operator == MCFunctionAST.ScoreboardMathOperator.Subtract) op = "-=";
+            if (command.operator == MCFunctionAST.ScoreboardMathOperator.Multiply) op = "*=";
+            if (command.operator == MCFunctionAST.ScoreboardMathOperator.Divide) op = "/=";
+            if (command.operator == MCFunctionAST.ScoreboardMathOperator.Modulo) op = "%=";
+            if (command.operator == MCFunctionAST.ScoreboardMathOperator.Minimum) op = "<";
+            if (command.operator == MCFunctionAST.ScoreboardMathOperator.Maximum) op = ">";
+            if (command.operator == MCFunctionAST.ScoreboardMathOperator.Swap) op = "><";
+            return head + "operation " + target + " " + command.objective + " " + op +
+                " " + compilePlayerTarget(command.source) + " " + command.sourceObjective;
+        }
+        if (a == MCFunctionAST.ScoreboardAction.PlayerTest) {
+            return head + "test " + target + " " + command.objective + " " +
+                command.minimum + (command.maximum == undefined ? "" : " " + command.maximum);
+        }
+        if (a == MCFunctionAST.ScoreboardAction.PlayerRandom) {
+            return head + "random " + target + " " + command.objective + " " +
+                command.minimum + " " + command.maximum;
+        }
+        let verb = a == MCFunctionAST.ScoreboardAction.PlayerSet ? "set" :
+            a == MCFunctionAST.ScoreboardAction.PlayerAdd ? "add" : "remove";
+        return head + verb + " " + target + " " + command.objective + " " + command.count;
     }
 
     /** Official Bedrock /ride five-action grammar. No leading slash. */

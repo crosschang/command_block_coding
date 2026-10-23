@@ -42,7 +42,8 @@ namespace MCFunctionAST {
         PlayAnimation = 35,
         Fog = 36,
         Ride = 37,
-        Dialogue = 38
+        Dialogue = 38,
+        Scoreboard = 39
     }
 
     export interface CommandNode {
