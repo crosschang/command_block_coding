@@ -380,25 +380,31 @@ namespace MCFunctionPreview {
 
     function handleScoreboardPreview(command: MCFunctionAST.ScoreboardCommand): QueryResult {
         if (command.action == MCFunctionAST.ScoreboardAction.ObjectiveList) {
+            // The game-chat command is always shown, including empty sessions.
+            // A session with no recorded objectives is NOT proof the world has none.
+            // Keep Preview-only guidance separate from the canonical command.
             let ids = getScoreboardKnownObjectiveIds();
             let labels = getScoreboardKnownObjectiveLabels();
+            let summary = "INFO [SESSION_KNOWN] SCOREBOARD OBJECTIVES " +
+                "(Preview-tracked IDs only; NOT the complete/live world list)";
             if (ids.length == 0) {
-                previewSay("INFO [SESSION_KNOWN] SCOREBOARD objectives: none observed by this Preview session. " +
-                    "NOT the live world list. Use /scoreboard objectives list in game chat.");
+                summary += "\nNo objectives recorded in this Preview session. " +
+                    "The world may still have other objectives.";
             } else {
-                let summary = "INFO [SESSION_KNOWN] SCOREBOARD objectives added in Preview " +
-                    "(NOT the complete/live world list):";
                 let shown = ids.length;
                 if (shown > 6) shown = 6;
                 for (let i = 0; i < shown; i++) {
                     summary += "\n" + ids[i];
                     if (labels[i].length > 0) summary += " (" + labels[i] + ")";
                 }
-                if (ids.length > shown) summary += "\n... additional session entries omitted";
-                summary += "\nLive: /scoreboard objectives list";
-                previewSay(summary);
+                if (ids.length > shown) {
+                    summary += "\n... additional session entries omitted";
+                }
             }
-            return handledQuery(QueryConfidence.SessionKnown, "Preview-known objective IDs only");
+            summary += "\nINFO [DIRECT] Complete LIVE objective list: " +
+                "/scoreboard objectives list (type in GAME chat)";
+            previewSay(summary);
+            return handledQuery(QueryConfidence.SessionKnown, "Preview-known objective IDs only, direct world list guidance");
         }
         if (command.action == MCFunctionAST.ScoreboardAction.PlayerList) {
             return handleScoreboardPlayersListPreview(command);
@@ -431,7 +437,8 @@ namespace MCFunctionPreview {
             requested = scoreboardPreviewSingleHolderName(command.target);
             if (requested.length == 0) {
                 previewSay("INFO [UNAVAILABLE] SCOREBOARD players list for a broad/filtered selector " +
-                    "cannot be enumerated reliably by Preview. Use the direct /scoreboard players list command.");
+                    "cannot be enumerated reliably by Preview. " +
+                    "Use GAME chat: /" + MCFunctionCompiler.compileCommand(command));
                 return handledQuery(QueryConfidence.Unavailable, "non-single target preview unavailable");
             }
         }
@@ -457,9 +464,13 @@ namespace MCFunctionPreview {
         }
         if (shown == 0) {
             previewSay("INFO [SESSION_KNOWN] No matching holder/objective pair observed by this Preview. " +
-                "This does NOT mean the live world has none. Use /scoreboard players list in game chat.");
+                "This does NOT mean the live world has none.");
         }
-        return handledQuery(QueryConfidence.Partial, "session known score holders; native rawtext.score attempted");
+        // Players list has the same OUTPUT_HIDDEN limitation as objectives list.
+        // Always offer the canonical live query, even after rawtext.score succeeds.
+        previewSay("INFO [DIRECT] Complete LIVE player score list: /" +
+            MCFunctionCompiler.compileCommand(command) + " (type in GAME chat)");
+        return handledQuery(QueryConfidence.Partial, "session known score holders plus direct live list guidance");
     }
 
     /**
