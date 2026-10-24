@@ -95,6 +95,26 @@ namespace Command {
         v.clause.target=target ? target.target : undefined;
         return v;
     }
+    export enum ExecuteEntityContextMode {
+        //% block="positioned as"
+        PositionedAs = 0,
+        //% block="rotated as"
+        RotatedAs = 1
+    }
+    //% group="EXECUTE" weight=124
+    //% blockId=mcfunction_execute_as_context_compact
+    //% block="$mode entity $target next $next"
+    //% target.shadow="mcfunction_target_selector"
+    //% next.shadow="mcfunction_execute_end"
+    //% inlineInputMode=external
+    export function executeEntityContext(mode: ExecuteEntityContextMode,
+        target: MCFunctionFields.TargetValue, next: ExecuteClauseValue): ExecuteClauseValue {
+        let k = mode == ExecuteEntityContextMode.PositionedAs ?
+            MCFunctionAST.ExecuteClauseKind.PositionedAs : MCFunctionAST.ExecuteClauseKind.RotatedAs;
+        let v = clause(k, next);
+        v.clause.target = target ? target.target : undefined;
+        return v;
+    }
     //% group="EXECUTE" weight=122
     //% blockId=mcfunction_execute_if_block
     //% block="$mode block at $position block $block next $next"
@@ -125,6 +145,22 @@ namespace Command {
         v.clause.end=end ? end.position : undefined;
         v.clause.destination=dest ? dest.position : undefined;
         v.clause.scan=<MCFunctionAST.ExecuteScan><number>scan;
+        return v;
+    }
+    //% group="EXECUTE" weight=121
+    //% blockId=mcfunction_execute_if_block_states
+    //% block="$mode block at $position block $block states $states next $next"
+    //% position.shadow="mcfunction_position_absolute"
+    //% block.shadow="mcfunction_block_custom_id"
+    //% states.shadow="mcfunction_block_states_none"
+    //% next.shadow="mcfunction_execute_end"
+    //% inlineInputMode=external
+    export function executeIfBlockStates(mode: ExecutePolarity,
+        position: MCFunctionPositionFields.PositionValue, block: MCFunctionFields.BlockValue,
+        states: MCFunctionBlockStateFields.BlockStatesValue,
+        next: ExecuteClauseValue): ExecuteClauseValue {
+        let v = executeIfBlock(mode, position, block, next);
+        v.clause.blockStates = states ? states.states : undefined;
         return v;
     }
     // The Selector-style compact clauses below reuse the same ordered ExecuteClause AST.
@@ -283,6 +319,39 @@ namespace Command {
         v.clause.objective=objective;
         v.clause.scoreRange=range ? range.range : undefined; return v;
     }
+    export enum ExecuteCompareChoice {
+        //% block="="
+        Equal = 0,
+        //% block="<"
+        Less = 1,
+        //% block="<="
+        LessOrEqual = 2,
+        //% block=">"
+        Greater = 3,
+        //% block=">="
+        GreaterOrEqual = 4
+    }
+    //% group="EXECUTE" weight=112
+    //% blockId=mcfunction_execute_if_score_compare
+    //% block="$mode score target $target objective $objective comparator $operation source $source objective $sourceObjective next $next"
+    //% target.shadow="mcfunction_target_selector"
+    //% source.shadow="mcfunction_target_selector"
+    //% objective.shadow="text" objective.defl="points"
+    //% sourceObjective.shadow="text" sourceObjective.defl="points"
+    //% next.shadow="mcfunction_execute_end"
+    //% inlineInputMode=external
+    export function executeIfScoreCompare(mode: ExecutePolarity, target: MCFunctionFields.TargetValue,
+        objective: string, operation: ExecuteCompareChoice, source: MCFunctionFields.TargetValue,
+        sourceObjective: string, next: ExecuteClauseValue): ExecuteClauseValue {
+        let v = clause(mode == ExecutePolarity.If ? MCFunctionAST.ExecuteClauseKind.IfScoreCompare :
+            MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare, next);
+        v.clause.target = target ? target.target : undefined;
+        v.clause.objective = objective;
+        v.clause.scoreComparison = <MCFunctionAST.ExecuteScoreComparison><number>operation;
+        v.clause.sourceTarget = source ? source.target : undefined;
+        v.clause.sourceObjective = sourceObjective;
+        return v;
+    }
     //% group="EXECUTE" weight=111
     //% blockId=mcfunction_execute_run_say
     //% block="run SAY $message"
@@ -302,5 +371,130 @@ namespace Command {
     //% line.shadow="text" line.defl="say Hello"
     export function executeRunRaw(line: string): ExecuteRunValue {
         return new ExecuteRunValue(MCFunctionAST.createRawCommand(line));
+    }
+    // Typed RUN reporters wrap the shared AST constructors; no Minecraft command
+    // strings are assembled in the block layer. Existing Say/Scoreboard/Raw remain.
+    //% group="EXECUTE" weight=108
+    //% blockId=mcfunction_execute_run_function
+    //% block="run FUNCTION $functionId"
+    //% functionId.shadow="text" functionId.defl="test/example"
+    export function executeRunFunction(functionId: string): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionAST.createMcFunctionCommand(functionId));
+    }
+    //% group="EXECUTE" weight=107
+    //% blockId=mcfunction_execute_run_kill
+    //% block="run KILL $target"
+    //% target.shadow="mcfunction_selector_self"
+    export function executeRunKill(target: MCFunctionFields.SelectorValue): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionAST.createKillCommand(target ? target.selector : undefined));
+    }
+    //% group="EXECUTE" weight=106
+    //% blockId=mcfunction_execute_run_setblock
+    //% block="run SETBLOCK position $position block $block states $states"
+    //% position.shadow="mcfunction_position_absolute"
+    //% block.shadow="mcfunction_block_custom_id"
+    //% states.shadow="mcfunction_block_states_none"
+    //% inlineInputMode=external
+    export function executeRunSetBlock(position: MCFunctionPositionFields.PositionValue,
+        block: MCFunctionFields.BlockValue,
+        states: MCFunctionBlockStateFields.BlockStatesValue): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionAST.createSetBlockCommand(
+            position ? position.position : undefined, block ? block.blockId : "",
+            states ? states.states : undefined));
+    }
+    //% group="EXECUTE" weight=105
+    //% blockId=mcfunction_execute_run_summon
+    //% block="run SUMMON entity $entity at $position"
+    //% entity.shadow="mcfunction_entity_select"
+    //% position.shadow="mcfunction_position_absolute"
+    //% inlineInputMode=external
+    export function executeRunSummon(entity: MCFunctionFields.EntityValue,
+        position: MCFunctionPositionFields.PositionValue): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionAST.createSummonSimpleCommand(
+            entity ? entity.entityId : "", undefined, position ? position.position : undefined));
+    }
+    //% group="EXECUTE" weight=104
+    //% blockId=mcfunction_execute_run_tag
+    //% block="run TAG target $target add $tag"
+    //% target.shadow="mcfunction_selector_self"
+    //% tag.shadow="text" tag.defl="c3_test"
+    //% inlineInputMode=external
+    export function executeRunTag(target: MCFunctionFields.SelectorValue,
+        tag: string): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionAST.createTagCommand(target ? target.selector : undefined,
+            MCFunctionAST.TagActionKind.Add, tag));
+    }
+    //% group="EXECUTE" weight=103
+    //% blockId=mcfunction_execute_run_tp
+    //% block="run TP target $target destination $position"
+    //% target.shadow="mcfunction_target_selector"
+    //% position.shadow="mcfunction_position_absolute"
+    //% inlineInputMode=external
+    export function executeRunTp(target: MCFunctionFields.TargetValue,
+        position: MCFunctionPositionFields.PositionValue): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionAST.createTeleportReferenceCommand(
+            target ? target.target : undefined,
+            MCFunctionAST.createTeleportPositionDestination(position ? position.position : undefined)));
+    }
+    //% group="EXECUTE" weight=102
+    //% blockId=mcfunction_execute_run_give
+    //% block="run GIVE $target item $item count $amount"
+    //% target.shadow="mcfunction_selector_self"
+    //% item.shadow="mcfunction_item_custom_id"
+    //% amount.defl=1
+    //% inlineInputMode=external
+    export function executeRunGive(target: MCFunctionFields.SelectorValue,
+        item: string, amount: number): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionAST.createGiveCommand(
+            target ? target.selector : undefined,
+            MCFunctionAST.createItemStack(item, amount)));
+    }
+    //% group="EXECUTE" weight=101
+    //% blockId=mcfunction_execute_run_fill
+    //% block="run FILL from $from to $to block $block states $states"
+    //% from.shadow="mcfunction_position_absolute"
+    //% to.shadow="mcfunction_position_absolute"
+    //% block.shadow="mcfunction_block_custom_id"
+    //% states.shadow="mcfunction_block_states_none"
+    //% inlineInputMode=external
+    export function executeRunFill(from: MCFunctionPositionFields.PositionValue,
+        to: MCFunctionPositionFields.PositionValue, block: MCFunctionFields.BlockValue,
+        states: MCFunctionBlockStateFields.BlockStatesValue): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionAST.createFillCommand(
+            from ? from.position : undefined, to ? to.position : undefined,
+            block ? block.blockId : "", states ? states.states : undefined));
+    }
+    //% group="EXECUTE" weight=100
+    //% blockId=mcfunction_execute_run_gamerule
+    //% block="run GAMERULE $action"
+    export function executeRunGamerule(action: GameRuleOperationValue): ExecuteRunValue {
+        return new ExecuteRunValue(action ? action.command : undefined);
+    }
+    //% group="EXECUTE" weight=99
+    //% blockId=mcfunction_execute_run_ride
+    //% block="run RIDE target $target action $action"
+    //% target.shadow="mcfunction_target_selector"
+    //% action.shadow="mcfunction_ride_action_stop"
+    //% inlineInputMode=external
+    export function executeRunRide(target: MCFunctionFields.TargetValue,
+        action: RideActionValue): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionBlocks.createRideCommand(
+            action ? action.action : undefined, target ? target.target : undefined,
+            action ? action.mount : undefined, action ? action.entityType : undefined,
+            action ? action.teleportRule : undefined, action ? action.fillType : undefined,
+            action ? action.rideRule : undefined, action ? action.spawnEvent : undefined,
+            action ? action.nameTag : undefined));
+    }
+    //% group="EXECUTE" weight=98
+    //% blockId=mcfunction_execute_run_dialogue
+    //% block="run DIALOGUE NPC $npc action $action"
+    //% npc.shadow="mcfunction_target_selector"
+    //% action.shadow="mcfunction_dialogue_action_open"
+    //% inlineInputMode=external
+    export function executeRunDialogue(npc: MCFunctionFields.TargetValue,
+        action: DialogueActionValue): ExecuteRunValue {
+        return new ExecuteRunValue(MCFunctionBlocks.createDialogueCommand(
+            action ? action.action : undefined, npc ? npc.target : undefined,
+            action ? action.player : undefined, action ? action.sceneName : undefined));
     }
 }

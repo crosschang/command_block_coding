@@ -20,6 +20,10 @@ namespace MCFunctionExecutePreview {
         if (k == MCFunctionAST.ExecuteClauseKind.IfBlock ||
             k == MCFunctionAST.ExecuteClauseKind.UnlessBlock) {
             if (!absolute(c.position)) return Decision.Unknown;
+            // TypeScript block IDs alone cannot prove a state match.
+            // Preserve typed BlockStates in Compiler; do not fake a Preview PASS.
+            if (c.blockStates && c.blockStates.entries && c.blockStates.entries.length > 0)
+                return Decision.Unknown;
             let id = c.blockId;
             if (id.indexOf("minecraft:") == 0) id = id.substr(10);
             if (!supportedVanillaBlock(id)) return Decision.Unknown;
@@ -59,9 +63,11 @@ namespace MCFunctionExecutePreview {
                 return;
             }
         }
-        // No nested or raw RUN through Preview. Restrict to verified existing adapters.
-        if (command.run.kind != MCFunctionAST.CommandKind.Say &&
-            command.run.kind != MCFunctionAST.CommandKind.Scoreboard) {
+        // Reuse the existing typed command Compiler/Preview pipeline for RUN.
+        // Nested modern EXECUTE requires context replay, while RAW bypasses typed
+        // validation; neither is safe to dispatch using legacy player.execute().
+        if (command.run.kind == MCFunctionAST.CommandKind.Execute ||
+            command.run.kind == MCFunctionAST.CommandKind.Raw) {
             MCFunctionPreview.previewSay("INFO [EXECUTE_RUN_UNSUPPORTED] RUN not replayed in Preview.");
             return;
         }

@@ -2431,14 +2431,16 @@ namespace MCFunctionValidator {
         // errors in a long chain must never be silently ignored.
         for (let i = 0; i < cmd.clauses.length; i++) {
             let c = cmd.clauses[i];
-            if (!c || c.kind < 0 || c.kind > MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
+            if (!c || c.kind < 0 || c.kind > MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare) {
                 addIssue(issues, ValidationLevel.Error, "EXECUTE_CLAUSE_INVALID", "Invalid EXECUTE clause.");
                 continue;
             }
             let k = c.kind;
             if (k == MCFunctionAST.ExecuteClauseKind.As || k == MCFunctionAST.ExecuteClauseKind.At ||
                 k == MCFunctionAST.ExecuteClauseKind.IfEntity || k == MCFunctionAST.ExecuteClauseKind.UnlessEntity ||
-                k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches || k == MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
+                k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches || k == MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches ||
+                k == MCFunctionAST.ExecuteClauseKind.IfScoreCompare || k == MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare ||
+                k == MCFunctionAST.ExecuteClauseKind.PositionedAs || k == MCFunctionAST.ExecuteClauseKind.RotatedAs) {
                 appendIssues(issues, validatePlayerReference(c.target, true));
             }
             if (k == MCFunctionAST.ExecuteClauseKind.Positioned ||
@@ -2476,6 +2478,9 @@ namespace MCFunctionValidator {
             if (k == MCFunctionAST.ExecuteClauseKind.IfBlock || k == MCFunctionAST.ExecuteClauseKind.UnlessBlock) {
                 if (!c.blockId || !isSafeCommandId(c.blockId))
                     addIssue(issues, ValidationLevel.Error, "EXECUTE_BLOCK_INVALID", "Block ID must be a nonempty token.");
+                if (c.blockStates && c.blockStates.entries && c.blockStates.entries.length > 0) {
+                    appendIssues(issues, validateBlockStates(c.blockStates, c.blockId));
+                }
             }
             if (k == MCFunctionAST.ExecuteClauseKind.IfBlocks || k == MCFunctionAST.ExecuteClauseKind.UnlessBlocks) {
                 if (!c.begin || !c.end || !c.destination) {
@@ -2487,6 +2492,20 @@ namespace MCFunctionValidator {
                 }
                 if (c.scan != MCFunctionAST.ExecuteScan.All && c.scan != MCFunctionAST.ExecuteScan.Masked)
                     addIssue(issues, ValidationLevel.Error, "EXECUTE_SCAN_INVALID", "Invalid scan mode.");
+            }
+            if (k == MCFunctionAST.ExecuteClauseKind.IfScoreCompare ||
+                k == MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare) {
+                if (!c.objective || !isSafeCommandId(c.objective) ||
+                    !c.sourceObjective || !isSafeCommandId(c.sourceObjective)) {
+                    addIssue(issues, ValidationLevel.Error, "EXECUTE_SCORE_COMPARE_OBJECTIVE",
+                        "Both scoreboard objective IDs are required and must be valid tokens.");
+                }
+                appendIssues(issues, validatePlayerReference(c.sourceTarget, true));
+                if (c.scoreComparison == undefined ||
+                    MCFunctionAST.executeScoreOperatorToken(c.scoreComparison) == "") {
+                    addIssue(issues, ValidationLevel.Error, "EXECUTE_SCORE_COMPARE_OPERATOR",
+                        "Invalid score comparison operator.");
+                }
             }
             if (k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches ||
                 k == MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {

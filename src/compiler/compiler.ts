@@ -127,6 +127,10 @@ namespace MCFunctionCompiler {
             } else if (k == MCFunctionAST.ExecuteClauseKind.In) {
                 result += " in " + (c.dimension == MCFunctionAST.ExecuteDimension.Nether ? "nether" :
                     c.dimension == MCFunctionAST.ExecuteDimension.TheEnd ? "the_end" : "overworld");
+            } else if (k == MCFunctionAST.ExecuteClauseKind.PositionedAs) {
+                result += " positioned as " + compilePlayerTarget(c.target);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.RotatedAs) {
+                result += " rotated as " + compilePlayerTarget(c.target);
             } else if (k == MCFunctionAST.ExecuteClauseKind.Positioned) {
                 result += " positioned " + compilePosition(c.position);
             } else if (k == MCFunctionAST.ExecuteClauseKind.Rotated) {
@@ -147,7 +151,9 @@ namespace MCFunctionCompiler {
             } else if (k == MCFunctionAST.ExecuteClauseKind.IfBlock ||
                 k == MCFunctionAST.ExecuteClauseKind.UnlessBlock) {
                 result += (k == MCFunctionAST.ExecuteClauseKind.IfBlock ? " if block " : " unless block ") +
-                    compilePosition(c.position) + " " + c.blockId;
+                    compilePosition(c.position) + " " + c.blockId +
+                    (c.blockStates && c.blockStates.entries && c.blockStates.entries.length > 0 ?
+                        " " + compileBlockStates(c.blockStates) : "");
             } else if (k == MCFunctionAST.ExecuteClauseKind.IfBlocks ||
                 k == MCFunctionAST.ExecuteClauseKind.UnlessBlocks) {
                 result += (k == MCFunctionAST.ExecuteClauseKind.IfBlocks ? " if blocks " : " unless blocks ") +
@@ -159,6 +165,12 @@ namespace MCFunctionCompiler {
                 result += (k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches ? " if score " : " unless score ") +
                     compilePlayerTarget(c.target) + " " + c.objective + " matches " +
                     compileExecuteRange(c.scoreRange);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.IfScoreCompare ||
+                k == MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare) {
+                result += (k == MCFunctionAST.ExecuteClauseKind.IfScoreCompare ? " if score " : " unless score ") +
+                    compilePlayerTarget(c.target) + " " + c.objective + " " +
+                    MCFunctionAST.executeScoreOperatorToken(c.scoreComparison) + " " +
+                    compilePlayerTarget(c.sourceTarget) + " " + c.sourceObjective;
             }
         }
         return result + " run " + compileCommand(command.run);
