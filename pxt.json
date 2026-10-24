@@ -1,6 +1,6 @@
 {
     "name": "command_block_coding",
-    "version": "0.0.82",
+    "version": "0.0.77",
     "description": "Minecraft Education command blocks for MakeCode",
     "dependencies": {
         "core": "*",
@@ -9,6 +9,7 @@
     "files": [
         "main.blocks",
         "src/ast/command.ts",
+        "commands/c3_execute.ts",
         "src/ast/raw_command.ts",
         "src/ast/range.ts",
         "src/ast/slot.ts",
@@ -80,6 +81,8 @@
         "src/preview/query_adapter.ts",
         "src/preview/summon_preview.ts",
         "item_components.ts",
+        "src/preview/execute_interpreter.ts",
+        "src/blocks/c3_execute_blocks.ts",
         "custom.ts",
         "function_file.ts",
         "main.ts",

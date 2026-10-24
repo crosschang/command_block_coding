@@ -11,9 +11,13 @@
  * .mcfunction output keeps the real `=` syntax.
  */
 //% color=#4C97FF weight=100 icon="\uf1b2"
-//% groups='["SCOREBOARD", "RIDE", "DIALOGUE", "PLAYANIMATION", "FOG", "DAMAGE", "EVENT", "CONTROLSCHEME", "AIMASSIST", "SETBLOCK", "FILL", "CLONE", "PARTICLE", "SOUND", "MUSIC", "ENCHANT", "TELL", "TIME", "WEATHER", "DIFFICULTY", "CAMERASHAKE", "CAMERA", "HUD", "INPUTPERMISSION", "SPAWNPOINT", "SETWORLDSPAWN", "GAMERULE", "TAG", "GAMEMODE", "KILL", "CLEAR", "SUMMON", "EFFECT", "TELEPORT", "GIVE", "SAY", "FUNCTION", "RAW COMMAND"]'
+//% groups='["EXECUTE", "SCOREBOARD", "RIDE", "DIALOGUE", "PLAYANIMATION", "FOG", "DAMAGE", "EVENT", "CONTROLSCHEME", "AIMASSIST", "SETBLOCK", "FILL", "CLONE", "PARTICLE", "SOUND", "MUSIC", "ENCHANT", "TELL", "TIME", "WEATHER", "DIFFICULTY", "CAMERASHAKE", "CAMERA", "HUD", "INPUTPERMISSION", "SPAWNPOINT", "SETWORLDSPAWN", "GAMERULE", "TAG", "GAMEMODE", "KILL", "CLEAR", "SUMMON", "EFFECT", "TELEPORT", "GIVE", "SAY", "FUNCTION", "RAW COMMAND"]'
 namespace Command {
     function executeValidatedCommandNow(command: MCFunctionAST.CommandNode): void {
+        if (command.kind == MCFunctionAST.CommandKind.Execute) {
+            MCFunctionExecutePreview.execute(<MCFunctionAST.ExecuteCommand>command);
+            return;
+        }
         let queryResult = MCFunctionPreview.tryHandleQuery(command);
         if (queryResult.handled) {
             return;

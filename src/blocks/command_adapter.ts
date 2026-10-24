@@ -1,5 +1,10 @@
 /** MakeCode block input -> Minecraft command AST adapter. */
 namespace MCFunctionBlocks {
+    export function createExecuteCommand(clauses: MCFunctionAST.ExecuteClause[],
+        run: MCFunctionAST.CommandNode): MCFunctionAST.ExecuteCommand {
+        return MCFunctionAST.createExecuteCommand(clauses, run);
+    }
+
     export function createScoreboardCommand(
         source: MCFunctionAST.ScoreboardCommand): MCFunctionAST.ScoreboardCommand {
         // Block reporter has already captured the typed semantic command.

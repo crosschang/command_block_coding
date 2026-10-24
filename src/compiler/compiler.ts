@@ -1,6 +1,8 @@
 /** Minecraft command compiler: AST -> .mcfunction command line. */
 namespace MCFunctionCompiler {
     export function compileCommand(command: MCFunctionAST.CommandNode): string {
+        if (command.kind == MCFunctionAST.CommandKind.Execute) return compileExecute(<MCFunctionAST.ExecuteCommand>command);
+
         switch (command.kind) {
             case MCFunctionAST.CommandKind.Scoreboard:
                 return compileScoreboard(<MCFunctionAST.ScoreboardCommand>command);
@@ -114,6 +116,58 @@ namespace MCFunctionCompiler {
     }
 
     /** Official Bedrock scoreboard commands. AST is never assembled by block UI. */
+    /** C3: serialize ordered modern Bedrock EXECUTE clauses without losing context. */
+    export function compileExecute(command: MCFunctionAST.ExecuteCommand): string {
+        let result = "execute";
+        for (let i = 0; i < command.clauses.length; i++) {
+            let c = command.clauses[i];
+            let k = c.kind;
+            if (k == MCFunctionAST.ExecuteClauseKind.As || k == MCFunctionAST.ExecuteClauseKind.At) {
+                result += (k == MCFunctionAST.ExecuteClauseKind.As ? " as " : " at ") + compilePlayerTarget(c.target);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.In) {
+                result += " in " + (c.dimension == MCFunctionAST.ExecuteDimension.Nether ? "nether" :
+                    c.dimension == MCFunctionAST.ExecuteDimension.TheEnd ? "the_end" : "overworld");
+            } else if (k == MCFunctionAST.ExecuteClauseKind.Positioned) {
+                result += " positioned " + compilePosition(c.position);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.Rotated) {
+                result += " rotated " + compileRotation(c.rotation);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.FacingPosition) {
+                result += " facing " + compilePosition(c.facing.position);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.FacingEntity) {
+                result += " facing entity " + compileSelector(c.facing.entitySelector) + " " +
+                    MCFunctionAST.entityAnchorToken(c.facing.anchor);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.Align) {
+                result += " align " + c.axes;
+            } else if (k == MCFunctionAST.ExecuteClauseKind.Anchored) {
+                result += " anchored " + MCFunctionAST.entityAnchorToken(c.anchor);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.IfEntity ||
+                k == MCFunctionAST.ExecuteClauseKind.UnlessEntity) {
+                result += (k == MCFunctionAST.ExecuteClauseKind.IfEntity ? " if entity " : " unless entity ") +
+                    compilePlayerTarget(c.target);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.IfBlock ||
+                k == MCFunctionAST.ExecuteClauseKind.UnlessBlock) {
+                result += (k == MCFunctionAST.ExecuteClauseKind.IfBlock ? " if block " : " unless block ") +
+                    compilePosition(c.position) + " " + c.blockId;
+            } else if (k == MCFunctionAST.ExecuteClauseKind.IfBlocks ||
+                k == MCFunctionAST.ExecuteClauseKind.UnlessBlocks) {
+                result += (k == MCFunctionAST.ExecuteClauseKind.IfBlocks ? " if blocks " : " unless blocks ") +
+                    compilePosition(c.begin) + " " + compilePosition(c.end) + " " +
+                    compilePosition(c.destination) +
+                    (c.scan == MCFunctionAST.ExecuteScan.Masked ? " masked" : " all");
+            } else if (k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches ||
+                k == MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
+                result += (k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches ? " if score " : " unless score ") +
+                    compilePlayerTarget(c.target) + " " + c.objective + " matches " +
+                    compileExecuteRange(c.scoreRange);
+            }
+        }
+        return result + " run " + compileCommand(command.run);
+    }
+    function compileExecuteRange(r: MCFunctionAST.NumberRange): string {
+        if (r.hasMin && r.hasMax && r.min == r.max) return "" + r.min;
+        return (r.hasMin ? "" + r.min : "") + ".." + (r.hasMax ? "" + r.max : "");
+    }
+
     function compileScoreboard(command: MCFunctionAST.ScoreboardCommand): string {
         let a = command.action;
         if (a == MCFunctionAST.ScoreboardAction.ObjectiveList) return "scoreboard objectives list";

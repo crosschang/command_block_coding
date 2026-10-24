@@ -2409,7 +2409,107 @@ namespace MCFunctionValidator {
         return numeric >= -2147483648 && numeric <= 2147483647;
     }
 
+    /** C3: canonical syntax validation; Preview capability is NOT a syntax error. */
+    export function validateExecuteCommand(cmd: MCFunctionAST.ExecuteCommand): ValidationIssue[] {
+        let issues: ValidationIssue[] = [];
+        if (!cmd || !cmd.run) {
+            addIssue(issues, ValidationLevel.Error, "EXECUTE_RUN_MISSING", "EXECUTE requires a RUN command.");
+            return issues;
+        }
+        if (cmd.run.kind == MCFunctionAST.CommandKind.Execute) {
+            // Nested Execute is legal in real Bedrock, but defer to explicit flat chains
+            // while the current Preview interpreter handles only a simple RUN.
+            addIssue(issues, ValidationLevel.Warning, "EXECUTE_NESTED", "Nested EXECUTE requires separate runtime verification.");
+        }
+        appendIssues(issues, validateCommand(cmd.run));
+        if (!cmd.clauses) {
+            addIssue(issues, ValidationLevel.Error, "EXECUTE_CLAUSES_MISSING", "Missing EXECUTE clause list.");
+            return issues;
+        }
+        if (cmd.clauses.length > 32) {
+            addIssue(issues, ValidationLevel.Error, "EXECUTE_TOO_MANY", "Maximum 32 EXECUTE clauses in this editor.");
+        }
+        for (let i = 0; i < cmd.clauses.length && i < 33; i++) {
+            let c = cmd.clauses[i];
+            if (!c || c.kind < 0 || c.kind > MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
+                addIssue(issues, ValidationLevel.Error, "EXECUTE_CLAUSE_INVALID", "Invalid EXECUTE clause.");
+                continue;
+            }
+            let k = c.kind;
+            if (k == MCFunctionAST.ExecuteClauseKind.As || k == MCFunctionAST.ExecuteClauseKind.At ||
+                k == MCFunctionAST.ExecuteClauseKind.IfEntity || k == MCFunctionAST.ExecuteClauseKind.UnlessEntity ||
+                k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches || k == MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
+                appendIssues(issues, validatePlayerReference(c.target, true));
+            }
+            if (k == MCFunctionAST.ExecuteClauseKind.Positioned ||
+                k == MCFunctionAST.ExecuteClauseKind.IfBlock || k == MCFunctionAST.ExecuteClauseKind.UnlessBlock) {
+                if (!c.position) addIssue(issues, ValidationLevel.Error, "EXECUTE_POSITION_MISSING", "Position is required.");
+                else appendIssues(issues, validatePosition(c.position));
+            }
+            if (k == MCFunctionAST.ExecuteClauseKind.FacingPosition ||
+                k == MCFunctionAST.ExecuteClauseKind.FacingEntity) {
+                if (!c.facing || (k == MCFunctionAST.ExecuteClauseKind.FacingPosition && !c.facing.position) ||
+                    (k == MCFunctionAST.ExecuteClauseKind.FacingEntity && !c.facing.entitySelector)) {
+                    addIssue(issues, ValidationLevel.Error, "EXECUTE_FACING_INVALID", "Facing input is required.");
+                } else if (k == MCFunctionAST.ExecuteClauseKind.FacingPosition) {
+                    appendIssues(issues, validatePosition(c.facing.position));
+                } else {
+                    appendIssues(issues, validateSelector(c.facing.entitySelector));
+                }
+            }
+            if (k == MCFunctionAST.ExecuteClauseKind.Rotated) {
+                if (!c.rotation) addIssue(issues, ValidationLevel.Error, "EXECUTE_ROTATION_MISSING", "Rotation is required.");
+                else appendIssues(issues, validateRotation(c.rotation));
+            }
+            if (k == MCFunctionAST.ExecuteClauseKind.In &&
+                (c.dimension == undefined || c.dimension < 0 || c.dimension > 2))
+                addIssue(issues, ValidationLevel.Error, "EXECUTE_DIMENSION_INVALID", "Invalid dimension.");
+            if (k == MCFunctionAST.ExecuteClauseKind.Align &&
+                (!c.axes || c.axes.length < 1 || c.axes.length > 3 ||
+                c.axes.indexOf("x") < 0 && c.axes.indexOf("y") < 0 && c.axes.indexOf("z") < 0 ||
+                !executeValidAxes(c.axes))) {
+                addIssue(issues, ValidationLevel.Error, "EXECUTE_ALIGN_INVALID", "Align uses unique x, y, z axes only.");
+            }
+            if (k == MCFunctionAST.ExecuteClauseKind.Anchored &&
+                c.anchor != MCFunctionAST.EntityAnchor.Eyes && c.anchor != MCFunctionAST.EntityAnchor.Feet)
+                addIssue(issues, ValidationLevel.Error, "EXECUTE_ANCHOR_INVALID", "Anchor must be eyes or feet.");
+            if (k == MCFunctionAST.ExecuteClauseKind.IfBlock || k == MCFunctionAST.ExecuteClauseKind.UnlessBlock) {
+                if (!c.blockId || !isSafeCommandId(c.blockId))
+                    addIssue(issues, ValidationLevel.Error, "EXECUTE_BLOCK_INVALID", "Block ID must be a nonempty token.");
+            }
+            if (k == MCFunctionAST.ExecuteClauseKind.IfBlocks || k == MCFunctionAST.ExecuteClauseKind.UnlessBlocks) {
+                if (!c.begin || !c.end || !c.destination) {
+                    addIssue(issues, ValidationLevel.Error, "EXECUTE_BLOCKS_POSITIONS", "Three positions are required.");
+                } else {
+                    appendIssues(issues, validatePosition(c.begin));
+                    appendIssues(issues, validatePosition(c.end));
+                    appendIssues(issues, validatePosition(c.destination));
+                }
+                if (c.scan != MCFunctionAST.ExecuteScan.All && c.scan != MCFunctionAST.ExecuteScan.Masked)
+                    addIssue(issues, ValidationLevel.Error, "EXECUTE_SCAN_INVALID", "Invalid scan mode.");
+            }
+            if (k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches ||
+                k == MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
+                if (!c.objective || !isSafeCommandId(c.objective))
+                    addIssue(issues, ValidationLevel.Error, "EXECUTE_SCORE_OBJECTIVE", "Invalid scoreboard objective.");
+                if (!c.scoreRange || (!c.scoreRange.hasMin && !c.scoreRange.hasMax) ||
+                    (c.scoreRange.hasMin && c.scoreRange.hasMax && c.scoreRange.min > c.scoreRange.max))
+                    addIssue(issues, ValidationLevel.Error, "EXECUTE_SCORE_RANGE", "Invalid score range.");
+            }
+        }
+        return issues;
+    }
+    function executeValidAxes(s: string): boolean {
+        for (let i = 0; i < s.length; i++) {
+            let ch = s.charAt(i);
+            if (ch != "x" && ch != "y" && ch != "z") return false;
+            if (s.indexOf(ch) != i) return false;
+        }
+        return true;
+    }
+
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
+        if (command.kind == MCFunctionAST.CommandKind.Execute) return validateExecuteCommand(<MCFunctionAST.ExecuteCommand>command);
         let issues: ValidationIssue[] = [];
         if (command.kind == MCFunctionAST.CommandKind.Scoreboard) {
             appendIssues(issues, validateScoreboardCommand(<MCFunctionAST.ScoreboardCommand>command));

@@ -43,7 +43,8 @@ namespace MCFunctionAST {
         Fog = 36,
         Ride = 37,
         Dialogue = 38,
-        Scoreboard = 39
+        Scoreboard = 39,
+        Execute = 40
     }
 
     export interface CommandNode {
