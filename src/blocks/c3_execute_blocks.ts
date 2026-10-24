@@ -41,7 +41,7 @@ namespace Command {
     //% blockId=command_execute_unified
     //% block="EXECUTE clauses $clauses RUN $run"
     //% clauses.shadow="mcfunction_execute_end"
-    //% run.shadow="mcfunction_execute_run_say"
+    //% run.shadow="mcfunction_execute_run_group_say"
     //% inlineInputMode=external
     export function execute(clauses: ExecuteClauseValue, run: ExecuteRunValue): void {
         let list: MCFunctionAST.ExecuteClause[] = [];
@@ -352,42 +352,54 @@ namespace Command {
         v.clause.sourceObjective = sourceObjective;
         return v;
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=111
     //% blockId=mcfunction_execute_run_say
     //% block="run SAY $message"
     //% message.shadow="text" message.defl="C3 condition matched"
     export function executeRunSay(message: string): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionBlocks.createSayCommand(message));
+        return MCFunctionExecuteRun.say(message);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=110
     //% blockId=mcfunction_execute_run_scoreboard
     //% block="run SCOREBOARD $action"
     export function executeRunScoreboard(action: ScoreboardActionValue): ExecuteRunValue {
-        return new ExecuteRunValue(action ? MCFunctionBlocks.createScoreboardCommand(action.command) : undefined);
+        return MCFunctionExecuteRun.scoreboard(action);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=109
     //% blockId=mcfunction_execute_run_raw
     //% block="run RAW COMMAND $line"
     //% line.shadow="text" line.defl="say Hello"
     export function executeRunRaw(line: string): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionAST.createRawCommand(line));
+        return MCFunctionExecuteRun.raw(line);
     }
     // Typed RUN reporters wrap the shared AST constructors; no Minecraft command
     // strings are assembled in the block layer. Existing Say/Scoreboard/Raw remain.
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=108
     //% blockId=mcfunction_execute_run_function
     //% block="run FUNCTION $functionId"
     //% functionId.shadow="text" functionId.defl="test/example"
     export function executeRunFunction(functionId: string): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionAST.createMcFunctionCommand(functionId));
+        return MCFunctionExecuteRun.mcfunction(functionId);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=107
     //% blockId=mcfunction_execute_run_kill
     //% block="run KILL $target"
     //% target.shadow="mcfunction_selector_self"
     export function executeRunKill(target: MCFunctionFields.SelectorValue): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionAST.createKillCommand(target ? target.selector : undefined));
+        return MCFunctionExecuteRun.kill(target);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=106
     //% blockId=mcfunction_execute_run_setblock
     //% block="run SETBLOCK position $position block $block states $states"
@@ -398,10 +410,10 @@ namespace Command {
     export function executeRunSetBlock(position: MCFunctionPositionFields.PositionValue,
         block: MCFunctionFields.BlockValue,
         states: MCFunctionBlockStateFields.BlockStatesValue): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionAST.createSetBlockCommand(
-            position ? position.position : undefined, block ? block.blockId : "",
-            states ? states.states : undefined));
+        return MCFunctionExecuteRun.setblock(position, block, states);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=105
     //% blockId=mcfunction_execute_run_summon
     //% block="run SUMMON entity $entity at $position"
@@ -410,9 +422,10 @@ namespace Command {
     //% inlineInputMode=external
     export function executeRunSummon(entity: MCFunctionFields.EntityValue,
         position: MCFunctionPositionFields.PositionValue): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionAST.createSummonSimpleCommand(
-            entity ? entity.entityId : "", undefined, position ? position.position : undefined));
+        return MCFunctionExecuteRun.summon(entity, position);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=104
     //% blockId=mcfunction_execute_run_tag
     //% block="run TAG target $target add $tag"
@@ -421,9 +434,10 @@ namespace Command {
     //% inlineInputMode=external
     export function executeRunTag(target: MCFunctionFields.SelectorValue,
         tag: string): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionAST.createTagCommand(target ? target.selector : undefined,
-            MCFunctionAST.TagActionKind.Add, tag));
+        return MCFunctionExecuteRun.tag(target, tag);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=103
     //% blockId=mcfunction_execute_run_tp
     //% block="run TP target $target destination $position"
@@ -432,10 +446,10 @@ namespace Command {
     //% inlineInputMode=external
     export function executeRunTp(target: MCFunctionFields.TargetValue,
         position: MCFunctionPositionFields.PositionValue): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionAST.createTeleportReferenceCommand(
-            target ? target.target : undefined,
-            MCFunctionAST.createTeleportPositionDestination(position ? position.position : undefined)));
+        return MCFunctionExecuteRun.teleport(target, position);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=102
     //% blockId=mcfunction_execute_run_give
     //% block="run GIVE $target item $item count $amount"
@@ -445,10 +459,10 @@ namespace Command {
     //% inlineInputMode=external
     export function executeRunGive(target: MCFunctionFields.SelectorValue,
         item: string, amount: number): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionAST.createGiveCommand(
-            target ? target.selector : undefined,
-            MCFunctionAST.createItemStack(item, amount)));
+        return MCFunctionExecuteRun.give(target, item, amount);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=101
     //% blockId=mcfunction_execute_run_fill
     //% block="run FILL from $from to $to block $block states $states"
@@ -460,16 +474,18 @@ namespace Command {
     export function executeRunFill(from: MCFunctionPositionFields.PositionValue,
         to: MCFunctionPositionFields.PositionValue, block: MCFunctionFields.BlockValue,
         states: MCFunctionBlockStateFields.BlockStatesValue): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionAST.createFillCommand(
-            from ? from.position : undefined, to ? to.position : undefined,
-            block ? block.blockId : "", states ? states.states : undefined));
+        return MCFunctionExecuteRun.fill(from, to, block, states);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=100
     //% blockId=mcfunction_execute_run_gamerule
     //% block="run GAMERULE $action"
     export function executeRunGamerule(action: GameRuleOperationValue): ExecuteRunValue {
-        return new ExecuteRunValue(action ? action.command : undefined);
+        return MCFunctionExecuteRun.gamerule(action);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=99
     //% blockId=mcfunction_execute_run_ride
     //% block="run RIDE target $target action $action"
@@ -478,13 +494,10 @@ namespace Command {
     //% inlineInputMode=external
     export function executeRunRide(target: MCFunctionFields.TargetValue,
         action: RideActionValue): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionBlocks.createRideCommand(
-            action ? action.action : undefined, target ? target.target : undefined,
-            action ? action.mount : undefined, action ? action.entityType : undefined,
-            action ? action.teleportRule : undefined, action ? action.fillType : undefined,
-            action ? action.rideRule : undefined, action ? action.spawnEvent : undefined,
-            action ? action.nameTag : undefined));
+        return MCFunctionExecuteRun.ride(target, action);
     }
+    // Deprecated but callable legacy block. New editor blocks live in MCFunctionExecuteRun.
+    //% blockHidden=true
     //% group="EXECUTE" weight=98
     //% blockId=mcfunction_execute_run_dialogue
     //% block="run DIALOGUE NPC $npc action $action"
@@ -493,8 +506,6 @@ namespace Command {
     //% inlineInputMode=external
     export function executeRunDialogue(npc: MCFunctionFields.TargetValue,
         action: DialogueActionValue): ExecuteRunValue {
-        return new ExecuteRunValue(MCFunctionBlocks.createDialogueCommand(
-            action ? action.action : undefined, npc ? npc.target : undefined,
-            action ? action.player : undefined, action ? action.sceneName : undefined));
+        return MCFunctionExecuteRun.dialogue(npc, action);
     }
 }
