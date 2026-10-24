@@ -2426,10 +2426,10 @@ namespace MCFunctionValidator {
             addIssue(issues, ValidationLevel.Error, "EXECUTE_CLAUSES_MISSING", "Missing EXECUTE clause list.");
             return issues;
         }
-        if (cmd.clauses.length > 32) {
-            addIssue(issues, ValidationLevel.Error, "EXECUTE_TOO_MANY", "Maximum 32 EXECUTE clauses in this editor.");
-        }
-        for (let i = 0; i < cmd.clauses.length && i < 33; i++) {
+        // EXECUTE clause chaining has no arbitrary editor-only count cap.
+        // Continue validating EVERY clause, including those after index 32;
+        // errors in a long chain must never be silently ignored.
+        for (let i = 0; i < cmd.clauses.length; i++) {
             let c = cmd.clauses[i];
             if (!c || c.kind < 0 || c.kind > MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
                 addIssue(issues, ValidationLevel.Error, "EXECUTE_CLAUSE_INVALID", "Invalid EXECUTE clause.");

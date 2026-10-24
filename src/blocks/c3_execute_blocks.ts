@@ -46,14 +46,23 @@ namespace Command {
     export function execute(clauses: ExecuteClauseValue, run: ExecuteRunValue): void {
         let list: MCFunctionAST.ExecuteClause[] = [];
         let part = clauses;
-        let limit = 0;
-        while (part && part.clause && limit < 33) {
+        // EXECUTE only: no fixed clause-count limit. The GUI preserves every
+        // ordered clause in the canonical AST (including clauses after 32).
+        // Reject accidentally cyclic programmatic chains to avoid infinite loops.
+        let slow = clauses;
+        let fast = clauses;
+        while (fast && fast.next) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) {
+                MCFunctionPreview.previewSay("ERROR [EXECUTE_CYCLE] Cyclic EXECUTE clauses; RUN blocked.");
+                return;
+            }
+        }
+        while (part && part.clause) {
             list.push(part.clause);
             part = part.next;
-            limit++;
         }
-        // Too-long chains become invalid, not silently truncated valid commands.
-        if (part && part.clause) list.push(part.clause);
         let cmd = MCFunctionBlocks.createExecuteCommand(list, run ? run.command : undefined);
         if (!FunctionFile.allowCommandExecution()) return;
         let issues = MCFunctionValidator.validateCommand(cmd);
