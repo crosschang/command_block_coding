@@ -73,9 +73,9 @@ namespace MCFunctionExecutePreview {
         // A failed command or absent match can only lead to UNKNOWN, not a
         // fabricated STANDING/SNEAK/LOW match (unless the runtime itself lies
         // about selector-based tag changes; test this in Education).
-        player.execute("tag @s[y=~1.5,dy=0] add " + highTag);
-        player.execute("tag @s[y=~0.7,dy=0] add " + midTag);
-        player.execute("tag @s[y=~0.3,dy=0] add " + lowTag);
+        player.execute("execute @s ~ ~ ~ tag @s[y=~1.5,dy=0] add " + highTag);
+        player.execute("execute @s ~ ~ ~ tag @s[y=~0.7,dy=0] add " + midTag);
+        player.execute("execute @s ~ ~ ~ tag @s[y=~0.3,dy=0] add " + lowTag);
 
         sendPoseLine("@s[tag=" + highTag + ",tag=" + midTag + ",tag=" + lowTag + "]", standing);
         sendPoseLine("@s[tag=!" + highTag + ",tag=" + midTag + ",tag=" + lowTag + "]", sneak);
