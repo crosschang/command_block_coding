@@ -1,0 +1,86 @@
+--- ../C3_E1_TS_PREVIEW_0.0.84/src/preview/execute_interpreter.ts	2026-10-25 23:22:10.498351276 +0000
++++ src/preview/execute_interpreter.ts	2026-10-25 23:55:15.153958444 +0000
+@@ -1,5 +1,5 @@
+ /**
+- * C3 Execute Preview Interpreter - E1 virtual position context.
++ * C3 Execute Preview Interpreter - E1 + E2A self executor context.
+  *
+  * E1 implementation scope:
+  * - positioned absolute and relative (~) coordinates
+@@ -7,8 +7,9 @@
+  * - if/unless block(s) using the virtual position
+  * - RUN SAY and RUN SETBLOCK using the virtual position
+  * - preserve existing behavior for conditional-only EXECUTE without context modifiers
++ * - E2A: unfiltered as @s, at @s, positioned as @s (the MakeCode player only)
+  *
+- * Out of scope: local (^), as/at, entity/score, rotation, facing, anchored, dimension.
++ * Out of scope: local (^), multi-entity as/at, entity/score, rotation, facing, anchored, dimension.
+  * These are blocked; no modern EXECUTE is sent through player.execute().
+  * This does NOT modify canonical AST or .mcfunction Compiler output.
+  *
+@@ -80,6 +81,21 @@
+         return id;
+     }
+ 
++    /**
++     * E2A deliberately supports ONLY unfiltered @s. The MakeCode player is the
++     * executor of a direct FunctionFile Preview invocation. Other selectors
++     * require per-entity branches (E2B); never silently approximate @a/@e.
++     */
++    function isUnfilteredSelf(target: MCFunctionAST.PlayerTarget): boolean {
++        if (!target || target.kind != MCFunctionAST.PlayerTargetKind.Selector)
++            return false;
++        let selector = target.selector;
++        return !!selector && selector.base == MCFunctionAST.SelectorBase.Self &&
++            !!selector.filters && selector.filters.length == 0 &&
++            !!selector.scores && selector.scores.length == 0 &&
++            !!selector.hasItems && selector.hasItems.length == 0;
++    }
++
+     /** Evaluate supported block conditions relative to the *current* virtual position. */
+     function evaluateClause(c: MCFunctionAST.ExecuteClause,
+         context: PreviewPosition): Decision {
+@@ -156,6 +172,18 @@
+                 changedPosition = true;
+             } else if (k == MCFunctionAST.ExecuteClauseKind.Align) {
+                 changedPosition = true;
++            } else if (k == MCFunctionAST.ExecuteClauseKind.As ||
++                k == MCFunctionAST.ExecuteClauseKind.At ||
++                k == MCFunctionAST.ExecuteClauseKind.PositionedAs) {
++                if (!isUnfilteredSelf(clauses[i].target)) {
++                    unsupportedClause(i);
++                    return;
++                }
++                // AS @s keeps both executor and current position unchanged.
++                // AT @s resets position (and rotation) to @s; E2A RUN/clauses
++                // are intentionally rotation-insensitive.
++                // POSITIONED AS @s resets only the position.
++                if (k != MCFunctionAST.ExecuteClauseKind.As) changedPosition = true;
+             } else if (k != MCFunctionAST.ExecuteClauseKind.IfBlock &&
+                 k != MCFunctionAST.ExecuteClauseKind.UnlessBlock &&
+                 k != MCFunctionAST.ExecuteClauseKind.IfBlocks &&
+@@ -177,8 +205,8 @@
+             return;
+         }
+ 
+-        // The virtual context belongs to one single-player MakeCode executor.
+-        // E2 must model executor branches; do not silently emulate as/at here.
++        // E2A: the only supported executor is the single MakeCode player.
++        // Multi-target selectors require E2B branches and remain unsupported.
+         let context = initialPosition();
+         for (let i = 0; i < clauses.length; i++) {
+             let c = clauses[i];
+@@ -196,6 +224,13 @@
+                 if (c.axes.indexOf("x") >= 0) context.x = Math.floor(context.x);
+                 if (c.axes.indexOf("y") >= 0) context.y = Math.floor(context.y);
+                 if (c.axes.indexOf("z") >= 0) context.z = Math.floor(context.z);
++            } else if (k == MCFunctionAST.ExecuteClauseKind.As) {
++                // as @s retains the same executor AND existing position.
++            } else if (k == MCFunctionAST.ExecuteClauseKind.At ||
++                k == MCFunctionAST.ExecuteClauseKind.PositionedAs) {
++                // Target has already been preflighted as unfiltered @s.
++                // Read at this step, so preceding positioned is discarded.
++                context = initialPosition();
+             } else {
+                 let decision = evaluateClause(c, context);
+                 if (decision == Decision.Unknown) {
