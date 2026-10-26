@@ -48,3 +48,7 @@ declare namespace MCFunctionAST {
     function createMinRange(min:number):any;
 }
 interface CompilerHelper { compileSelector(s:any):string; }
+declare namespace MCFunctionAST {
+    enum ExecuteScoreComparison { Equal=0, Less=1, LessOrEqual=2, Greater=3, GreaterOrEqual=4 }
+    function createMinMaxRange(minimum:number, maximum:number):any;
+}

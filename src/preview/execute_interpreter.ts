@@ -8,9 +8,14 @@
  * E1: positioned/align and block comparisons; E2: @s + restricted native
  * legacy dispatcher for multi-entity simple actions; E3: provable entity
  * existence; E4: explicit rotation + local math; E5: facing position/anchor;
- * E6: dimension-neutral SAY only. Score queries, player pitch from API,
- * complex entity branching, and dimension-dependent world effects remain
- * gated until an exact implementation exists.
+ * E6: dimension-neutral SAY plus global score predicates (no world access).
+ * E3 limited read-only bounded score compare (fail-closed on ambiguous response);
+ * E5 pose-irrelevant facing position can run; new E5 pose detector
+ * links three hitbox tiers to player eye-height *candidate* coordinates.
+ * Candidate values are NOT Native-parity calibrated: local eye-anchored
+ * world changes continue to be blocked, with a diagnostic coordinate instead.
+ * Unknown poses/entities, ambiguous score probes and cross-dimension effects
+ * remain gated until exact execution is possible.
  */
 namespace MCFunctionExecutePreview {
     export enum Decision { Unknown = 0, False = 1, True = 2 }
@@ -34,6 +39,157 @@ namespace MCFunctionExecutePreview {
         return {yaw: player.getOrientation(), pitch: 0, yawKnown: true,
             pitchKnown: false, anchor: MCFunctionAST.EntityAnchor.Feet};
     }
+
+    /**
+     * E5 PLAYER-ONLY posture candidate; never part of the command AST.
+     * Native @s hitbox volume checks were observed for STANDING/SNEAK/LOW.
+     * Height numbers are calibration CANDIDATES, not Education-proven constants.
+     * LOW includes swimming/crawling/gliding; do not infer a unique animation.
+     */
+    enum EyePoseTier { Unknown = 0, Standing = 1, Sneak = 2, Low = 3 }
+    interface EyePoseSample {
+        tier: EyePoseTier;
+        eyeHeightCandidate: number;
+    }
+
+    /**
+     * Bedrock @s[y=~N,dy=0] intersects the executor's hitbox.
+     * PXT player.execute() bool has not yet been proven to represent the
+     * native result in Education: positive and negative controls are REQUIRED.
+     * Fail closed for inconsistent or rejected probes.
+     */
+    function detectLocalPlayerEyePose(): EyePoseSample {
+        let unknown: EyePoseSample = {tier: EyePoseTier.Unknown, eyeHeightCandidate: 0};
+        // Avoid relying on an arbitrary entity's position: current player ONLY.
+        let exists = player.execute("testfor @s");
+        let impossible = player.execute("testfor @s[y=~8,dy=0]");
+        if (!exists || impossible) return unknown;
+        let high = player.execute("testfor @s[y=~1.5,dy=0]");
+        let mid = player.execute("testfor @s[y=~0.7,dy=0]");
+        let low = player.execute("testfor @s[y=~0.3,dy=0]");
+        // Upper tiers overlap the lower intervals; this is deliberate.
+        if (high && mid && low)
+            return {tier: EyePoseTier.Standing, eyeHeightCandidate: 1.62};
+        if (!high && mid && low)
+            return {tier: EyePoseTier.Sneak, eyeHeightCandidate: 1.27};
+        if (!high && !mid && low)
+            return {tier: EyePoseTier.Low, eyeHeightCandidate: 0.40};
+        return unknown;
+    }
+    function eyePoseName(tier: EyePoseTier): string {
+        if (tier == EyePoseTier.Standing) return "STANDING";
+        if (tier == EyePoseTier.Sneak) return "SNEAK";
+        if (tier == EyePoseTier.Low) return "LOW";
+        return "UNKNOWN";
+    }
+
+    /**
+     * Prototype eye-origin projection. Only tests simple known-@s branches;
+     * does NOT run the command or install any blocks. The pose-height lookup
+     * deliberately stays outside canonical registry/Compiler until calibrated.
+     */
+    function eyeAnchorLocalCandidate(cmd: MCFunctionAST.ExecuteCommand): void {
+        let run = cmd.run;
+        if (!run || run.kind != MCFunctionAST.CommandKind.SetBlock ||
+            !isLocal((<MCFunctionAST.SetBlockCommand>run).position)) {
+            advancedUnsupported("EXECUTE_EYE_HEIGHT_UNCALIBRATED"); return;
+        }
+        let sample = detectLocalPlayerEyePose();
+        if (sample.tier == EyePoseTier.Unknown) {
+            advancedUnsupported("EXECUTE_POSE_UNKNOWN"); return;
+        }
+        let context = initialPosition();
+        let d = initialDirection();
+        let playerCamera = true;
+        let clauses = cmd.clauses;
+        for (let i = 0; i < clauses.length; i++) {
+            let c = clauses[i], k = c.kind;
+            if (k == MCFunctionAST.ExecuteClauseKind.As ||
+                k == MCFunctionAST.ExecuteClauseKind.At ||
+                k == MCFunctionAST.ExecuteClauseKind.PositionedAs ||
+                k == MCFunctionAST.ExecuteClauseKind.RotatedAs) {
+                if (!isUnfilteredSelf(c.target)) {
+                    advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT"); return;
+                }
+                if (k == MCFunctionAST.ExecuteClauseKind.At ||
+                    k == MCFunctionAST.ExecuteClauseKind.PositionedAs) context = initialPosition();
+                if (k == MCFunctionAST.ExecuteClauseKind.At ||
+                    k == MCFunctionAST.ExecuteClauseKind.RotatedAs) {
+                    d = initialDirection(); playerCamera = true;
+                }
+            } else if (k == MCFunctionAST.ExecuteClauseKind.Positioned) {
+                // No ^ positions in calibration itself: need an exact origin.
+                let next = resolvePosition(c.position, context);
+                if (!next) {advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return;}
+                context = next;
+                // Modern EXECUTE positioned resets anchor to FEET.
+                d.anchor = MCFunctionAST.EntityAnchor.Feet;
+            } else if (k == MCFunctionAST.ExecuteClauseKind.Align) {
+                if (c.axes.indexOf("x") >= 0) context.x = Math.floor(context.x);
+                if (c.axes.indexOf("y") >= 0) context.y = Math.floor(context.y);
+                if (c.axes.indexOf("z") >= 0) context.z = Math.floor(context.z);
+            } else if (k == MCFunctionAST.ExecuteClauseKind.Anchored) {
+                d.anchor = c.anchor;
+            } else if (k == MCFunctionAST.ExecuteClauseKind.Rotated) {
+                if (!c.rotation) {advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return;}
+                applyRotation(c.rotation, d); playerCamera = false;
+            } else if (k == MCFunctionAST.ExecuteClauseKind.FacingPosition) {
+                let to = resolvePosition(c.facing ? c.facing.position : undefined, context);
+                if (!to) {advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return;}
+                let from = {x:context.x, y:context.y, z:context.z};
+                if (d.anchor == MCFunctionAST.EntityAnchor.Eyes)
+                    from.y += sample.eyeHeightCandidate;
+                if (!setFacing(d, from, to)) {
+                    advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return;
+                }
+                playerCamera = false;
+            } else {
+                // Includes entity facing, conditional tests and dimension shifts.
+                // A calibration estimate cannot falsely claim these were run.
+                advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT"); return;
+            }
+        }
+        if (d.anchor != MCFunctionAST.EntityAnchor.Eyes) {
+            advancedUnsupported("EXECUTE_EYE_ANCHOR_RESET"); return;
+        }
+        // Shift the local coordinate origin to candidate eyes, then project
+        // using the same player-camera/explicit-rotation E4 math as FEET.
+        let dFeet: PreviewDirection = {yaw:d.yaw, pitch:d.pitch,
+            yawKnown:d.yawKnown, pitchKnown:d.pitchKnown,
+            anchor:MCFunctionAST.EntityAnchor.Feet};
+        let base: PreviewPosition = {x:context.x,
+            y:context.y + sample.eyeHeightCandidate,z:context.z};
+        let p = resolvePositionWithDirection(
+            (<MCFunctionAST.SetBlockCommand>run).position,
+            base, dFeet, playerCamera);
+        if (!p) {advancedUnsupported("EXECUTE_EYE_ROTATION_UNKNOWN");return;}
+        let x = Math.floor(p.x), y = Math.floor(p.y), z = Math.floor(p.z);
+        MCFunctionPreview.previewSay("INFO [EXECUTE_EYE_HEIGHT_CANDIDATE] " +
+            eyePoseName(sample.tier) + " eye +" + sample.eyeHeightCandidate +
+            " block " + x + " " + y + " " + z +
+            "; CALIBRATION ONLY. No RUN executed.");
+    }
+
+    /** Determine whether local RUN will consume a live eye anchor. */
+    function needsEyeAnchorCandidate(command: MCFunctionAST.ExecuteCommand): boolean {
+        if (!command || !command.run ||
+            command.run.kind != MCFunctionAST.CommandKind.SetBlock ||
+            !isLocal((<MCFunctionAST.SetBlockCommand>command.run).position))
+            return false;
+        let anchor = MCFunctionAST.EntityAnchor.Feet;
+        for (let i = 0; i < command.clauses.length; i++) {
+            let c = command.clauses[i];
+            if (c.kind == MCFunctionAST.ExecuteClauseKind.FacingPosition ||
+                c.kind == MCFunctionAST.ExecuteClauseKind.FacingEntity)
+                return false; // Existing E5 facing safeguard stays authoritative.
+            if (c.kind == MCFunctionAST.ExecuteClauseKind.Anchored) anchor = c.anchor;
+            // 'positioned' resets anchor, unlike 'at'.
+            if (c.kind == MCFunctionAST.ExecuteClauseKind.Positioned)
+                anchor = MCFunctionAST.EntityAnchor.Feet;
+        }
+        return anchor == MCFunctionAST.EntityAnchor.Eyes;
+    }
+
     function isLocal(p: MCFunctionAST.Position): boolean {
         return !!p && !!p.x && !!p.y && !!p.z &&
             p.x.mode == MCFunctionAST.CoordinateMode.Local &&
@@ -131,6 +287,103 @@ namespace MCFunctionExecutePreview {
             if (scoreSelectorTest(c.objective, upper)) return Decision.False;
         }
         return Decision.Unknown;
+    }
+
+    /**
+     * E3: Experimental, read-only score comparison via mutually exclusive
+     * legacy score-range probes. The MakeCode boolean response is NOT trusted
+     * merely because one command returned true: every split tests BOTH halves.
+     * If the host accepts all strings as success, both halves become true and
+     * the function rejects the result instead of fabricating a score.
+     *
+     * Initial bounded scope: integer scores [-64, 63]. Values outside this
+     * domain are UNSUPPORTED, never treated as failed comparisons.
+     * Requires in-world Education validation for @s and Fake Player holders.
+     */
+    function safeScoreWord(value: string, fakeName: boolean): boolean {
+        if (!value || value.length > 32) return false;
+        for (let i = 0; i < value.length; i++) {
+            let n = value.charCodeAt(i);
+            let valid = (n >= 48 && n <= 57) ||
+                (n >= 65 && n <= 90) || (n >= 97 && n <= 122) ||
+                n == 95 || n == 45 || n == 46 ||
+                (fakeName && n == 35);
+            if (!valid) return false;
+        }
+        return true;
+    }
+    function scoreHolderProbe(target: MCFunctionAST.PlayerTarget,
+        objective: string, minimum: number, maximum: number): boolean {
+        if (!safeScoreWord(objective, false)) return false;
+        if (isUnfilteredSelf(target)) {
+            return scoreSelectorTest(objective,
+                MCFunctionAST.createMinMaxRange(minimum, maximum));
+        }
+        // Literal fake-player and simple named holder: no quoting or injection.
+        if (!target || target.kind != MCFunctionAST.PlayerTargetKind.Name ||
+            !safeScoreWord(target.name, true)) return false;
+        return player.execute("scoreboard players test " + target.name + " " +
+            objective + " " + minimum + " " + maximum);
+    }
+    function readableScoreHolder(target: MCFunctionAST.PlayerTarget): boolean {
+        return isUnfilteredSelf(target) ||
+            (!!target && target.kind == MCFunctionAST.PlayerTargetKind.Name &&
+             safeScoreWord(target.name, true));
+    }
+    function readBoundedScore(target: MCFunctionAST.PlayerTarget,
+        objective: string): number {
+        const below = -64, above = 63;
+        if (!readableScoreHolder(target) || !safeScoreWord(objective, false))
+            return undefined;
+        if (!scoreHolderProbe(target, objective, below, above)) return undefined;
+        let low = below, high = above;
+        while (low < high) {
+            let middle = Math.floor((low + high) / 2);
+            let left = scoreHolderProbe(target, objective, low, middle);
+            let right = scoreHolderProbe(target, objective, middle + 1, high);
+            // Both true => host boolean is not a valid predicate, or changed state.
+            // Both false => score absent, API failure, or changed state.
+            if (left == right) return undefined;
+            if (left) high = middle;
+            else low = middle + 1;
+        }
+        // Final verification protects against host returning unconditional true
+        // and against score changes between the binary-search probes.
+        if (!scoreHolderProbe(target, objective, low, low)) return undefined;
+        let another = low == above ? low - 1 : low + 1;
+        if (scoreHolderProbe(target, objective, another, another)) return undefined;
+        return low;
+    }
+    function scoreCompareDecision(c: MCFunctionAST.ExecuteClause): Decision {
+        let left = readBoundedScore(c.target, c.objective);
+        if (left == undefined) return Decision.Unknown;
+        let right = readBoundedScore(c.sourceTarget, c.sourceObjective);
+        if (right == undefined) return Decision.Unknown;
+        let same = c.scoreComparison == MCFunctionAST.ExecuteScoreComparison.Equal && left == right;
+        let less = c.scoreComparison == MCFunctionAST.ExecuteScoreComparison.Less && left < right;
+        let lessEqual = c.scoreComparison == MCFunctionAST.ExecuteScoreComparison.LessOrEqual && left <= right;
+        let greater = c.scoreComparison == MCFunctionAST.ExecuteScoreComparison.Greater && left > right;
+        let greaterEqual = c.scoreComparison == MCFunctionAST.ExecuteScoreComparison.GreaterOrEqual && left >= right;
+        return same || less || lessEqual || greater || greaterEqual ?
+            Decision.True : Decision.False;
+    }
+
+    /** Detect any local ^ coordinate that would make pose/anchor observable. */
+    function anyLocalCoordinate(command: MCFunctionAST.ExecuteCommand): boolean {
+        let cs = command.clauses;
+        for (let i = 0; i < cs.length; i++) {
+            let c = cs[i], k = c.kind;
+            if (k == MCFunctionAST.ExecuteClauseKind.Positioned && isLocal(c.position)) return true;
+            if ((k == MCFunctionAST.ExecuteClauseKind.IfBlock ||
+                 k == MCFunctionAST.ExecuteClauseKind.UnlessBlock) && isLocal(c.position)) return true;
+            if ((k == MCFunctionAST.ExecuteClauseKind.IfBlocks ||
+                 k == MCFunctionAST.ExecuteClauseKind.UnlessBlocks) &&
+                (isLocal(c.begin) || isLocal(c.end) || isLocal(c.destination))) return true;
+            if (k == MCFunctionAST.ExecuteClauseKind.FacingPosition &&
+                c.facing && isLocal(c.facing.position)) return true;
+        }
+        return command.run && command.run.kind == MCFunctionAST.CommandKind.SetBlock &&
+            isLocal((<MCFunctionAST.SetBlockCommand>command.run).position);
     }
 
     function isAdvanced(k: MCFunctionAST.ExecuteClauseKind): boolean {
@@ -402,6 +655,12 @@ namespace MCFunctionExecutePreview {
         }
         let clauses = command.clauses;
         if (!clauses || !command.run) return;
+        // E5: run ONLY the diagnostic pose-to-eye calculation. Until the
+        // eye-height table is Native-calibrated this must never modify blocks.
+        if (needsEyeAnchorCandidate(command)) {
+            eyeAnchorLocalCandidate(command);
+            return;
+        }
         let hasMultiTarget = false;
         let hasAdvanced = false;
         for (let i = 0; i < clauses.length; i++) {
@@ -481,8 +740,9 @@ namespace MCFunctionExecutePreview {
                     preflightValid = false;
             } else if (k == MCFunctionAST.ExecuteClauseKind.IfScoreCompare ||
                 k == MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare) {
-                // Cross-objective comparison is not exposed by current PXT reads.
-                preflightValid = false;
+                if (!readableScoreHolder(c.target) || !readableScoreHolder(c.sourceTarget) ||
+                    !safeScoreWord(c.objective, false) ||
+                    !safeScoreWord(c.sourceObjective, false)) preflightValid = false;
             } else if (k != MCFunctionAST.ExecuteClauseKind.IfBlock &&
                 k != MCFunctionAST.ExecuteClauseKind.UnlessBlock &&
                 k != MCFunctionAST.ExecuteClauseKind.IfBlocks &&
@@ -494,9 +754,9 @@ namespace MCFunctionExecutePreview {
             }
         }
         if (changedDimension) {
-            // E6: only SAY is semantically independent of dimension. World
-            // mutation, conditions and all coordinate-sensitive commands
-            // cannot be replayed correctly by PXT across dimensions.
+            // E6: SAY and global scoreboard predicates do not access block/entity
+            // state in the selected dimension. Block modifications and any
+            // world-dependent predicates remain forbidden.
             if (command.run.kind != MCFunctionAST.CommandKind.Say) {
                 advancedUnsupported("EXECUTE_DIMENSION_UNSUPPORTED"); return;
             }
@@ -507,9 +767,7 @@ namespace MCFunctionExecutePreview {
                     k == MCFunctionAST.ExecuteClauseKind.IfBlocks ||
                     k == MCFunctionAST.ExecuteClauseKind.UnlessBlocks ||
                     k == MCFunctionAST.ExecuteClauseKind.IfEntity ||
-                    k == MCFunctionAST.ExecuteClauseKind.UnlessEntity ||
-                    k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches ||
-                    k == MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
+                    k == MCFunctionAST.ExecuteClauseKind.UnlessEntity) {
                     advancedUnsupported("EXECUTE_DIMENSION_UNSUPPORTED"); return;
                 }
             }
@@ -523,7 +781,15 @@ namespace MCFunctionExecutePreview {
                 eyes = clauses[i].anchor == MCFunctionAST.EntityAnchor.Eyes;
             if (eyes && (k == MCFunctionAST.ExecuteClauseKind.FacingPosition ||
                 k == MCFunctionAST.ExecuteClauseKind.FacingEntity)) {
-                advancedUnsupported("EXECUTE_EYES_POSE_UNAVAILABLE"); return;
+                // If any later local ^ coordinate might consume the facing,
+                // exact pose is mandatory. Never invent an eye offset.
+                if (anyLocalCoordinate(command)) {
+                    advancedUnsupported("EXECUTE_EYES_POSE_UNAVAILABLE"); return;
+                }
+                // Entity eyes still lack an exact 3D target pose.
+                if (k == MCFunctionAST.ExecuteClauseKind.FacingEntity) {
+                    advancedUnsupported("EXECUTE_EYES_POSE_UNAVAILABLE"); return;
+                }
             }
         }
         if ((changedPosition || changedRotation || changedDimension || hasAdvanced) &&
@@ -540,6 +806,8 @@ namespace MCFunctionExecutePreview {
                     orientation, usingCamera);
                 if (!next) {advancedUnsupported("EXECUTE_LOCAL_UNKNOWN"); return;}
                 context = next;
+                // Modern EXECUTE positioned resets the anchor to FEET.
+                orientation.anchor = MCFunctionAST.EntityAnchor.Feet;
             } else if (k == MCFunctionAST.ExecuteClauseKind.Align) {
                 if (c.axes.indexOf("x") >= 0) context.x = Math.floor(context.x);
                 if (c.axes.indexOf("y") >= 0) context.y = Math.floor(context.y);
@@ -561,8 +829,21 @@ namespace MCFunctionExecutePreview {
             } else if (k == MCFunctionAST.ExecuteClauseKind.FacingPosition) {
                 let target = resolvePositionWithDirection(c.facing.position,
                     context, orientation, usingCamera);
-                if (!target || !setFacing(orientation, context, target)) {
-                    advancedUnsupported("EXECUTE_FACING_UNKNOWN");return;
+                if (!target) {
+                    advancedUnsupported("EXECUTE_FACING_UNKNOWN"); return;
+                }
+                if (orientation.anchor == MCFunctionAST.EntityAnchor.Eyes) {
+                    // For eyes, we can prove facing has a valid target when
+                    // the horizontal displacement is nonzero. Rotation is
+                    // intentionally left unknown: no local ^ consumers exist.
+                    if (target.x == context.x && target.z == context.z ||
+                        anyLocalCoordinate(command)) {
+                        advancedUnsupported("EXECUTE_EYES_POSE_UNAVAILABLE"); return;
+                    }
+                    orientation.yawKnown = false;
+                    orientation.pitchKnown = false;
+                } else if (!setFacing(orientation, context, target)) {
+                    advancedUnsupported("EXECUTE_FACING_UNKNOWN"); return;
                 }
                 usingCamera = false;
             } else if (k == MCFunctionAST.ExecuteClauseKind.FacingEntity) {
@@ -610,6 +891,14 @@ namespace MCFunctionExecutePreview {
     function evaluateClauseWithDirection(c: MCFunctionAST.ExecuteClause,
         context: PreviewPosition, d: PreviewDirection, camera: boolean): Decision {
         let k = c.kind;
+        if (k == MCFunctionAST.ExecuteClauseKind.IfScoreCompare ||
+            k == MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare) {
+            let decision = scoreCompareDecision(c);
+            if (decision == Decision.Unknown) return Decision.Unknown;
+            if (k == MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare)
+                return decision == Decision.True ? Decision.False : Decision.True;
+            return decision;
+        }
         if (k == MCFunctionAST.ExecuteClauseKind.IfScoreMatches ||
             k == MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
             let decision = evaluateScoreMatch(c);

@@ -50,3 +50,8 @@ declare namespace MCFunctionRotationFields {function absolute(yaw:number,pitch:n
 declare namespace MCFunctionPositionFields {function local(x:number,y:number,z:number):any;}
 declare namespace MCFunctionFields {function rangeMinMax(min:number,max:number):any;}
 declare namespace Command {function mcFunction(functionId:string):void;}
+declare namespace Command {
+    function scoreboardFakePlayer(name:string):any;
+    enum ExecuteCompareChoice { Equal=0, Less=1, LessOrEqual=2, Greater=3, GreaterOrEqual=4 }
+    function executeIfScoreCompare(mode:ExecutePolarity,target:any,objective:string,operator:ExecuteCompareChoice,source:any,sourceObjective:string,next:any):any;
+}
