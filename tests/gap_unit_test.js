@@ -13,7 +13,7 @@ const code=fs.readFileSync(jsFile,'utf-8');
 const k={As:0,At:1,In:2,Positioned:3,Rotated:4,FacingPosition:5,FacingEntity:6,Align:7,Anchored:8,IfEntity:9,UnlessEntity:10,IfBlock:11,UnlessBlock:12,IfBlocks:13,UnlessBlocks:14,IfScoreMatches:15,UnlessScoreMatches:16,PositionedAs:17,RotatedAs:18,IfScoreCompare:19,UnlessScoreCompare:20};
 const kind={Raw:0,Say:1,Give:3,Effect:6,Tag:7,SetBlock:11,Execute:40,Other:99};
 const mode={Absolute:0,Relative:1,Local:2};
-const blocksStore=new Map(), commands=[], warnings=[];let scoreTestMode='unknown';let scoreboardProbeMode='disabled';let scoreboardData={'@s|score_main':3,'E2P_B|score_other':1};let here={x:4,y:-60,z:-76}, yaw=0, poseMode='unknown';
+const blocksStore=new Map(), commands=[], warnings=[], tags=new Set(), cleanedTags=[];let scoreTestMode='unknown';let scoreboardProbeMode='disabled';let scoreboardData={'@s|score_main':3,'E2P_B|score_other':1};let here={x:4,y:-60,z:-76}, yaw=0, poseMode='unknown';
 const point=(p)=>[p.x,p.y,p.z].map(Math.floor).join(':');
 const mkPos=(m,x,y,z)=>({x:{mode:m,value:x},y:{mode:m,value:y},z:{mode:m,value:z}});
 const abs=(x,y,z)=>mkPos(0,x,y,z),rel=(x,y,z)=>mkPos(1,x,y,z),local=(x,y,z)=>mkPos(2,x,y,z);
@@ -43,6 +43,19 @@ const ctx={Math,Axis:{X:0,Y:1,Z:2},TestForBlocksMask:{All:0,Masked:1},world:make
    createMinRange:(min)=>({hasMin:true,min,hasMax:false,max:0})},
   player:{position:()=>makePosition(here.x,here.y,here.z),getOrientation:()=>yaw,execute:(str)=>{
       commands.push(str);
+      if(str.startsWith('tag @s[y=~') && str.includes('] add ')) {
+          const m=str.match(/^tag @s\[y=~([0-9.]+),dy=0\] add ([^ ]+)$/);
+          if(m){const h=Number(m[1]);const max={standing:1.8,sneak:1.5,low:0.6}[poseMode]||0;
+              if(h<max) tags.add(m[2]); }
+          return poseMode==='alwaysTrue'; // deliberately untrustworthy boolean
+      }
+      if(str.startsWith('tellraw @s[tag=')) {
+          const sel=str.match(/^tellraw @s\[([^\]]+)\] /);
+          if(sel){const ok=sel[1].split(',').every(t=>{
+              const val=t.slice(4);return val.startsWith('!')?!tags.has(val.slice(1)):tags.has(val);
+          });if(ok){const m=str.match(/\"text\":\"([^\"]+)\"/);if(m)warnings.push(m[1]);}}
+          return false; // even delivery may return false in the mock
+      }
       if(str==='testfor @s' && poseMode!=='unknown')return true;
       if(str.startsWith('testfor @s[y=~')) {
         if(poseMode==='alwaysTrue')return true;
@@ -78,7 +91,7 @@ const ctx={Math,Axis:{X:0,Y:1,Z:2},TestForBlocksMask:{All:0,Masked:1},world:make
       return true;
   }},
   blocks:{blockByName:(n)=>n,testForBlock:(id,p)=>blocksStore.get(point(p))===(id.startsWith('minecraft:')?id:'minecraft:'+id),testForBlocks:()=>true},
-  MCFunctionPreview:{previewSay:(w)=>warnings.push(w),tryHandleQuery:()=>({handled:false}),observeCommand:()=>{}},
+  MCFunctionPreview:{previewSay:(w)=>warnings.push(w),tryHandleQuery:()=>({handled:false}),observeCommand:()=>{},createInternalTagScopeToken:()=> 'ABC123', createInternalTagName:(purpose,token)=>'_cbi_'+purpose+'_'+token,cleanupInternalTag:(t)=>{cleanedTags.push(t);tags.delete(t);}, previewEscapeJsonText:(w)=>w},
   MCFunctionPreviewBlockCommandSerializer:{tryCompile:()=>''},
   MCFunctionCompiler:{compileSelector:(selector)=>{
       const range=selector.scores[0].range;
@@ -90,7 +103,7 @@ const ctx={Math,Axis:{X:0,Y:1,Z:2},TestForBlocksMask:{All:0,Masked:1},world:make
 vm.createContext(ctx);vm.runInContext(code,ctx);
 const exe=ctx.MCFunctionExecutePreview.execute;
 let passed=0;
-function test(name,fn){commands.length=0;warnings.length=0;scoreTestMode='unknown';scoreboardProbeMode='disabled';poseMode='unknown';scoreboardData={'@s|score_main':3,'E2P_B|score_other':1};blocksStore.clear();here={x:4,y:-60,z:-76};yaw=0;blocksStore.set('5:-60:-76','minecraft:gold_block');fn();passed++;console.log('PASS',name);}
+function test(name,fn){commands.length=0;warnings.length=0;tags.clear();cleanedTags.length=0;scoreTestMode='unknown';scoreboardProbeMode='disabled';poseMode='unknown';scoreboardData={'@s|score_main':3,'E2P_B|score_other':1};blocksStore.clear();here={x:4,y:-60,z:-76};yaw=0;blocksStore.set('5:-60:-76','minecraft:gold_block');fn();passed++;console.log('PASS',name);}
 function expectCmd(v){assert(commands.some(x=>x.includes(v)),`Expected '${v}' in ${commands}`);}
 function blocked(){assert(commands.every(x=>x.startsWith('testfor ')), 'unexpected effect command: '+commands.join('|'));assert(warnings.length>0,'expected diagnostic');}
 test('E1 absolute positioned relative SETBLOCK',()=>{
@@ -205,21 +218,23 @@ const poseCandidate = ()=>run(set(local(0,0,4),'minecraft:gold_block'),[
   clause(k.Positioned,{position:rel(0,0.45,0)}),
   clause(k.Anchored,{anchor:0}),
   clause(k.Rotated,{rotation:{yaw:{mode:0,value:0},pitch:{mode:0,value:0}}})]);
-test('E5 pose STANDING candidate diagnostic only',()=>{
- poseMode='standing';exe(poseCandidate());blocked();
- assert(warnings.some(x=>x.includes('STANDING eye +1.62 block 4 -58 -72')));});
-test('E5 pose SNEAK candidate diagnostic only',()=>{
- poseMode='sneak';exe(poseCandidate());blocked();
- assert(warnings.some(x=>x.includes('SNEAK eye +1.27 block 4 -59 -72')));});
-test('E5 pose LOW candidate diagnostic only',()=>{
- poseMode='low';exe(poseCandidate());blocked();
- assert(warnings.some(x=>x.includes('LOW eye +0.4 block 4 -60 -72')));});
-test('E5 pose API all-true false-positive rejected',()=>{
- poseMode='alwaysTrue';exe(poseCandidate());blocked();
- assert(warnings.some(x=>x.includes('EXECUTE_POSE_UNKNOWN')));});
-test('E5 pose unavailable rejected',()=>{
- poseMode='unknown';exe(poseCandidate());blocked();
- assert(warnings.some(x=>x.includes('EXECUTE_POSE_UNKNOWN')));});
+function poseDiagnosticOnly(expected) {
+ assert(!commands.some(x=>x.startsWith('setblock ')), 'E5 calibration must not modify world');
+ assert(warnings.some(x=>x.includes(expected)), 'expected pose message '+expected+'; actual '+warnings.join('|'));
+ assert.equal(cleanedTags.length,3,'each scoped tag must be cleaned');
+ assert.equal(tags.size,0,'no internal tags leaked');
+ assert(!commands.some(x=>x.startsWith('testfor @s[y=')),'obsolete bool testfor used');
+}
+test('E5 native selector gates STANDING despite misleading execute booleans',()=>{
+ poseMode='standing';exe(poseCandidate());poseDiagnosticOnly('STANDING eye +1.62 block 4 -58 -72');});
+test('E5 native selector gates SNEAK despite misleading execute booleans',()=>{
+ poseMode='sneak';exe(poseCandidate());poseDiagnosticOnly('SNEAK eye +1.27 block 4 -59 -72');});
+test('E5 native selector gates LOW despite misleading execute booleans',()=>{
+ poseMode='low';exe(poseCandidate());poseDiagnosticOnly('LOW eye +0.4 block 4 -60 -72');});
+test('E5 impossible all-true boolean rejected by selector gate',()=>{
+ poseMode='alwaysTrue';exe(poseCandidate());poseDiagnosticOnly('EXECUTE_POSE_UNKNOWN');});
+test('E5 unclassified pose produces UNKNOWN only',()=>{
+ poseMode='unknown';exe(poseCandidate());poseDiagnosticOnly('EXECUTE_POSE_UNKNOWN');});
 test('E5 eye anchor overwritten by positioned: legacy feet behavior preserved',()=>{
  poseMode='standing';exe(run(set(local(0,0,4),'minecraft:gold_block'),[
   clause(k.Anchored,{anchor:0}),clause(k.Positioned,{position:rel(0,0.45,0)}),

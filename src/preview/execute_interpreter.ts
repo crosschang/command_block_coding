@@ -10,8 +10,9 @@
  * existence; E4: explicit rotation + local math; E5: facing position/anchor;
  * E6: dimension-neutral SAY plus global score predicates (no world access).
  * E3 limited read-only bounded score compare (fail-closed on ambiguous response);
- * E5 pose-irrelevant facing position can run; new E5 pose detector
- * links three hitbox tiers to player eye-height *candidate* coordinates.
+ * E5 pose-irrelevant facing position can run. E5 selector-gated diagnostics
+ * replace the unreliable PXT /testfor boolean pose detector, using the
+ * existing Preview internal-tag lifecycle.
  * Candidate values are NOT Native-parity calibrated: local eye-anchored
  * world changes continue to be blocked, with a diagnostic coordinate instead.
  * Unknown poses/entities, ambiguous score probes and cross-dimension effects
@@ -41,63 +42,70 @@ namespace MCFunctionExecutePreview {
     }
 
     /**
-     * E5 PLAYER-ONLY posture candidate; never part of the command AST.
-     * Native @s hitbox volume checks were observed for STANDING/SNEAK/LOW.
-     * Height numbers are calibration CANDIDATES, not Education-proven constants.
-     * LOW includes swimming/crawling/gliding; do not infer a unique animation.
+     * E5: candidate eye heights for diagnostic ONLY. These are not certified
+     * Minecraft Education runtime eye heights and MUST NOT be used for RUN.
+     * A low hitbox includes crawling/swimming/gliding and is not a unique pose.
      */
-    enum EyePoseTier { Unknown = 0, Standing = 1, Sneak = 2, Low = 3 }
     interface EyePoseSample {
-        tier: EyePoseTier;
+        label: string;
         eyeHeightCandidate: number;
     }
 
     /**
-     * Bedrock @s[y=~N,dy=0] intersects the executor's hitbox.
-     * PXT player.execute() bool has not yet been proven to represent the
-     * native result in Education: positive and negative controls are REQUIRED.
-     * Fail closed for inconsistent or rejected probes.
+     * PXT's player.execute() boolean did not agree with native hitbox tests.
+     * Never ask TypeScript to interpret that boolean as a pose result.
+     * Instead the GAME's selector filters decide which tellraw receives the
+     * independently calculated (and NOT YET CALIBRATED) eye coordinate.
+     *
+     * Two temporary tags capture HIGH and MID hits; one captures LOW.  Three
+     * disjoint combinations are selected by /tellraw; all other combinations
+     * are UNKNOWN. Every tag is scoped and cleaned up after this diagnostic.
+     * This is Preview-only, not Minecraft Command AST or .mcfunction output.
      */
-    function detectLocalPlayerEyePose(): EyePoseSample {
-        let unknown: EyePoseSample = {tier: EyePoseTier.Unknown, eyeHeightCandidate: 0};
-        // Avoid relying on an arbitrary entity's position: current player ONLY.
-        let exists = player.execute("testfor @s");
-        let impossible = player.execute("testfor @s[y=~8,dy=0]");
-        if (!exists || impossible) return unknown;
-        let high = player.execute("testfor @s[y=~1.5,dy=0]");
-        let mid = player.execute("testfor @s[y=~0.7,dy=0]");
-        let low = player.execute("testfor @s[y=~0.3,dy=0]");
-        // Upper tiers overlap the lower intervals; this is deliberate.
-        if (high && mid && low)
-            return {tier: EyePoseTier.Standing, eyeHeightCandidate: 1.62};
-        if (!high && mid && low)
-            return {tier: EyePoseTier.Sneak, eyeHeightCandidate: 1.27};
-        if (!high && !mid && low)
-            return {tier: EyePoseTier.Low, eyeHeightCandidate: 0.40};
-        return unknown;
+    function showPoseCandidates(standing: string, sneak: string, low: string): void {
+        let token = MCFunctionPreview.createInternalTagScopeToken();
+        let highTag = MCFunctionPreview.createInternalTagName("ph", token);
+        let midTag = MCFunctionPreview.createInternalTagName("pm", token);
+        let lowTag = MCFunctionPreview.createInternalTagName("pl", token);
+
+        // Do not inspect player.execute() return values. The native selectors
+        // control actual tag changes, just as in verified command-block tests.
+        // A failed command or absent match can only lead to UNKNOWN, not a
+        // fabricated STANDING/SNEAK/LOW match (unless the runtime itself lies
+        // about selector-based tag changes; test this in Education).
+        player.execute("tag @s[y=~1.5,dy=0] add " + highTag);
+        player.execute("tag @s[y=~0.7,dy=0] add " + midTag);
+        player.execute("tag @s[y=~0.3,dy=0] add " + lowTag);
+
+        sendPoseLine("@s[tag=" + highTag + ",tag=" + midTag + ",tag=" + lowTag + "]", standing);
+        sendPoseLine("@s[tag=!" + highTag + ",tag=" + midTag + ",tag=" + lowTag + "]", sneak);
+        sendPoseLine("@s[tag=!" + highTag + ",tag=!" + midTag + ",tag=" + lowTag + "]", low);
+
+        // Unknown (no valid LOW match OR inconsistent upper tiers).
+        let unknown = "INFO [EXECUTE_POSE_UNKNOWN] Hitbox selector result " +
+            "not classified. CALIBRATION ONLY; no RUN executed.";
+        sendPoseLine("@s[tag=!" + lowTag + "]", unknown);
+        sendPoseLine("@s[tag=" + highTag + ",tag=!" + midTag + "]", unknown);
+
+        MCFunctionPreview.cleanupInternalTag(highTag);
+        MCFunctionPreview.cleanupInternalTag(midTag);
+        MCFunctionPreview.cleanupInternalTag(lowTag);
     }
-    function eyePoseName(tier: EyePoseTier): string {
-        if (tier == EyePoseTier.Standing) return "STANDING";
-        if (tier == EyePoseTier.Sneak) return "SNEAK";
-        if (tier == EyePoseTier.Low) return "LOW";
-        return "UNKNOWN";
+
+    function sendPoseLine(target: string, message: string): void {
+        let escaped = MCFunctionPreview.previewEscapeJsonText("[Preview] " + message);
+        player.execute("tellraw " + target +
+            " {\"rawtext\":[{\"text\":\"" + escaped + "\"}]}");
     }
 
     /**
-     * Prototype eye-origin projection. Only tests simple known-@s branches;
-     * does NOT run the command or install any blocks. The pose-height lookup
-     * deliberately stays outside canonical registry/Compiler until calibrated.
+     * Project the same canonical RUN using one candidate height; do not mutate
+     * AST and do not execute RUN. The game gates the displayed candidate only
+     * *after* all three independent projections are available.
      */
-    function eyeAnchorLocalCandidate(cmd: MCFunctionAST.ExecuteCommand): void {
+    function eyeCandidateText(cmd: MCFunctionAST.ExecuteCommand,
+        sample: EyePoseSample): string {
         let run = cmd.run;
-        if (!run || run.kind != MCFunctionAST.CommandKind.SetBlock ||
-            !isLocal((<MCFunctionAST.SetBlockCommand>run).position)) {
-            advancedUnsupported("EXECUTE_EYE_HEIGHT_UNCALIBRATED"); return;
-        }
-        let sample = detectLocalPlayerEyePose();
-        if (sample.tier == EyePoseTier.Unknown) {
-            advancedUnsupported("EXECUTE_POSE_UNKNOWN"); return;
-        }
         let context = initialPosition();
         let d = initialDirection();
         let playerCamera = true;
@@ -109,7 +117,7 @@ namespace MCFunctionExecutePreview {
                 k == MCFunctionAST.ExecuteClauseKind.PositionedAs ||
                 k == MCFunctionAST.ExecuteClauseKind.RotatedAs) {
                 if (!isUnfilteredSelf(c.target)) {
-                    advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT"); return;
+                    advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT"); return undefined;
                 }
                 if (k == MCFunctionAST.ExecuteClauseKind.At ||
                     k == MCFunctionAST.ExecuteClauseKind.PositionedAs) context = initialPosition();
@@ -118,11 +126,9 @@ namespace MCFunctionExecutePreview {
                     d = initialDirection(); playerCamera = true;
                 }
             } else if (k == MCFunctionAST.ExecuteClauseKind.Positioned) {
-                // No ^ positions in calibration itself: need an exact origin.
                 let next = resolvePosition(c.position, context);
-                if (!next) {advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return;}
+                if (!next) {advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return undefined;}
                 context = next;
-                // Modern EXECUTE positioned resets anchor to FEET.
                 d.anchor = MCFunctionAST.EntityAnchor.Feet;
             } else if (k == MCFunctionAST.ExecuteClauseKind.Align) {
                 if (c.axes.indexOf("x") >= 0) context.x = Math.floor(context.x);
@@ -131,29 +137,25 @@ namespace MCFunctionExecutePreview {
             } else if (k == MCFunctionAST.ExecuteClauseKind.Anchored) {
                 d.anchor = c.anchor;
             } else if (k == MCFunctionAST.ExecuteClauseKind.Rotated) {
-                if (!c.rotation) {advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return;}
+                if (!c.rotation) {advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return undefined;}
                 applyRotation(c.rotation, d); playerCamera = false;
             } else if (k == MCFunctionAST.ExecuteClauseKind.FacingPosition) {
                 let to = resolvePosition(c.facing ? c.facing.position : undefined, context);
-                if (!to) {advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return;}
+                if (!to) {advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return undefined;}
                 let from = {x:context.x, y:context.y, z:context.z};
                 if (d.anchor == MCFunctionAST.EntityAnchor.Eyes)
                     from.y += sample.eyeHeightCandidate;
                 if (!setFacing(d, from, to)) {
-                    advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return;
+                    advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT");return undefined;
                 }
                 playerCamera = false;
             } else {
-                // Includes entity facing, conditional tests and dimension shifts.
-                // A calibration estimate cannot falsely claim these were run.
-                advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT"); return;
+                advancedUnsupported("EXECUTE_EYE_COMPLEX_CONTEXT"); return undefined;
             }
         }
         if (d.anchor != MCFunctionAST.EntityAnchor.Eyes) {
-            advancedUnsupported("EXECUTE_EYE_ANCHOR_RESET"); return;
+            advancedUnsupported("EXECUTE_EYE_ANCHOR_RESET"); return undefined;
         }
-        // Shift the local coordinate origin to candidate eyes, then project
-        // using the same player-camera/explicit-rotation E4 math as FEET.
         let dFeet: PreviewDirection = {yaw:d.yaw, pitch:d.pitch,
             yawKnown:d.yawKnown, pitchKnown:d.pitchKnown,
             anchor:MCFunctionAST.EntityAnchor.Feet};
@@ -162,12 +164,30 @@ namespace MCFunctionExecutePreview {
         let p = resolvePositionWithDirection(
             (<MCFunctionAST.SetBlockCommand>run).position,
             base, dFeet, playerCamera);
-        if (!p) {advancedUnsupported("EXECUTE_EYE_ROTATION_UNKNOWN");return;}
+        if (!p) {advancedUnsupported("EXECUTE_EYE_ROTATION_UNKNOWN");return undefined;}
         let x = Math.floor(p.x), y = Math.floor(p.y), z = Math.floor(p.z);
-        MCFunctionPreview.previewSay("INFO [EXECUTE_EYE_HEIGHT_CANDIDATE] " +
-            eyePoseName(sample.tier) + " eye +" + sample.eyeHeightCandidate +
+        return "INFO [EXECUTE_EYE_HEIGHT_CANDIDATE] " +
+            sample.label + " eye +" + sample.eyeHeightCandidate +
             " block " + x + " " + y + " " + z +
-            "; CALIBRATION ONLY. No RUN executed.");
+            "; CALIBRATION ONLY. No RUN executed.";
+    }
+
+    function eyeAnchorLocalCandidate(cmd: MCFunctionAST.ExecuteCommand): void {
+        let run = cmd.run;
+        if (!run || run.kind != MCFunctionAST.CommandKind.SetBlock ||
+            !isLocal((<MCFunctionAST.SetBlockCommand>run).position)) {
+            advancedUnsupported("EXECUTE_EYE_HEIGHT_UNCALIBRATED"); return;
+        }
+        let standing = eyeCandidateText(cmd,
+            {label: "STANDING", eyeHeightCandidate: 1.62});
+        if (!standing) return;
+        let sneak = eyeCandidateText(cmd,
+            {label: "SNEAK", eyeHeightCandidate: 1.27});
+        if (!sneak) return;
+        let low = eyeCandidateText(cmd,
+            {label: "LOW", eyeHeightCandidate: 0.40});
+        if (!low) return;
+        showPoseCandidates(standing, sneak, low);
     }
 
     /** Determine whether local RUN will consume a live eye anchor. */

@@ -22,7 +22,7 @@ declare const TestForBlocksMask: { Masked:number;All:number };
 declare const player: { position():Position;execute(command:string):boolean; getOrientation():number };
 declare const blocks: { blockByName(id:string):any;testForBlock(id:any,p:Position):boolean;testForBlocks(a:Position,b:Position,c:Position,mask:number):boolean };
 declare function world(x:number,y:number,z:number):Position;
-declare const MCFunctionPreview: { previewSay(m:string):void;tryHandleQuery(c:any):{handled:boolean};observeCommand(c:any,success:boolean):void };
+declare namespace MCFunctionPreview { function previewSay(m:string):void;function tryHandleQuery(c:any):{handled:boolean};function observeCommand(c:any,success:boolean):void; }
 declare const MCFunctionCompiler: { compileCommand(c:any):string; compilePlayerTarget(t:any):string; compileSelector(s:any):string };
 declare const MCFunctionPreviewBlockCommandSerializer: { tryCompile(c:any):string };
 declare namespace MCFunctionAST {
@@ -51,4 +51,11 @@ interface CompilerHelper { compileSelector(s:any):string; }
 declare namespace MCFunctionAST {
     enum ExecuteScoreComparison { Equal=0, Less=1, LessOrEqual=2, Greater=3, GreaterOrEqual=4 }
     function createMinMaxRange(minimum:number, maximum:number):any;
+}
+
+declare namespace MCFunctionPreview {
+function createInternalTagScopeToken():string;
+function createInternalTagName(purpose:string,token:string):string;
+function cleanupInternalTag(tag:string):void;
+function previewEscapeJsonText(text:string):string;
 }
