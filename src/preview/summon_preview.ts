@@ -47,6 +47,11 @@ namespace MCFunctionPreview {
     }
 
     function executeValidatedSummon(command: MCFunctionAST.SummonCommand): void {
+        // Native Script API route; retain legacy emulation when OFF.
+        if (MCFunctionCBX12Bridge.isEnabled()) {
+            MCFunctionCBX12Bridge.execute(command);
+            return;
+        }
         if (!needsOrientationEmulation(command)) {
             executeCompiled(command);
             return;
