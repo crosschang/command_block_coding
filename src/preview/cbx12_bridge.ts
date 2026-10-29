@@ -1,25 +1,37 @@
 /**
- * CBX12 opt-in Runtime Preview transport for Minecraft Education 26.32.
- * Actual repository source: crosschang/command_block_coding @ 0.0.89.
- * Canonical AST / Validator / Compiler and .mcfunction output stay unchanged.
+ * Backward-compatible CBX12 and opt-in CBXCORE runtime transport.
+ * Integration base: crosschang/command_block_coding @ pxt.json 0.0.91.
+ * Canonical AST / Validator / Compiler / .mcfunction output are unchanged.
  *
- * SCRIPT API BEHAVIOR PACK REQUIRED. Experimental solo-test-world use only.
- * Sending a command is not an acknowledgement of successful game execution.
+ * enable(): legacy CBX12 solo-world route; enableUnified(): CBXCORE route.
+ * Separate Script API pack required. Both are experimental and NOT for public use.
+ * Submitting a command is not proof of game execution or a world-state change.
  */
 namespace MCFunctionCBX12Bridge {
     const MAX_COMMAND_LENGTH = 300;
     const HEX_DIGITS = "0123456789abcdef";
     let enabled = false;
+    let unifiedTransport = false;
 
     /** Opt in at runtime. No in-game command is sent during initialization. */
     export function enable(): void {
         enabled = true;
+        unifiedTransport = false; // Existing callers always get their original CBX12 route.
     }
 
     /** Restore the original PXT Preview execution routes. */
     export function disable(): void {
         enabled = false;
+        unifiedTransport = false;
     }
+
+    /** CBX12 old path stays available; this opts in to the unified CBXCORE pack. */
+    export function enableUnified(): void {
+        enabled = true;
+        unifiedTransport = true;
+    }
+
+    export function isUnified(): boolean { return enabled && unifiedTransport; }
 
     export function isEnabled(): boolean {
         return enabled;
@@ -40,6 +52,10 @@ namespace MCFunctionCBX12Bridge {
 
     /** Diagnostic only. The behavior pack reports its own PING_OK message. */
     export function ping(): void {
+        if (isUnified()) {
+            MCFunctionCBXCore.ping();
+            return;
+        }
         let submitted = player.execute("scriptevent cbx12:ping MAKECODE");
         if (!submitted) {
             MCFunctionPreview.previewSay("WARNING [CBX12_PING_SEND] Check behavior pack.");
@@ -47,6 +63,10 @@ namespace MCFunctionCBX12Bridge {
     }
 
     function sendCompiled(compiled: string): void {
+        if (isUnified()) {
+            MCFunctionCBXCore.fireCompiled(compiled);
+            return;
+        }
         if (!compiled || compiled.length == 0) {
             MCFunctionPreview.previewSay("ERROR [CBX12_EMPTY] No compiled command.");
             return;

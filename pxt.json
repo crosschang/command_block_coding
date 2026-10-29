@@ -78,6 +78,7 @@
         "src/preview/block_command_serializer.ts",
         "src/preview/output_adapter.ts",
         "src/preview/cbx12_bridge.ts",
+        "src/preview/cbx_core_reply.ts",
         "src/preview/diagnostic_store.ts",
         "src/preview/query_adapter.ts",
         "src/preview/summon_preview.ts",
