@@ -668,6 +668,11 @@ namespace MCFunctionExecutePreview {
     }
     /** Called after definition validation; dispatches no modern EXECUTE via PXT. */
     export function execute(original: MCFunctionAST.ExecuteCommand): void {
+        // CBX12 opt-in: use the canonical Execute AST, not PXT emulation.
+        if (MCFunctionCBX12Bridge.isEnabled()) {
+            MCFunctionCBX12Bridge.execute(original);
+            return;
+        }
         let command = flatten(original);
         if (!command) {
             advancedUnsupported("EXECUTE_NESTED_LIMIT");
