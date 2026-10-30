@@ -122,6 +122,46 @@ namespace MCFunctionCBXCore {
         return submitted;
     }
 
+    /**
+     * Experimental wire-only selective escaping. PXT must never see a literal @
+     * in the scriptevent payload; the Behavior Pack decodes it before runCommand.
+     * Percent is escaped FIRST, so a pre-existing "%40" remains literal.
+     * Non-ASCII UTF-16 code units use %uXXXX to avoid lossy transports.
+     * Does not change AST/Compiler/.mcfunction content.
+     */
+    export function encodeSelective(line: string): string {
+        let out = "";
+        for (let i = 0; i < line.length; i++) {
+            let c = line.charAt(i);
+            let n = line.charCodeAt(i);
+            if (c === "%") out += "%25";
+            else if (c === "@") out += "%40";
+            else if (c === "|") out += "%7c";
+            else if (n < 32 || n > 126) {
+                out += "%u" + HEX_DIGITS.charAt(Math.floor(n / 4096)) +
+                    HEX_DIGITS.charAt(Math.floor(n / 256) % 16) +
+                    HEX_DIGITS.charAt(Math.floor(n / 16) % 16) +
+                    HEX_DIGITS.charAt(n % 16);
+            } else out += c;
+        }
+        return out;
+    }
+
+    export function fireCompiledSelective(compiled: string): boolean {
+        if (!validCommand(compiled)) {
+            MCFunctionPreview.previewSay("ERROR [CBXHY_BAD_COMMAND] invalid length/line");
+            return false;
+        }
+        let encoded = encodeSelective(compiled);
+        if (encoded.length > 1260) {
+            MCFunctionPreview.previewSay("ERROR [CBXHY_WIRE_TOO_LONG] length=" + encoded.length);
+            return false;
+        }
+        let submitted = player.execute("scriptevent cbxhy:select " + encoded);
+        if (!submitted) MCFunctionPreview.previewSay("WARNING [CBXHY_SEND_FAILED]");
+        return submitted;
+    }
+
     /** Canonical AST validation and compilation, then request an ACK-able receipt. */
     export function requestCommand(command: MCFunctionAST.CommandNode): Ticket {
         if (!command) return failedTicket("MISSING_AST");
@@ -130,6 +170,23 @@ namespace MCFunctionCBXCore {
         let line = MCFunctionCompiler.compileCommand(command);
         if (!validCommand(line)) return failedTicket("BAD_COMMAND");
         return submit(token(), "exec", hexEncode(line));
+    }
+
+    /**
+     * Experimental ACK-able request that shares the same AST/Validator/Compiler
+     * and CBX16 ticket/wait protocol, but avoids full 4x HEX inflation.
+     * Original requestRawCommand() remains untouched for A/B baseline.
+     */
+    export function requestRawCommandSelective(line: string): Ticket {
+        let ast = MCFunctionBlocks.createRawCommand(line);
+        let issues = MCFunctionValidator.validateCommand(ast);
+        if (MCFunctionValidator.hasError(issues)) return failedTicket("VALIDATION_ERROR");
+        let compiled = MCFunctionCompiler.compileCommand(ast);
+        if (!validCommand(compiled)) return failedTicket("BAD_COMMAND");
+        let encoded = encodeSelective(compiled);
+        // Reserve envelope space for token|exec_sel|, within the pack's cap.
+        if (encoded.length > 1200) return failedTicket("SELECTIVE_WIRE_TOO_LONG");
+        return submit(token(), "exec_sel", encoded);
     }
 
     /** User-authored text is retained as RawCommand AST before compilation. */

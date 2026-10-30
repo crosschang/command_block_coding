@@ -12,24 +12,37 @@ namespace MCFunctionCBX12Bridge {
     const HEX_DIGITS = "0123456789abcdef";
     let enabled = false;
     let unifiedTransport = false;
+    let selectiveTransport = false;
 
     /** Opt in at runtime. No in-game command is sent during initialization. */
     export function enable(): void {
         enabled = true;
         unifiedTransport = false; // Existing callers always get their original CBX12 route.
+        selectiveTransport = false;
     }
 
     /** Restore the original PXT Preview execution routes. */
     export function disable(): void {
         enabled = false;
         unifiedTransport = false;
+        selectiveTransport = false;
     }
 
     /** CBX12 old path stays available; this opts in to the unified CBXCORE pack. */
     export function enableUnified(): void {
         enabled = true;
         unifiedTransport = true;
+        selectiveTransport = false;
     }
+
+    /** EXPERIMENTAL: compiled AST line, only @/%/non-ASCII selectively escaped. */
+    export function enableSelective(): void {
+        enabled = true;
+        unifiedTransport = true;
+        selectiveTransport = true;
+    }
+
+    export function isSelective(): boolean { return isUnified() && selectiveTransport; }
 
     export function isUnified(): boolean { return enabled && unifiedTransport; }
 
@@ -64,7 +77,8 @@ namespace MCFunctionCBX12Bridge {
 
     function sendCompiled(compiled: string): void {
         if (isUnified()) {
-            MCFunctionCBXCore.fireCompiled(compiled);
+            if (isSelective()) MCFunctionCBXCore.fireCompiledSelective(compiled);
+            else MCFunctionCBXCore.fireCompiled(compiled);
             return;
         }
         if (!compiled || compiled.length == 0) {
