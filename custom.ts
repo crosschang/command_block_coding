@@ -14,8 +14,8 @@
 //% groups='["EXECUTE", "SCOREBOARD", "RIDE", "DIALOGUE", "PLAYANIMATION", "FOG", "DAMAGE", "EVENT", "CONTROLSCHEME", "AIMASSIST", "SETBLOCK", "FILL", "CLONE", "PARTICLE", "SOUND", "MUSIC", "ENCHANT", "TELL", "TIME", "WEATHER", "DIFFICULTY", "CAMERASHAKE", "CAMERA", "HUD", "INPUTPERMISSION", "SPAWNPOINT", "SETWORLDSPAWN", "GAMERULE", "TAG", "GAMEMODE", "KILL", "CLEAR", "SUMMON", "EFFECT", "TELEPORT", "GIVE", "SAY", "FUNCTION", "RAW COMMAND"]'
 namespace Command {
     function executeValidatedCommandNow(command: MCFunctionAST.CommandNode): void {
-        // CBX12 opt-in: preserve the existing Preview when the bridge is OFF.
-        if (MCFunctionCBX12Bridge.isEnabled()) {
+        // P1a shared route; no worker, queue, or extra delay is introduced.
+        if (MCFunctionRuntime.resolve(command) == MCFunctionRuntime.Route.Bridge) {
             MCFunctionCBX12Bridge.execute(command);
             return;
         }

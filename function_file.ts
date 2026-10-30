@@ -265,6 +265,25 @@ namespace FunctionFile {
         return collectingTickValues;
     }
 
+    /** Bridge route configuration is Preview metadata, not function/tick content. */
+    export function allowBridgeConfiguration(): boolean {
+        if (collectingTickValues) {
+            reportStructureError(
+                "BRIDGE_CONFIG_IN_TICK_JSON",
+                "PREVIEW bridge route must be at workspace top level, not inside tick.json."
+            );
+            return false;
+        }
+        if (collectingDefinitionActions || functionExecutionDepth > 0) {
+            reportStructureError(
+                "BRIDGE_CONFIG_IN_FUNCTION_FILE",
+                "PREVIEW bridge route must be at workspace top level, not inside mcfunction file."
+            );
+            return false;
+        }
+        return true;
+    }
+
     function addDefinitionIssueUnique(
         issue: MCFunctionValidator.ValidationIssue
     ): void {

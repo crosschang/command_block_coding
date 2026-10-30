@@ -37,6 +37,14 @@ namespace Command {
         //% block="eyes"
         Eyes = 1
     }
+    /** The same route as other Command AST blocks; legacy OFF stays unchanged. */
+    function executeC3ThroughRuntime(command: MCFunctionAST.ExecuteCommand): void {
+        if (MCFunctionRuntime.resolve(command) == MCFunctionRuntime.Route.Bridge) {
+            MCFunctionCBX12Bridge.execute(command);
+        } else {
+            MCFunctionExecutePreview.execute(command);
+        }
+    }
     //% group="EXECUTE" weight=125
     //% blockId=command_execute_unified
     //% block="EXECUTE clauses $clauses RUN $run"
@@ -67,13 +75,13 @@ namespace Command {
         if (!FunctionFile.allowCommandExecution()) return;
         let issues = MCFunctionValidator.validateCommand(cmd);
         if (FunctionFile.capturePreviewAction(issues, function () {
-            MCFunctionExecutePreview.execute(cmd);
+            executeC3ThroughRuntime(cmd);
         }, cmd)) return;
         if (MCFunctionValidator.hasError(issues)) {
             MCFunctionPreview.previewSay("ERROR [EXECUTE_VALIDATION] Invalid EXECUTE definition; RUN blocked.");
             return;
         }
-        MCFunctionExecutePreview.execute(cmd);
+        executeC3ThroughRuntime(cmd);
     }
     //% group="EXECUTE" weight=124
     //% blockId=mcfunction_execute_end

@@ -47,8 +47,8 @@ namespace MCFunctionPreview {
     }
 
     function executeValidatedSummon(command: MCFunctionAST.SummonCommand): void {
-        // Native Script API route; retain legacy emulation when OFF.
-        if (MCFunctionCBX12Bridge.isEnabled()) {
+        // Shared route; keep the proven advanced orientation adapter when OFF.
+        if (MCFunctionRuntime.resolve(command) == MCFunctionRuntime.Route.Bridge) {
             MCFunctionCBX12Bridge.execute(command);
             return;
         }
