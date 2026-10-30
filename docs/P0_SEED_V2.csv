@@ -1,0 +1,18 @@
+﻿command_variant,prior_evidence,proposed_auto_route,required_result,unverified_boundary,phase
+say,DIRECT PASS 2026-10-07,MAKECODE_DIRECT,none,기존 검증 형태 한정,P1
+summon basic,DIRECT PASS 2026-10-07,MAKECODE_DIRECT,none,버전/인수 범위 제한,P1
+summon rotation/facing,EMULATED PASS 2026-10-07,MAKECODE_ADAPTER;BRIDGE_CANDIDATE,none,브리지 원문 동등성 미확인,P1/P2
+execute modern chained,player.execute FAIL; CBX6 BRIDGE_PASS fixture,BRIDGE_COMMAND,none,구문/상태별 추가 검증,P1
+setblock states,DIRECT PASS with Preview serializer difference,MAKECODE_DIRECT_CONDITIONAL,none,블록 상태 구문 serializer 차이,P1
+playerwaypoints,NATIVE_COMMAND_PASS; BRIDGE_FAIL 2026-10-29,MAKECODE_VERIFIED_OR_DEFERRED,unknown,브리지 강제 전환 금지,P1
+/list,OUTPUT_HIDDEN; CBX10 EXEC_PASS,BRIDGE_QUERY,string-list,명단 BP->MakeCode 미검증; standalone AST 미구현,P2
+tag target list,SESSION_KNOWN; CBX10 API_READBACK_PASS empty,BRIDGE_QUERY_CANDIDATE,string-list,실제 다수 태그 / PXT 역송신 미검증,P2
+scoreboard objectives list,SESSION_KNOWN only,BRIDGE_QUERY_CANDIDATE,structured-list,전체 world objective getter 검증 필요,P2
+scoreboard players list,PARTIAL / SESSION_KNOWN,BRIDGE_QUERY_CANDIDATE,structured-list,fake player와 선택자 범위,P2
+gamerule no-arg list,OUTPUT_HIDDEN; CBX10 EXEC_PASS,BRIDGE_QUERY_CANDIDATE,structured-list,전체 목록 문자열/값 역송신 미검증,P2
+gamerule keepinventory query,OUTPUT_HIDDEN; CBX10 API_READBACK_PASS,MAKECODE_GETTER_OR_BRIDGE_QUERY,boolean,BP 채팅 readback이지 PXT 수신 아님,P2
+time query daytime,OUTPUT_HIDDEN old; API readback; MakeCode timeQuery path exists,MAKECODE_GETTER_IF_EQUIVALENT,number,live direct getter 경로 재확인; PXT 반환 분리,P2
+tickingarea list,OUTPUT_HIDDEN 2026-10-07,BRIDGE_QUERY_CANDIDATE,structured-list,API 기능 검증 필요,P2
+testfor target,OUTPUT_HIDDEN; CBX10 EXEC_PASS,BRIDGE_QUERY_CANDIDATE,boolean,실행 성공과 조건 truth 구분,P2
+FunctionFile mixed routes,3-command SELECTIVE/HEX execution PASS 2026-10-30,WHOLE_FUNCTION_BRIDGE_PREFERRED,execution-status,순서/완료 보장과 호출 문맥,P3
+tick.json preview,50ms loops.forever existing; dedicated tick test NOT TESTED,BP_TICK_SCHEDULER_TARGET,tick-status,실제 tick.json과 시점/주체 차이,P4
