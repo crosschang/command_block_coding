@@ -79,6 +79,7 @@
         "src/preview/output_adapter.ts",
         "src/preview/cbx12_bridge.ts",
         "src/preview/runtime_dispatcher.ts",
+        "src/preview/cbx_live_query.ts",
         "src/preview/cbx_core_reply.ts",
         "src/blocks/runtime_bridge_blocks.ts",
         "src/preview/diagnostic_store.ts",
