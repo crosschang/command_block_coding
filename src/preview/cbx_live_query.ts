@@ -1,9 +1,9 @@
 /**
- * P2b FAST: nonblocking live readback for Minecraft Education MakeCode.
+ * P2b V4 HUFF: nonblocking live readback for Minecraft Education MakeCode.
  * This is Preview-only runtime metadata, NEVER a Minecraft Command AST node.
- * P2b tag readback was observed in-game; FAST codec requires new game verification.
+ * P2b FAST cbxq3 is in-game PASS; this V4 codec needs separate game verification.
  *
- * V3 wire cbxq3; requires P2b FAST lab pack (not old cbxq2 pack).
+ * V4 wire cbxq4; requires P2b FAST lab pack (not old cbxq2 pack).
  * Fast64 alphabet, ASCII7, full UTF-16; scalar numbers/booleans have dedicated wire.
  * Two-phase contract (no worker / loops.pause / busy wait):
  *   ticket = request(kind, page);
@@ -24,6 +24,15 @@ namespace MCFunctionLiveQuery {
     let probeCalls = 0;
     // The compact 64-symbol alphabet covers normal ID, objective, tag and user names.
     const FAST_ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789_-ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    // P2b V4: static Huffman/trigram token tree. Data is mirrored in the pack.
+    // No runtime network request, worker, or file writes are involved.
+    const HUFF_TOKENS: string[] = ["minecraft:","minecraft","objective","_money","player","_test","admin","score","world","_dev","_one","fake","test","cbx","tag"," ","-",".","/","0","1","2","3","4","5","6","7","8","9",":","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","_","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","<ESC>"];
+    const HUFF_ZERO: number[] = [1,2,3,55,5,6,-1,8,15,29,11,145,13,54,-1,146,17,18,19,34,-1,164,58,-1,25,150,27,28,-1,30,31,52,33,-1,-1,60,135,138,39,-1,47,76,142,44,45,46,-1,48,49,151,51,-1,-1,-1,-1,56,-1,-1,-1,-1,61,62,63,64,-1,-1,67,-1,-1,70,71,-1,-1,74,-1,-1,77,78,-1,-1,81,-1,-1,84,-1,165,87,-1,-1,90,91,92,-1,-1,95,-1,-1,98,99,-1,-1,102,-1,-1,105,106,107,108,-1,-1,111,-1,-1,114,115,-1,-1,118,-1,-1,121,122,123,-1,-1,126,-1,-1,129,130,-1,-1,133,-1,-1,158,-1,-1,139,-1,-1,-1,-1,-1,-1,-1,147,-1,-1,-1,-1,-1,153,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+    const HUFF_ONE: number[] = [7,35,24,4,141,162,-1,40,9,10,159,12,163,14,-1,16,21,155,148,20,-1,22,23,-1,152,26,59,57,-1,137,144,32,53,-1,-1,36,37,38,83,-1,41,42,43,140,161,65,-1,69,66,50,149,-1,-1,-1,-1,160,-1,-1,-1,-1,104,89,85,166,-1,-1,68,-1,-1,73,72,-1,-1,75,-1,-1,80,79,-1,-1,82,-1,-1,156,-1,86,88,-1,-1,97,94,93,-1,-1,96,-1,-1,101,100,-1,-1,103,-1,-1,120,113,110,109,-1,-1,112,-1,-1,117,116,-1,-1,119,-1,-1,128,125,124,-1,-1,127,-1,-1,132,131,-1,-1,134,-1,-1,136,-1,-1,143,-1,-1,-1,-1,-1,-1,-1,154,-1,-1,-1,-1,-1,157,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1];
+    const HUFF_SYMBOL: number[] = [-1,-1,-1,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,2,-1,-1,3,-1,-1,-1,-1,4,-1,-1,-1,-1,5,6,-1,-1,-1,-1,7,-1,-1,-1,-1,-1,-1,8,-1,-1,-1,-1,9,10,11,12,-1,13,14,15,16,-1,-1,-1,-1,17,18,-1,19,20,-1,-1,21,22,-1,23,24,-1,-1,25,26,-1,27,28,-1,29,-1,-1,30,31,-1,-1,-1,32,33,-1,34,35,-1,-1,36,37,-1,38,39,-1,-1,-1,-1,40,41,-1,42,43,-1,-1,44,45,-1,46,47,-1,-1,-1,48,49,-1,50,51,-1,-1,52,53,-1,54,55,-1,56,57,-1,58,59,60,61,62,63,64,-1,65,66,67,68,69,-1,70,71,72,73,74,75,76,77,78,79,80,81,82,83];
+    const HUFF_ESCAPE_INDEX = 83;
+    const MAX_HUFF_BITS = 768;
+
 
     export enum Kind {
         //% block="online players (/list)"
@@ -88,7 +97,7 @@ namespace MCFunctionLiveQuery {
     function sourceToken(): string {
         seq++;
         if (seq > 9999) seq = 1;
-        return "cbxq3" + gameplay.timeQuery(TimeQuery.GameTime) + "x" + seq + "x" +
+        return "cbxq4" + gameplay.timeQuery(TimeQuery.GameTime) + "x" + seq + "x" +
             (Math.floor(Math.random() * 900000) + 100000);
     }
     function validPage(page: number): boolean {
@@ -126,7 +135,7 @@ namespace MCFunctionLiveQuery {
         return sum;
     }
     function ack(ticket: Ticket): void {
-        player.execute("scriptevent cbxq3:ack " + ticket.token);
+        player.execute("scriptevent cbxq4:ack " + ticket.token);
         ticket.closed = true;
     }
 
@@ -144,7 +153,7 @@ namespace MCFunctionLiveQuery {
     //% block="LIVE QUERY ping behavior pack"
     //% weight=95
     export function ping(): boolean {
-        return player.execute("scriptevent cbxq3:ping MAKECODE");
+        return player.execute("scriptevent cbxq4:ping MAKECODE");
     }
 
     /** Requests a snapshot. No read or waiting occurs in this call. */
@@ -160,7 +169,7 @@ namespace MCFunctionLiveQuery {
             return new Ticket("", kind, page, false, "SCALAR_PAGE_NOT_ZERO");
         }
         let token = sourceToken();
-        let sent = player.execute("scriptevent cbxq3:req " + token + "|" + op(kind) + "|" + page);
+        let sent = player.execute("scriptevent cbxq4:req " + token + "|" + op(kind) + "|" + page);
         return new Ticket(token, kind, page, sent, sent ? "" : "SEND_FAILED");
     }
 
@@ -241,22 +250,62 @@ namespace MCFunctionLiveQuery {
         for (let index = 0; index < count; index++) {
             let len = bits(base + "l" + index + "x", 6);
             let mode = bits(base + "m" + index + "x", 2);
-            if (len > MAX_UNITS || mode > 2) {
+            if (len > MAX_UNITS || mode > 3) {
                 result.status = "INVALID_PACKET_FORMAT";
                 return completed(result, ticket, started);
             }
-            let width = mode == 0 ? 6 : (mode == 1 ? 7 : 16);
             let s = "";
-            for (let pos = 0; pos < len; pos++) {
-                let n = bits(base + "c" + index + "x" + pos + "x", width);
-                if (mode == 0) {
-                    if (n >= FAST_ALPHABET.length) {
-                        result.status = "INVALID_FAST_SYMBOL";
+            if (mode == 3) {
+                // Decode a prefix-code token stream until exactly len UTF16 units.
+                // Each bit is still one testfor; there is no MakeCode polling.
+                let cursor = 0;
+                let state = 0;
+                while (s.length < len && cursor < MAX_HUFF_BITS) {
+                    let oneBit = probe(base + "c" + index + "x" + cursor + "x");
+                    cursor++;
+                    state = oneBit ? HUFF_ONE[state] : HUFF_ZERO[state];
+                    if (state < 0) {
+                        result.status = "INVALID_HUFF_TREE";
                         return completed(result, ticket, started);
                     }
-                    s += FAST_ALPHABET.charAt(n);
-                } else {
-                    s += String.fromCharCode(n);
+                    let value = HUFF_SYMBOL[state];
+                    if (value >= 0) {
+                        if (value == HUFF_ESCAPE_INDEX) {
+                            let unit = 0;
+                            let power = 1;
+                            for (let bit = 0; bit < 16; bit++) {
+                                if (probe(base + "c" + index + "x" + cursor + "x")) unit += power;
+                                cursor++;
+                                power *= 2;
+                            }
+                            s += String.fromCharCode(unit);
+                        } else {
+                            s += HUFF_TOKENS[value];
+                        }
+                        if (s.length > len) {
+                            result.status = "INVALID_HUFF_LENGTH";
+                            return completed(result, ticket, started);
+                        }
+                        state = 0;
+                    }
+                }
+                if (s.length != len || state != 0) {
+                    result.status = "INVALID_HUFF_STREAM";
+                    return completed(result, ticket, started);
+                }
+            } else {
+                let width = mode == 0 ? 6 : (mode == 1 ? 7 : 16);
+                for (let pos = 0; pos < len; pos++) {
+                    let n = bits(base + "c" + index + "x" + pos + "x", width);
+                    if (mode == 0) {
+                        if (n >= FAST_ALPHABET.length) {
+                            result.status = "INVALID_FAST_SYMBOL";
+                            return completed(result, ticket, started);
+                        }
+                        s += FAST_ALPHABET.charAt(n);
+                    } else {
+                        s += String.fromCharCode(n);
+                    }
                 }
             }
             result.items.push(s);
@@ -282,7 +331,7 @@ namespace MCFunctionLiveQuery {
     //% weight=80
     export function cancel(ticket: Ticket): void {
         if (!ticket || ticket.closed || !ticket.sent) return;
-        player.execute("scriptevent cbxq3:cancel " + ticket.token);
+        player.execute("scriptevent cbxq4:cancel " + ticket.token);
         ticket.closed = true;
     }
     //% blockId=cbxq2_item
