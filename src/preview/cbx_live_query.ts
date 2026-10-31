@@ -1,14 +1,16 @@
 /**
- * P2b nonblocking live readback for Minecraft Education MakeCode.
+ * P2b FAST: nonblocking live readback for Minecraft Education MakeCode.
  * This is Preview-only runtime metadata, NEVER a Minecraft Command AST node.
- * P2a proved chat-level getters; P2b's variable readback remains unverified in-game.
+ * P2b tag readback was observed in-game; FAST codec requires new game verification.
  *
+ * V3 wire cbxq3; requires P2b FAST lab pack (not old cbxq2 pack).
+ * Fast64 alphabet, ASCII7, full UTF-16; scalar numbers/booleans have dedicated wire.
  * Two-phase contract (no worker / loops.pause / busy wait):
  *   ticket = request(kind, page);
  *   // In a later player.onChat callback or other user event:
  *   result = tryRead(ticket);
  * Readback is explicitly bounded to two UTF-16 strings of <=32 code units each.
- * It relies on existing CBXCORE-calibrated player.execute("testfor @s[tag=...]")
+ * It relies on calibrated player.execute("testfor @s[tag=...]")
  * boolean behavior, NOT direct text extraction from game chat.
  */
 //% color=#477D95 weight=92 icon="\uf002" block="LIVE QUERY"
@@ -19,6 +21,9 @@ namespace MCFunctionLiveQuery {
     const MAX_WAIT_TICKS = 1200;
     let seq = 0;
     let calibrated = false;
+    let probeCalls = 0;
+    // The compact 64-symbol alphabet covers normal ID, objective, tag and user names.
+    const FAST_ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789_-ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     export enum Kind {
         //% block="online players (/list)"
@@ -61,6 +66,8 @@ namespace MCFunctionLiveQuery {
         items: string[];
         numberValue: number;
         booleanValue: boolean;
+        probeCalls: number;
+        readTicks: number;
         kind: Kind;
         page: number;
         constructor(kind: Kind, page: number) {
@@ -73,13 +80,15 @@ namespace MCFunctionLiveQuery {
             this.items = [];
             this.numberValue = 0;
             this.booleanValue = false;
+            this.probeCalls = 0;
+            this.readTicks = 0;
         }
     }
 
     function sourceToken(): string {
         seq++;
         if (seq > 9999) seq = 1;
-        return "cbxq2" + gameplay.timeQuery(TimeQuery.GameTime) + "x" + seq + "x" +
+        return "cbxq3" + gameplay.timeQuery(TimeQuery.GameTime) + "x" + seq + "x" +
             (Math.floor(Math.random() * 900000) + 100000);
     }
     function validPage(page: number): boolean {
@@ -95,6 +104,7 @@ namespace MCFunctionLiveQuery {
         return "";
     }
     function probe(tag: string): boolean {
+        probeCalls++;
         return player.execute("testfor @s[tag=" + tag + "]");
     }
     function bits(prefix: string, width: number): number {
@@ -116,7 +126,7 @@ namespace MCFunctionLiveQuery {
         return sum;
     }
     function ack(ticket: Ticket): void {
-        player.execute("scriptevent cbxq2:ack " + ticket.token);
+        player.execute("scriptevent cbxq3:ack " + ticket.token);
         ticket.closed = true;
     }
 
@@ -134,7 +144,7 @@ namespace MCFunctionLiveQuery {
     //% block="LIVE QUERY ping behavior pack"
     //% weight=95
     export function ping(): boolean {
-        return player.execute("scriptevent cbxq2:ping MAKECODE");
+        return player.execute("scriptevent cbxq3:ping MAKECODE");
     }
 
     /** Requests a snapshot. No read or waiting occurs in this call. */
@@ -150,8 +160,16 @@ namespace MCFunctionLiveQuery {
             return new Ticket("", kind, page, false, "SCALAR_PAGE_NOT_ZERO");
         }
         let token = sourceToken();
-        let sent = player.execute("scriptevent cbxq2:req " + token + "|" + op(kind) + "|" + page);
+        let sent = player.execute("scriptevent cbxq3:req " + token + "|" + op(kind) + "|" + page);
         return new Ticket(token, kind, page, sent, sent ? "" : "SEND_FAILED");
+    }
+
+    /** One bounded read; the value is ready before this is called. */
+    function completed(result: Result, ticket: Ticket, started: number): Result {
+        ack(ticket);
+        result.probeCalls = probeCalls;
+        result.readTicks = gameplay.timeQuery(TimeQuery.GameTime) - started;
+        return result;
     }
 
     /** Reads only an ALREADY READY snapshot. No poll, pause, or background worker. */
@@ -164,7 +182,11 @@ namespace MCFunctionLiveQuery {
         if (ticket.closed) { result.status = "ALREADY_CLOSED"; return result; }
         if (!ticket.sent) { result.status = ticket.failure || "NOT_SENT"; return result; }
         if (!calibrated) { result.status = "NOT_CALIBRATED"; return result; }
+        probeCalls = 0;
+        let started = gameplay.timeQuery(TimeQuery.GameTime);
         if (!probe(ticket.token + "_r")) {
+            result.probeCalls = probeCalls;
+            result.readTicks = gameplay.timeQuery(TimeQuery.GameTime) - started;
             if (gameplay.timeQuery(TimeQuery.GameTime) - ticket.started > MAX_WAIT_TICKS) {
                 result.status = "EXPIRED";
                 cancel(ticket);
@@ -174,83 +196,93 @@ namespace MCFunctionLiveQuery {
         result.ready = true;
         if (probe(ticket.token + "_e")) {
             result.status = "SERVER_ERROR";
-            ack(ticket);
-            return result;
+            return completed(result, ticket, started);
         }
         let base = ticket.token + "_";
+
+        // Direct scalar packets avoid decoding "1000" or "false" as UTF-16.
+        if (ticket.kind == Kind.Daytime) {
+            let time = bits(base + "v", 15);
+            let check = bits(base + "h", 8);
+            if (time > 24000 || check != ((time * 31 + 73) % 256)) {
+                result.status = "INVALID_TIME_PACKET";
+                return completed(result, ticket, started);
+            }
+            result.total = 1;
+            result.numberValue = time;
+            result.items.push("" + time);
+            result.status = "OK";
+            result.ok = true;
+            return completed(result, ticket, started);
+        }
+        if (ticket.kind == Kind.KeepInventory) {
+            let yes = probe(base + "v");
+            let no = probe(base + "z");
+            if (yes == no) {
+                result.status = "INVALID_BOOLEAN_PACKET";
+                return completed(result, ticket, started);
+            }
+            result.total = 1;
+            result.booleanValue = yes;
+            result.items.push(yes ? "true" : "false");
+            result.status = "OK";
+            result.ok = true;
+            return completed(result, ticket, started);
+        }
+
         let count = bits(base + "n", 2);
         let total = bits(base + "t", 12);
         if (count > PAGE_SIZE || total > 4095 || count > total ||
             (ticket.page * PAGE_SIZE >= total && count != 0)) {
             result.status = "INVALID_PACKET_COUNT";
-            ack(ticket);
-            return result;
+            return completed(result, ticket, started);
         }
         result.total = total;
         for (let index = 0; index < count; index++) {
             let len = bits(base + "l" + index + "x", 6);
-            if (len > MAX_UNITS) {
-                result.status = "INVALID_PACKET_LENGTH";
-                ack(ticket);
-                return result;
+            let mode = bits(base + "m" + index + "x", 2);
+            if (len > MAX_UNITS || mode > 2) {
+                result.status = "INVALID_PACKET_FORMAT";
+                return completed(result, ticket, started);
             }
+            let width = mode == 0 ? 6 : (mode == 1 ? 7 : 16);
             let s = "";
             for (let pos = 0; pos < len; pos++) {
-                let cp = base + "c" + index + "x" + pos + "x";
-                let code = bits(cp + "b", 8);
-                if (probe(cp + "w")) code += bits(cp + "h", 8) * 256;
-                s += String.fromCharCode(code);
+                let n = bits(base + "c" + index + "x" + pos + "x", width);
+                if (mode == 0) {
+                    if (n >= FAST_ALPHABET.length) {
+                        result.status = "INVALID_FAST_SYMBOL";
+                        return completed(result, ticket, started);
+                    }
+                    s += FAST_ALPHABET.charAt(n);
+                } else {
+                    s += String.fromCharCode(n);
+                }
             }
             result.items.push(s);
         }
         if (bits(base + "h", 8) != checksum(result.items, total, ticket.page)) {
             result.status = "INVALID_PACKET_CHECKSUM";
-            ack(ticket);
-            return result;
+            return completed(result, ticket, started);
         }
         if (probe(base + "o")) {
             if (count != 0 || total == 0 || ticket.page * PAGE_SIZE < total) {
                 result.status = "INVALID_PACKET_RANGE";
             } else {
                 result.status = "PAGE_OUT_OF_RANGE";
-                result.ok = false;
             }
-            ack(ticket);
-            return result;
+            return completed(result, ticket, started);
         }
-        if ((ticket.kind == Kind.Daytime || ticket.kind == Kind.KeepInventory) && count != 1) {
-            result.status = "INVALID_SCALAR_PACKET";
-            ack(ticket);
-            return result;
-        }
-        if (ticket.kind == Kind.Daytime) {
-            let value = result.items[0];
-            let num = parseInt(value, 10);
-            if ("" + num != value || num < 0 || num > 24000) {
-                result.status = "INVALID_TIME_VALUE";
-                ack(ticket);
-                return result;
-            }
-            result.numberValue = num;
-        } else if (ticket.kind == Kind.KeepInventory) {
-            if (result.items[0] != "true" && result.items[0] != "false") {
-                result.status = "INVALID_BOOL_VALUE";
-                ack(ticket);
-                return result;
-            }
-            result.booleanValue = result.items[0] == "true";
-        }
-        result.ok = true;
         result.status = "OK";
-        ack(ticket);
-        return result;
+        result.ok = true;
+        return completed(result, ticket, started);
     }
     //% blockId=cbxq2_cancel
     //% block="LIVE QUERY cancel $ticket"
     //% weight=80
     export function cancel(ticket: Ticket): void {
         if (!ticket || ticket.closed || !ticket.sent) return;
-        player.execute("scriptevent cbxq2:cancel " + ticket.token);
+        player.execute("scriptevent cbxq3:cancel " + ticket.token);
         ticket.closed = true;
     }
     //% blockId=cbxq2_item
