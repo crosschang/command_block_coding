@@ -39,6 +39,8 @@ namespace Command {
     }
     /** The same route as other Command AST blocks; legacy OFF stays unchanged. */
     function executeC3ThroughRuntime(command: MCFunctionAST.ExecuteCommand): void {
+        // P2c-3: preserve existing Execute AST.
+        if (MCFunctionTagListDirect.tryDisplay(command)) return;
         if (MCFunctionRuntime.resolve(command) == MCFunctionRuntime.Route.Bridge) {
             MCFunctionCBX12Bridge.execute(command);
         } else {
