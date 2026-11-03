@@ -21,6 +21,13 @@ namespace MCFunctionTagListDirect {
     const MAX_CHUNKS = 16;
     let nextSequence = 0;
     let packNoticeShown = false;
+    let summaryOutput = false;
+
+    /** Preview presentation only: canonical AST and .mcfunction are unchanged. */
+    export function setSummaryOutput(enabled: boolean): void {
+        summaryOutput = enabled;
+    }
+
 
     /** Pure AST test. Raw commands are deliberately opaque and not guessed. */
     export function isTagListLeaf(command: MCFunctionAST.CommandNode): boolean {
@@ -91,10 +98,15 @@ namespace MCFunctionTagListDirect {
         nextSequence++;
         if (nextSequence > 99999999) nextSequence = 1;
         let sequence = "q" + nextSequence;
+        // Request-specific mode is in the ScriptEvent ID, not the AST or
+        // request token. Both old DETAIL and the opt-in SUMMARY are supported.
+        let onceEvent = summaryOutput ? "cbxtb:once_summary" : "cbxtb:once";
+        let chunkEvent = summaryOutput ? "cbxtb:chunk_summary" : "cbxtb:chunk";
+        let commitEvent = summaryOutput ? "cbxtb:commit_summary" : "cbxtb:commit";
         if (encoded.length <= MAX_INLINE_HEX) {
             // One MakeCode call instead of chunk+commit. No automatic retry:
             // a retry could duplicate a query after an ambiguous submission.
-            if (!player.execute("scriptevent cbxtb:once " + sequence + " " + encoded)) {
+            if (!player.execute("scriptevent " + onceEvent + " " + sequence + " " + encoded)) {
                 MCFunctionPreview.previewSay("ERROR [CBXTB_SINGLE_SEND] Query not submitted.");
                 return;
             }
@@ -102,14 +114,14 @@ namespace MCFunctionTagListDirect {
             for (let i = 0; i < chunks; i++) {
                 let part = encoded.substr(i * HEX_CHUNK_LENGTH, HEX_CHUNK_LENGTH);
                 let submitted = player.execute(
-                    "scriptevent cbxtb:chunk " + sequence + " " + i + " " + chunks + " " + part
+                    "scriptevent " + chunkEvent + " " + sequence + " " + i + " " + chunks + " " + part
                 );
                 if (!submitted) {
                     MCFunctionPreview.previewSay("ERROR [CBXTB_CHUNK_SEND] Failed part " + (i + 1) + "/" + chunks);
                     return;
                 }
             }
-            let committed = player.execute("scriptevent cbxtb:commit " + sequence);
+            let committed = player.execute("scriptevent " + commitEvent + " " + sequence);
             if (!committed) {
                 MCFunctionPreview.previewSay("ERROR [CBXTB_COMMIT_SEND] Query commit failed.");
                 return;
