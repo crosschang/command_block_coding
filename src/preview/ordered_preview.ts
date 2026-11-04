@@ -54,7 +54,7 @@ namespace MCFunctionOrderedPreview {
     const ACK_DONE = "cbxo2d_done_";
     const ACK_ERROR = "cbxo2d_error_";
     const ACK_POLL_PAUSE = 100;
-    const ACK_POLL_LIMIT = 12;
+    const ACK_POLL_LIMIT = 13; // first quick poll + 12 standard fallback polls
 
     export function setReceiptMode(value: boolean): void {
         receiptMode = value;
@@ -169,7 +169,9 @@ namespace MCFunctionOrderedPreview {
 
     function waitReceipt(name: string, id: string): AckStatus {
         for (let attempt = 0; attempt < ACK_POLL_LIMIT; attempt++) {
-            loops.pause(ACK_POLL_PAUSE);
+            // Try the first receipt sooner without weakening the previous
+            // timeout policy. If a receipt is not ready, fall back to 100ms.
+            loops.pause(attempt == 0 ? 1 : ACK_POLL_PAUSE);
             let status = readAck(id);
             if (status == AckStatus.Submitted) continue;
             if (ackTransport == AckTransport.Scoreboard) {
