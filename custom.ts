@@ -146,7 +146,7 @@ namespace Command {
             executeValidatedCommandNow(command);
         };
 
-        if (FunctionFile.capturePreviewAction(issues, action)) {
+        if (FunctionFile.capturePreviewAction(issues, action, command)) {
             return;
         }
 

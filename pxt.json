@@ -1,6 +1,6 @@
 {
     "name": "command_block_coding",
-    "version": "0.0.98",
+    "version": "0.0.99",
     "description": "Minecraft Education command blocks for MakeCode",
     "dependencies": {
         "core": "*",
@@ -80,6 +80,7 @@
         "src/preview/cbx12_bridge.ts",
         "src/preview/runtime_dispatcher.ts",
         "src/preview/cbx_tag_list_direct.ts",
+        "src/preview/ordered_preview.ts",
         "src/preview/cbx_live_query.ts",
         "src/preview/cbx_core_reply.ts",
         "src/blocks/runtime_bridge_blocks.ts",

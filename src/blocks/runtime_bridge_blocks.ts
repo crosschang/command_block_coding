@@ -36,6 +36,22 @@ namespace RuntimeBridge {
         } else MCFunctionPreview.previewSay("ERROR [BRIDGE_MODE_UNKNOWN] Unsupported Preview bridge route.");
     }
 
+    /** Explicit opt-in. Legacy Preview and other bridges remain unchanged. */
+    export enum OrderedMode {
+        //% block="original Preview (ordered batching OFF)"
+        Off = 0,
+        //% block="FunctionFile ordered batch (pack required, experimental)"
+        On = 1
+    }
+    //% blockId=mcfunction_ordered_preview_mode
+    //% block="PREVIEW FunctionFile order $mode"
+    //% topblock=true
+    //% weight=63
+    export function orderedMode(mode: OrderedMode): void {
+        if (!FunctionFile.allowBridgeConfiguration()) return;
+        MCFunctionOrderedPreview.setEnabled(mode == OrderedMode.On);
+    }
+
     /** TAG LIST display mode affects Preview only, not the command AST. */
     export enum TagListOutputMode {
         //% block="DETAIL (all targets and tags)"

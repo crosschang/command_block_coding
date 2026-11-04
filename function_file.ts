@@ -33,6 +33,8 @@ namespace FunctionFile {
     let functionNames: string[] = [];
     let functionHandlers: (() => void)[] = [];
     let functionValid: boolean[] = [];
+    let functionCommands: MCFunctionAST.CommandNode[][] = [];
+    let functionPlanComplete: boolean[] = [];
     let registeredChatFunctionNames: string[] = [];
     let registeredChatDiagnosticNames: string[] = [];
 
@@ -51,6 +53,8 @@ namespace FunctionFile {
     // Command.* calls append validated replay actions here instead of touching the world.
     let collectingDefinitionActions = false;
     let definitionActions: (() => void)[] = [];
+    let definitionCommands: MCFunctionAST.CommandNode[] = [];
+    let definitionPlanComplete = true;
     let definitionIssues: MCFunctionValidator.ValidationIssue[] = [];
     let definitionStructureError = false;
     // True only if an actual GAMERULE LIST command was captured by a valid function.
@@ -88,7 +92,7 @@ namespace FunctionFile {
                     : "mcfunction name cbi_rules is reserved for the Gamerule Registry viewer."
             }];
 
-            register(name, createPreparedHandler([]), false);
+            register(name, createPreparedHandler([]), false, [], false);
             MCFunctionDiagnostics.replaceDefinitionIssues(name, reservedIssues);
             reportDefinitionComplete(name, reservedIssues, false);
             return;
@@ -127,6 +131,12 @@ namespace FunctionFile {
                     return true;
                 }
 
+                if (MCFunctionOrderedPreview.isEnabled()) {
+                    let ordered = buildOrderedPlan(name);
+                    if (ordered) MCFunctionOrderedPreview.submit(name, ordered);
+                    // Never silently fall back to the legacy handler.
+                    return true;
+                }
                 invokePreparedHandler(functionHandlers[i]);
                 return true;
             }
@@ -249,6 +259,8 @@ namespace FunctionFile {
                 }
             }
             definitionActions.push(action);
+            if (command) definitionCommands.push(command);
+            else definitionPlanComplete = false;
             // Metadata follows the captured command AST, not the presence of a
             // detached reporter or source-code text. No Minecraft state is read.
             if (command && command.kind == MCFunctionAST.CommandKind.Gamerule &&
@@ -307,12 +319,16 @@ namespace FunctionFile {
         // implementation is reused later by another project-level validation pass.
         let previousCollecting = collectingDefinitionActions;
         let previousActions = definitionActions;
+        let previousCommands = definitionCommands;
+        let previousPlanComplete = definitionPlanComplete;
         let previousIssues = definitionIssues;
         let previousStructureError = definitionStructureError;
         let previousHasGameruleList = definitionHasGameruleList;
 
         collectingDefinitionActions = true;
         definitionActions = [];
+        definitionCommands = [];
+        definitionPlanComplete = true;
         definitionIssues = [];
         definitionStructureError = false;
         definitionHasGameruleList = false;
@@ -322,19 +338,23 @@ namespace FunctionFile {
         functionExecutionDepth--;
 
         let actions = definitionActions;
+        let commands = definitionCommands;
+        let planComplete = definitionPlanComplete;
         let issues = definitionIssues;
         let structureError = definitionStructureError;
         let hasGameruleList = definitionHasGameruleList;
 
         collectingDefinitionActions = previousCollecting;
         definitionActions = previousActions;
+        definitionCommands = previousCommands;
+        definitionPlanComplete = previousPlanComplete;
         definitionIssues = previousIssues;
         definitionStructureError = previousStructureError;
         definitionHasGameruleList = previousHasGameruleList;
 
         let valid = !structureError && !MCFunctionValidator.hasError(issues);
         let preparedHandler = createPreparedHandler(actions);
-        register(name, preparedHandler, valid);
+        register(name, preparedHandler, valid, commands, planComplete);
 
         MCFunctionDiagnostics.replaceDefinitionIssues(name, issues);
         reportDefinitionComplete(name, issues, structureError);
@@ -349,6 +369,65 @@ namespace FunctionFile {
         // typing that same name shows diagnostics, NOT the prepared actions.
         // This registration is Preview-only and does not change .mcfunction AST.
         ensureFunctionChatRegistered(name);
+    }
+
+    /**
+     * Derive one ordered Preview plan without mutating the canonical AST.
+     * Inline locally defined function calls. External functions remain typed
+     * function AST nodes and are executed by the pack's native command engine.
+     * An unconditional recursive call exceeds this pilot's finite plan: block
+     * Preview only, but do not turn legitimate Minecraft recursion into a
+     * canonical AST/Validator error.
+     */
+    function buildOrderedPlan(name: string): MCFunctionAST.CommandNode[] {
+        let result: MCFunctionAST.CommandNode[] = [];
+        let stack: string[] = [];
+        if (!appendOrdered(name, result, stack)) return undefined;
+        return result;
+    }
+
+    function appendOrdered(name: string, result: MCFunctionAST.CommandNode[],
+        stack: string[]): boolean {
+        if (stack.length >= 8 || stack.indexOf(name) >= 0) {
+            MCFunctionPreview.previewSay("ERROR [P4O2C_RECURSIVE] " + name + " cannot be flattened.");
+            return false;
+        }
+        let index = -1;
+        for (let i = 0; i < functionNames.length; i++) {
+            if (functionNames[i] == name) { index = i; break; }
+        }
+        if (index < 0) {
+            MCFunctionPreview.previewSay("ERROR [P4O2C_LOCAL_NOT_FOUND] " + name);
+            return false;
+        }
+        if (!functionValid[index] || !functionPlanComplete[index]) {
+            MCFunctionPreview.previewSay("ERROR [P4O2C_INCOMPLETE] " + name +
+                " invalid or missing captured AST.");
+            return false;
+        }
+        stack.push(name);
+        let nodes = functionCommands[index];
+        for (let j = 0; j < nodes.length; j++) {
+            let node = nodes[j];
+            if (node.kind == MCFunctionAST.CommandKind.McFunction) {
+                let targetName = (<MCFunctionAST.McFunctionCommand>node).functionId;
+                let found = false;
+                for (let k = 0; k < functionNames.length; k++) {
+                    if (functionNames[k] == targetName) { found = true; break; }
+                }
+                if (found) {
+                    if (!appendOrdered(targetName, result, stack)) return false;
+                    continue;
+                }
+            }
+            result.push(node);
+            if (result.length > MCFunctionOrderedPreview.maxSteps()) {
+                MCFunctionPreview.previewSay("ERROR [P4O2C_PLAN_LIMIT] " + name);
+                return false;
+            }
+        }
+        stack.pop();
+        return true;
     }
 
     function createPreparedHandler(actions: (() => void)[]): () => void {
@@ -502,13 +581,16 @@ namespace FunctionFile {
         });
     }
 
-    function register(name: string, handler: () => void, valid: boolean): void {
+    function register(name: string, handler: () => void, valid: boolean,
+        commands: MCFunctionAST.CommandNode[], complete: boolean): void {
         // If Blocks <-> JavaScript is refreshed, replace an existing definition
         // rather than keeping duplicate entries in our own preview registry.
         for (let i = 0; i < functionNames.length; i++) {
             if (functionNames[i] == name) {
                 functionHandlers[i] = handler;
                 functionValid[i] = valid;
+                functionCommands[i] = commands;
+                functionPlanComplete[i] = complete;
                 return;
             }
         }
@@ -516,6 +598,8 @@ namespace FunctionFile {
         functionNames.push(name);
         functionHandlers.push(handler);
         functionValid.push(valid);
+        functionCommands.push(commands);
+        functionPlanComplete.push(complete);
     }
 
     function reportInvalidFunctionRun(name: string): void {
