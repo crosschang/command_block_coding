@@ -55,8 +55,8 @@ namespace RuntimeBridge {
     /**
      * P4-ORDER-2D: optional receipt readback. In Confirm mode the FunctionFile
      * preview does NOT return before DONE/ERROR/TIMEOUT is determined.
-     * Only use if the calibration has proved that player.execute(testfor)
-     * reflects the tag's actual state, not mere command submission.
+     * Only use if calibration has proved that player.execute() reflects
+     * TAG or Scoreboard test results, not mere command submission.
      */
     export enum OrderedAckMode {
         //% block="submit only (legacy P4-ORDER-2C)"
@@ -72,6 +72,26 @@ namespace RuntimeBridge {
     export function orderedAckMode(mode: OrderedAckMode): void {
         if (!FunctionFile.allowBridgeConfiguration()) return;
         MCFunctionOrderedPreview.setReceiptMode(mode == OrderedAckMode.Confirm);
+    }
+
+    /** Choose the transport explicitly. Previous TAG ACK remains as a fallback.
+     * New Scoreboard mode uses a per-request Fake Player under cbxo2f. */
+    export enum OrderedAckTransport {
+        //% block="legacy TAG receipts"
+        Tag = 0,
+        //% block="Scoreboard Fake Player receipts"
+        Scoreboard = 1
+    }
+
+    //% blockId=mcfunction_ordered_ack_transport
+    //% block="PREVIEW ordered ACK transport $mode"
+    //% topblock=true
+    //% weight=61
+    export function orderedAckTransport(mode: OrderedAckTransport): void {
+        if (!FunctionFile.allowBridgeConfiguration()) return;
+        MCFunctionOrderedPreview.setAckTransport(mode == OrderedAckTransport.Scoreboard
+            ? MCFunctionOrderedPreview.AckTransport.Scoreboard
+            : MCFunctionOrderedPreview.AckTransport.Tag);
     }
 
     /** Explicit calibration can be called from a chat handler. */
