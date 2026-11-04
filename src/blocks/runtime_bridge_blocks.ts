@@ -52,6 +52,54 @@ namespace RuntimeBridge {
         MCFunctionOrderedPreview.setEnabled(mode == OrderedMode.On);
     }
 
+    /**
+     * P4-ORDER-2D: optional receipt readback. In Confirm mode the FunctionFile
+     * preview does NOT return before DONE/ERROR/TIMEOUT is determined.
+     * Only use if the calibration has proved that player.execute(testfor)
+     * reflects the tag's actual state, not mere command submission.
+     */
+    export enum OrderedAckMode {
+        //% block="submit only (legacy P4-ORDER-2C)"
+        Off = 0,
+        //% block="wait for DONE / ERROR (experimental)"
+        Confirm = 1
+    }
+
+    //% blockId=mcfunction_ordered_ack_mode
+    //% block="PREVIEW ordered receipt $mode"
+    //% topblock=true
+    //% weight=62
+    export function orderedAckMode(mode: OrderedAckMode): void {
+        if (!FunctionFile.allowBridgeConfiguration()) return;
+        MCFunctionOrderedPreview.setReceiptMode(mode == OrderedAckMode.Confirm);
+    }
+
+    /** Explicit calibration can be called from a chat handler. */
+    //% blockId=mcfunction_ordered_ack_calibrate
+    //% block="PREVIEW test ACK readback"
+    //% weight=59
+    export function orderedAckCalibrate(): boolean {
+        if (!FunctionFile.allowBridgeConfiguration()) return false;
+        return MCFunctionOrderedPreview.probeReadback();
+    }
+
+    /** Submission success is never returned as confirmed DONE. */
+    export enum OrderedAckResult {
+        Idle = 0, Submitted = 1, Done = 2, Error = 3,
+        Timeout = 4, Unsupported = 5, SendFailed = 6,
+        Rejected = 7, Busy = 8
+    }
+    //% blockId=mcfunction_ordered_ack_last_status
+    //% block="PREVIEW last ordered receipt"
+    //% weight=58
+    export function lastOrderedAck(): OrderedAckResult {
+        return <OrderedAckResult>MCFunctionOrderedPreview.lastAckStatus();
+    }
+
+    export function lastOrderedRequestId(): string {
+        return MCFunctionOrderedPreview.lastRequestId();
+    }
+
     /** TAG LIST display mode affects Preview only, not the command AST. */
     export enum TagListOutputMode {
         //% block="DETAIL (all targets and tags)"

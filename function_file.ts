@@ -127,6 +127,7 @@ namespace FunctionFile {
         for (let i = 0; i < functionNames.length; i++) {
             if (functionNames[i] == name) {
                 if (!functionValid[i]) {
+                    MCFunctionOrderedPreview.markRejected();
                     reportInvalidFunctionRun(name);
                     return true;
                 }
@@ -134,6 +135,7 @@ namespace FunctionFile {
                 if (MCFunctionOrderedPreview.isEnabled()) {
                     let ordered = buildOrderedPlan(name);
                     if (ordered) MCFunctionOrderedPreview.submit(name, ordered);
+                    else MCFunctionOrderedPreview.markRejected();
                     // Never silently fall back to the legacy handler.
                     return true;
                 }
@@ -142,6 +144,8 @@ namespace FunctionFile {
             }
         }
 
+        if (MCFunctionOrderedPreview.isReceiptMode())
+            MCFunctionOrderedPreview.markRejected();
         return false;
     }
 
