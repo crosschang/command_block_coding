@@ -1,0 +1,24 @@
+﻿test,date,evidence_type,case,status,notes
+CBX12,2026-10-29,실게임,"SAY, RAW execute, summon, 구조화 execute",PASS (tested fixtures),GitHub 전체 명령 호환성 미보증
+CBX13,2026-10-29,실게임,태그 testfor boolean reply / CAL,PASS,상시/멀티플레이 미검증
+CBX14,2026-10-29,실게임,"0,1,32767,-12345 숫자 응답 / Score +1234",PASS (tested values),plain vs HEX A/B는 NOT_TEST_COMMAND 실패
+CBX15,2026-10-29,실게임,"@a,@s 평문 치환 vs HEX 보존",PASS,선택기 문맥 제약
+CBX15,2026-10-29,실게임,plain/HEX time query daytime 5쌍씩,PASS,속도 유의차 없음; detailed 18.4/18.6t; quiet 18.0/18.4t
+CBX16,2026-10-29,실게임,"TIMEOUT→CANCEL→lateReply=false, leftover 0",PASS,단일 플레이어 지연 요청
+CBXCORE context,2026-10-30,실게임,ctxas,PASS,"ctxat, ctxasat 미검증"
+CBXHY,2026-10-30,실게임,hyself/hylongsel(170)/hyreqsel ACK,PASS,전달이 늦게 나타났지만 후행 정상 실행
+CBXHY,2026-10-30,실게임,hysel FunctionFile 3명령,PASS,scoreboard=3; selective=5; 159 chars for three commands
+CBXHY,2026-10-30,실게임,hyfull FunctionFile 3명령,PASS,scoreboard=3; fullHex=3; 612 chars for three commands
+CBXHY 20pair,2026-10-30,실게임,bench1+bench5 6쌍,PASS 6/20,sel 44.8t / hex 43.8t; order=12 errors=0
+CBXHY 20pair,2026-10-30,Node mock,20쌍/120명령,PASS MOCK ONLY,실게임 20쌍 미완료
+CBXLOG,2026-10-30,실게임,QUIET 1쌍 로그 억제,PASS 1/20,sel 46t / hex 41t; suppressed=5; VERBOSE 미검증
+CBXLAT,2026-10-30,실게임,lat1sel QUEUED,PASS with delay,"chatToRun=1855t, trial=50t"
+CBXLAT,2026-10-30,실게임,lat1hex QUEUED,PASS with delay,"chatToRun=1561t, trial=48t"
+CBXLAT,2026-10-30,실게임,bench1 QUEUED,PASS with delay,"chatToRun=1371t, trials=49+39t"
+CBXSCHED,2026-10-30,실게임,bench1 QUEUED first A/B,PASS with delay,"chatToRun=1193t, afterBegin=1190t; trials=53+39t"
+CBXSCHED,2026-10-30,실게임,latdirect1 DIRECT first A/B,PASS,"chatToRun=3t, afterBegin=0t; trials=43+41t"
+CBXSCHED reverse,2026-10-30,실게임,"MakeCode empty-code restart, latdirect1 FIRST",PASS,trials=39+39t; chatToRun unavailable in this recording
+CBXSCHED reverse,2026-10-30,실게임,"same restart, bench1 NEXT",PASS with delay,"chatToRun=1426t, afterBegin=1423t; trials=53+39t, outputCalls=2/6t"
+CBXSCHED,2026-10-30,Node mock,queue/direct/reentrancy,PASS MOCK ONLY,PXT runtime root cause remains unknown
+tick.json Preview,2026-10-30,미실시,dedicated loops.forever periodic execution,NOT TESTED,do not infer CBXSCHED behavior
+.mcfunction roundtrip,2026-10-30,미실시,Parser AST Blocks Compiler end-to-end,NOT COMPLETED,core long term goal

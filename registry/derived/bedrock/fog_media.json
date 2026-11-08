@@ -1,0 +1,882 @@
+{
+  "schemaVersion": 1,
+  "source": "https://github.com/Mojang/bedrock-samples/tree/main/resource_pack/fogs",
+  "note": "Vanilla fog definition fields only; NOT proof the ID is active in Minecraft Education. Missing fields can inherit lower-priority fog settings.",
+  "entries": {
+    "minecraft:fog_bamboo_jungle": {
+      "id": "minecraft:fog_bamboo_jungle",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_bamboo_jungle_hills": {
+      "id": "minecraft:fog_bamboo_jungle_hills",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_basalt_deltas": {
+      "id": "minecraft:fog_basalt_deltas",
+      "distance": [
+        "air",
+        "weather",
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_beach": {
+      "id": "minecraft:fog_beach",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_birch_forest": {
+      "id": "minecraft:fog_birch_forest",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_birch_forest_hills": {
+      "id": "minecraft:fog_birch_forest_hills",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_cherry_grove": {
+      "id": "minecraft:fog_cherry_grove",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_cold_beach": {
+      "id": "minecraft:fog_cold_beach",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_cold_ocean": {
+      "id": "minecraft:fog_cold_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_cold_taiga": {
+      "id": "minecraft:fog_cold_taiga",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_cold_taiga_hills": {
+      "id": "minecraft:fog_cold_taiga_hills",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_cold_taiga_mutated": {
+      "id": "minecraft:fog_cold_taiga_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_crimson_forest": {
+      "id": "minecraft:fog_crimson_forest",
+      "distance": [
+        "air",
+        "weather",
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_dappled_forest": {
+      "id": "minecraft:fog_dappled_forest",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_deep_cold_ocean": {
+      "id": "minecraft:fog_deep_cold_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_deep_frozen_ocean": {
+      "id": "minecraft:fog_deep_frozen_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_deep_lukewarm_ocean": {
+      "id": "minecraft:fog_deep_lukewarm_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_deep_ocean": {
+      "id": "minecraft:fog_deep_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_deep_warm_ocean": {
+      "id": "minecraft:fog_deep_warm_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_default": {
+      "id": "minecraft:fog_default",
+      "distance": [
+        "air",
+        "weather",
+        "water",
+        "lava",
+        "lava_resistance"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_desert": {
+      "id": "minecraft:fog_desert",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_desert_hills": {
+      "id": "minecraft:fog_desert_hills",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_dry": {
+      "id": "minecraft:fog_dry",
+      "distance": [
+        "air",
+        "weather",
+        "water",
+        "lava",
+        "lava_resistance"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_extreme_hills": {
+      "id": "minecraft:fog_extreme_hills",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_extreme_hills_edge": {
+      "id": "minecraft:fog_extreme_hills_edge",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_extreme_hills_mutated": {
+      "id": "minecraft:fog_extreme_hills_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_extreme_hills_plus_trees": {
+      "id": "minecraft:fog_extreme_hills_plus_trees",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_extreme_hills_plus_trees_mutated": {
+      "id": "minecraft:fog_extreme_hills_plus_trees_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_flower_forest": {
+      "id": "minecraft:fog_flower_forest",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_forest": {
+      "id": "minecraft:fog_forest",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_forest_hills": {
+      "id": "minecraft:fog_forest_hills",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_frozen_ocean": {
+      "id": "minecraft:fog_frozen_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_frozen_river": {
+      "id": "minecraft:fog_frozen_river",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_hell": {
+      "id": "minecraft:fog_hell",
+      "distance": [
+        "air",
+        "weather",
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_humid": {
+      "id": "minecraft:fog_humid",
+      "distance": [
+        "air",
+        "weather",
+        "water",
+        "lava",
+        "lava_resistance"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_ice_mountains": {
+      "id": "minecraft:fog_ice_mountains",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_ice_plains": {
+      "id": "minecraft:fog_ice_plains",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_ice_plains_spikes": {
+      "id": "minecraft:fog_ice_plains_spikes",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_jungle": {
+      "id": "minecraft:fog_jungle",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_jungle_edge": {
+      "id": "minecraft:fog_jungle_edge",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_jungle_hills": {
+      "id": "minecraft:fog_jungle_hills",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_jungle_mutated": {
+      "id": "minecraft:fog_jungle_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_lukewarm_ocean": {
+      "id": "minecraft:fog_lukewarm_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_lush_caves": {
+      "id": "minecraft:fog_lush_caves",
+      "distance": [
+        "air",
+        "weather",
+        "water",
+        "lava",
+        "lava_resistance"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_mangrove_swamp": {
+      "id": "minecraft:fog_mangrove_swamp",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_mega_spruce_taiga": {
+      "id": "minecraft:fog_mega_spruce_taiga",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_mega_spruce_taiga_mutated": {
+      "id": "minecraft:fog_mega_spruce_taiga_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_mega_taiga": {
+      "id": "minecraft:fog_mega_taiga",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_mega_taiga_hills": {
+      "id": "minecraft:fog_mega_taiga_hills",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_mega_taiga_mutated": {
+      "id": "minecraft:fog_mega_taiga_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_mesa": {
+      "id": "minecraft:fog_mesa",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_mesa_bryce": {
+      "id": "minecraft:fog_mesa_bryce",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_mesa_mutated": {
+      "id": "minecraft:fog_mesa_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_mesa_plateau": {
+      "id": "minecraft:fog_mesa_plateau",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_mesa_plateau_stone": {
+      "id": "minecraft:fog_mesa_plateau_stone",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_mushroom_island": {
+      "id": "minecraft:fog_mushroom_island",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_mushroom_island_shore": {
+      "id": "minecraft:fog_mushroom_island_shore",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_ocean": {
+      "id": "minecraft:fog_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_pale_garden": {
+      "id": "minecraft:fog_pale_garden",
+      "distance": [
+        "air",
+        "weather",
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_plains": {
+      "id": "minecraft:fog_plains",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_powder_snow": {
+      "id": "minecraft:fog_powder_snow",
+      "distance": [
+        "powder_snow"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_river": {
+      "id": "minecraft:fog_river",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_roofed_forest": {
+      "id": "minecraft:fog_roofed_forest",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_roofed_forest_mutated": {
+      "id": "minecraft:fog_roofed_forest_mutated",
+      "distance": [
+        "air",
+        "weather",
+        "water",
+        "lava",
+        "lava_resistance"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_savanna": {
+      "id": "minecraft:fog_savanna",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_savanna_mutated": {
+      "id": "minecraft:fog_savanna_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_savanna_plateau": {
+      "id": "minecraft:fog_savanna_plateau",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_semi_humid": {
+      "id": "minecraft:fog_semi_humid",
+      "distance": [
+        "air",
+        "weather",
+        "water",
+        "lava",
+        "lava_resistance"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_soulsand_valley": {
+      "id": "minecraft:fog_soulsand_valley",
+      "distance": [
+        "air",
+        "weather",
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_stone_beach": {
+      "id": "minecraft:fog_stone_beach",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    },
+    "minecraft:fog_sulfur_caves": {
+      "id": "minecraft:fog_sulfur_caves",
+      "distance": [
+        "air",
+        "weather",
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_sunflower_plains": {
+      "id": "minecraft:fog_sunflower_plains",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_swampland": {
+      "id": "minecraft:fog_swampland",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_swampland_mutated": {
+      "id": "minecraft:fog_swampland_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_taiga": {
+      "id": "minecraft:fog_taiga",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_taiga_hills": {
+      "id": "minecraft:fog_taiga_hills",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_taiga_mutated": {
+      "id": "minecraft:fog_taiga_mutated",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_the_end": {
+      "id": "minecraft:fog_the_end",
+      "distance": [
+        "air",
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_warm_ocean": {
+      "id": "minecraft:fog_warm_ocean",
+      "distance": [
+        "water"
+      ],
+      "volumetric": [
+        "air"
+      ],
+      "volumetricScattering": [
+        "air"
+      ]
+    },
+    "minecraft:fog_warped_forest": {
+      "id": "minecraft:fog_warped_forest",
+      "distance": [
+        "air",
+        "weather",
+        "water"
+      ],
+      "volumetric": [],
+      "volumetricScattering": []
+    }
+  }
+}

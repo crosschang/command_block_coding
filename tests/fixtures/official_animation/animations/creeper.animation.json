@@ -1,0 +1,7 @@
+{
+ "format_version":"1.8.0",
+ "animations":{
+  "animation.creeper.legs":{"loop":true,"bones":{}},
+  "animation.creeper.swelling":{"loop":true,"bones":{}}
+ }
+}

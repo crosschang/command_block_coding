@@ -1,0 +1,439 @@
+{
+    "schemaVersion":  1,
+    "platform":  "bedrock",
+    "source":  {
+                   "kind":  "command-enum-entitytype-with-listing-fallback",
+                   "provider":  "MicrosoftDocs/minecraft-creator",
+                   "url":  "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/refs/heads/main/creator/Commands/enums/EntityType.md",
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.6019666Z"
+               },
+    "notes":  [
+                  "Primary source is the official EntityType command enum.",
+                  "Secondary documented vanilla-listing fallback: ",
+                  "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/refs/heads/main/creator/Reference/Content/VanillaListingsReference/Entities.md",
+                  "Registry membership does not by itself prove /summon availability or target-platform support.",
+                  "Custom entity namespaces remain supported through Direct Input."
+              ],
+    "entries":  [
+                    {
+                        "id":  "minecraft:slime"
+                    },
+                    {
+                        "id":  "minecraft:tnt"
+                    },
+                    {
+                        "id":  "minecraft:camel"
+                    },
+                    {
+                        "id":  "minecraft:turtle"
+                    },
+                    {
+                        "id":  "minecraft:chicken"
+                    },
+                    {
+                        "id":  "minecraft:bee"
+                    },
+                    {
+                        "id":  "minecraft:axolotl"
+                    },
+                    {
+                        "id":  "minecraft:pig"
+                    },
+                    {
+                        "id":  "minecraft:hoglin"
+                    },
+                    {
+                        "id":  "minecraft:sniffer"
+                    },
+                    {
+                        "id":  "minecraft:cat"
+                    },
+                    {
+                        "id":  "minecraft:cow"
+                    },
+                    {
+                        "id":  "minecraft:sheep"
+                    },
+                    {
+                        "id":  "minecraft:armadillo"
+                    },
+                    {
+                        "id":  "minecraft:wolf"
+                    },
+                    {
+                        "id":  "minecraft:villager"
+                    },
+                    {
+                        "id":  "minecraft:wandering_trader"
+                    },
+                    {
+                        "id":  "minecraft:mooshroom"
+                    },
+                    {
+                        "id":  "minecraft:squid"
+                    },
+                    {
+                        "id":  "minecraft:glow_squid"
+                    },
+                    {
+                        "id":  "minecraft:strider"
+                    },
+                    {
+                        "id":  "minecraft:rabbit"
+                    },
+                    {
+                        "id":  "minecraft:happy_ghast"
+                    },
+                    {
+                        "id":  "minecraft:bat"
+                    },
+                    {
+                        "id":  "minecraft:iron_golem"
+                    },
+                    {
+                        "id":  "minecraft:nautilus"
+                    },
+                    {
+                        "id":  "minecraft:snow_golem"
+                    },
+                    {
+                        "id":  "minecraft:zombie_nautilus"
+                    },
+                    {
+                        "id":  "minecraft:ocelot"
+                    },
+                    {
+                        "id":  "minecraft:horse"
+                    },
+                    {
+                        "id":  "minecraft:trader_llama"
+                    },
+                    {
+                        "id":  "minecraft:llama"
+                    },
+                    {
+                        "id":  "minecraft:polar_bear"
+                    },
+                    {
+                        "id":  "minecraft:parrot"
+                    },
+                    {
+                        "id":  "minecraft:dolphin"
+                    },
+                    {
+                        "id":  "minecraft:panda"
+                    },
+                    {
+                        "id":  "minecraft:fox"
+                    },
+                    {
+                        "id":  "minecraft:goat"
+                    },
+                    {
+                        "id":  "minecraft:frog"
+                    },
+                    {
+                        "id":  "minecraft:tadpole"
+                    },
+                    {
+                        "id":  "minecraft:allay"
+                    },
+                    {
+                        "id":  "minecraft:tropicalfish"
+                    },
+                    {
+                        "id":  "minecraft:cod"
+                    },
+                    {
+                        "id":  "minecraft:zombie_villager"
+                    },
+                    {
+                        "id":  "minecraft:pufferfish"
+                    },
+                    {
+                        "id":  "minecraft:salmon"
+                    },
+                    {
+                        "id":  "minecraft:donkey"
+                    },
+                    {
+                        "id":  "minecraft:mule"
+                    },
+                    {
+                        "id":  "minecraft:skeleton_horse"
+                    },
+                    {
+                        "id":  "minecraft:zombie_horse"
+                    },
+                    {
+                        "id":  "minecraft:zombie"
+                    },
+                    {
+                        "id":  "minecraft:drowned"
+                    },
+                    {
+                        "id":  "minecraft:creeper"
+                    },
+                    {
+                        "id":  "minecraft:skeleton"
+                    },
+                    {
+                        "id":  "minecraft:spider"
+                    },
+                    {
+                        "id":  "minecraft:zombie_pigman"
+                    },
+                    {
+                        "id":  "minecraft:enderman"
+                    },
+                    {
+                        "id":  "minecraft:silverfish"
+                    },
+                    {
+                        "id":  "minecraft:cave_spider"
+                    },
+                    {
+                        "id":  "minecraft:ghast"
+                    },
+                    {
+                        "id":  "minecraft:magma_cube"
+                    },
+                    {
+                        "id":  "minecraft:blaze"
+                    },
+                    {
+                        "id":  "minecraft:warden"
+                    },
+                    {
+                        "id":  "minecraft:witch"
+                    },
+                    {
+                        "id":  "minecraft:stray"
+                    },
+                    {
+                        "id":  "minecraft:husk"
+                    },
+                    {
+                        "id":  "minecraft:wither_skeleton"
+                    },
+                    {
+                        "id":  "minecraft:guardian"
+                    },
+                    {
+                        "id":  "minecraft:elder_guardian"
+                    },
+                    {
+                        "id":  "minecraft:elder_guardian_ghost"
+                    },
+                    {
+                        "id":  "minecraft:wither"
+                    },
+                    {
+                        "id":  "minecraft:ender_dragon"
+                    },
+                    {
+                        "id":  "minecraft:shulker"
+                    },
+                    {
+                        "id":  "minecraft:endermite"
+                    },
+                    {
+                        "id":  "minecraft:vindicator"
+                    },
+                    {
+                        "id":  "minecraft:evocation_illager"
+                    },
+                    {
+                        "id":  "minecraft:vex"
+                    },
+                    {
+                        "id":  "minecraft:phantom"
+                    },
+                    {
+                        "id":  "minecraft:pillager"
+                    },
+                    {
+                        "id":  "minecraft:ravager"
+                    },
+                    {
+                        "id":  "minecraft:piglin_brute"
+                    },
+                    {
+                        "id":  "minecraft:piglin"
+                    },
+                    {
+                        "id":  "minecraft:zoglin"
+                    },
+                    {
+                        "id":  "minecraft:breeze"
+                    },
+                    {
+                        "id":  "minecraft:bogged"
+                    },
+                    {
+                        "id":  "minecraft:creaking"
+                    },
+                    {
+                        "id":  "minecraft:copper_golem"
+                    },
+                    {
+                        "id":  "minecraft:parched"
+                    },
+                    {
+                        "id":  "minecraft:camel_husk"
+                    },
+                    {
+                        "id":  "minecraft:sulfur_cube"
+                    },
+                    {
+                        "id":  "minecraft:minecart"
+                    },
+                    {
+                        "id":  "minecraft:hopper_minecart"
+                    },
+                    {
+                        "id":  "minecraft:tnt_minecart"
+                    },
+                    {
+                        "id":  "minecraft:chest_minecart"
+                    },
+                    {
+                        "id":  "minecraft:command_block_minecart"
+                    },
+                    {
+                        "id":  "minecraft:xp_bottle"
+                    },
+                    {
+                        "id":  "minecraft:xp_orb"
+                    },
+                    {
+                        "id":  "minecraft:ender_crystal"
+                    },
+                    {
+                        "id":  "minecraft:arrow"
+                    },
+                    {
+                        "id":  "minecraft:snowball"
+                    },
+                    {
+                        "id":  "minecraft:egg"
+                    },
+                    {
+                        "id":  "minecraft:splash_potion"
+                    },
+                    {
+                        "id":  "minecraft:leash_knot"
+                    },
+                    {
+                        "id":  "minecraft:wind_charge_projectile"
+                    },
+                    {
+                        "id":  "minecraft:boat"
+                    },
+                    {
+                        "id":  "minecraft:chest_boat"
+                    },
+                    {
+                        "id":  "minecraft:lightning_bolt"
+                    },
+                    {
+                        "id":  "minecraft:evocation_fang"
+                    },
+                    {
+                        "id":  "minecraft:armor_stand"
+                    },
+                    {
+                        "id":  "minecraft:fireworks_rocket"
+                    },
+                    {
+                        "id":  "minecraft:npc"
+                    },
+                    {
+                        "id":  "minecraft:agent"
+                    },
+                    {
+                        "id":  "minecraft:area_effect_cloud"
+                    },
+                    {
+                        "id":  "minecraft:balloon"
+                    },
+                    {
+                        "id":  "minecraft:breeze_wind_charge_projectile"
+                    },
+                    {
+                        "id":  "minecraft:chalkboard"
+                    },
+                    {
+                        "id":  "minecraft:cushion"
+                    },
+                    {
+                        "id":  "minecraft:dragon_fireball"
+                    },
+                    {
+                        "id":  "minecraft:ender_pearl"
+                    },
+                    {
+                        "id":  "minecraft:eye_of_ender_signal"
+                    },
+                    {
+                        "id":  "minecraft:falling_block"
+                    },
+                    {
+                        "id":  "minecraft:fireball"
+                    },
+                    {
+                        "id":  "minecraft:fishing_hook"
+                    },
+                    {
+                        "id":  "minecraft:ice_bomb"
+                    },
+                    {
+                        "id":  "minecraft:item"
+                    },
+                    {
+                        "id":  "minecraft:lingering_potion"
+                    },
+                    {
+                        "id":  "minecraft:llama_spit"
+                    },
+                    {
+                        "id":  "minecraft:moving_block"
+                    },
+                    {
+                        "id":  "minecraft:ominous_item_spawner"
+                    },
+                    {
+                        "id":  "minecraft:painting"
+                    },
+                    {
+                        "id":  "minecraft:player"
+                    },
+                    {
+                        "id":  "minecraft:shield"
+                    },
+                    {
+                        "id":  "minecraft:shulker_bullet"
+                    },
+                    {
+                        "id":  "minecraft:small_fireball"
+                    },
+                    {
+                        "id":  "minecraft:thrown_trident"
+                    },
+                    {
+                        "id":  "minecraft:tripod_camera"
+                    },
+                    {
+                        "id":  "minecraft:villager_v2"
+                    },
+                    {
+                        "id":  "minecraft:wither_skull"
+                    },
+                    {
+                        "id":  "minecraft:wither_skull_dangerous"
+                    },
+                    {
+                        "id":  "minecraft:zombie_villager_v2"
+                    }
+                ]
+}

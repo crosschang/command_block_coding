@@ -1,0 +1,126 @@
+{
+    "schemaVersion":  1,
+    "platform":  "bedrock",
+    "source":  {
+                   "kind":  "command-enum-effect",
+                   "provider":  "MicrosoftDocs/minecraft-creator",
+                   "url":  "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/refs/heads/main/creator/Commands/commands/effect.md",
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.6039676Z"
+               },
+    "notes":  [
+                  "Effect command tokens do not use minecraft: namespace."
+              ],
+    "entries":  [
+                    {
+                        "id":  "wither"
+                    },
+                    {
+                        "id":  "speed"
+                    },
+                    {
+                        "id":  "slowness"
+                    },
+                    {
+                        "id":  "haste"
+                    },
+                    {
+                        "id":  "mining_fatigue"
+                    },
+                    {
+                        "id":  "strength"
+                    },
+                    {
+                        "id":  "instant_health"
+                    },
+                    {
+                        "id":  "instant_damage"
+                    },
+                    {
+                        "id":  "jump_boost"
+                    },
+                    {
+                        "id":  "nausea"
+                    },
+                    {
+                        "id":  "regeneration"
+                    },
+                    {
+                        "id":  "resistance"
+                    },
+                    {
+                        "id":  "fire_resistance"
+                    },
+                    {
+                        "id":  "water_breathing"
+                    },
+                    {
+                        "id":  "invisibility"
+                    },
+                    {
+                        "id":  "blindness"
+                    },
+                    {
+                        "id":  "night_vision"
+                    },
+                    {
+                        "id":  "hunger"
+                    },
+                    {
+                        "id":  "weakness"
+                    },
+                    {
+                        "id":  "poison"
+                    },
+                    {
+                        "id":  "health_boost"
+                    },
+                    {
+                        "id":  "absorption"
+                    },
+                    {
+                        "id":  "saturation"
+                    },
+                    {
+                        "id":  "levitation"
+                    },
+                    {
+                        "id":  "fatal_poison"
+                    },
+                    {
+                        "id":  "conduit_power"
+                    },
+                    {
+                        "id":  "slow_falling"
+                    },
+                    {
+                        "id":  "bad_omen"
+                    },
+                    {
+                        "id":  "village_hero"
+                    },
+                    {
+                        "id":  "darkness"
+                    },
+                    {
+                        "id":  "trial_omen"
+                    },
+                    {
+                        "id":  "wind_charged"
+                    },
+                    {
+                        "id":  "weaving"
+                    },
+                    {
+                        "id":  "oozing"
+                    },
+                    {
+                        "id":  "infested"
+                    },
+                    {
+                        "id":  "raid_omen"
+                    },
+                    {
+                        "id":  "breath_of_the_nautilus"
+                    }
+                ]
+}

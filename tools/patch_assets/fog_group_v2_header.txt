@@ -1,0 +1,19 @@
+/* B4 FOG ENVIRONMENT GROUPS v2 — exact media combinations, one reporter per ID. */
+const FOG_ENVIRONMENT_GROUPS = ['Direct Input','Air + Water','Water Only',
+  'Air + Water + Weather','Lava Included','Powder Snow','Other / Unknown'];
+/** Official resource JSON fields are authoring metadata, not evidence of Education rendering. */
+function fogEnvironmentGroup(id,media) {
+ const row=media[id];
+ if(!row)return 'Other / Unknown';
+ const set=new Set([...row.distance,...row.volumetric,...row.volumetricScattering]);
+ const exact=(fields)=>set.size===fields.length&&fields.every(field=>set.has(field));
+ if(exact(['water']))return 'Water Only';
+ if(exact(['powder_snow']))return 'Powder Snow';
+ if(exact(['air','water']))return 'Air + Water';
+ if(exact(['air','water','weather']))return 'Air + Water + Weather';
+ const lavaTypes=['air','water','weather','lava','lava_resistance'];
+ if((set.has('lava')||set.has('lava_resistance')) &&
+     [...set].every(field=>lavaTypes.includes(field))) return 'Lava Included';
+ // Preserve unsupported/future combinations without guessing their intended environment.
+ return 'Other / Unknown';
+}

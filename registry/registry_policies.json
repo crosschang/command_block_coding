@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "status": "active-authoring-policy",
+  "notes": [
+    "Registry data supports search, autocomplete, metadata, and diagnostics; Minecraft Command AST remains the semantic Source of Truth.",
+    "Pure Command Registry data must not automatically absorb Add-on authoring schemas merely because they exist in Creator documentation.",
+    "Unknown/custom values are preserved when the command domain is extensible or when forward/version compatibility requires Direct Input."
+  ],
+  "registries": {
+    "blocks": {
+      "customPolicy": "EXTENSIBLE_NAMESPACED_ID",
+      "sourceRole": "COMMAND_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "MEDIUM"
+    },
+    "items": {
+      "customPolicy": "EXTENSIBLE_NAMESPACED_ID",
+      "sourceRole": "COMMAND_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "MEDIUM"
+    },
+    "entities": {
+      "customPolicy": "EXTENSIBLE_NAMESPACED_ID",
+      "sourceRole": "COMMAND_ENTITY_TYPE_PRIMARY",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "CONTEXT_DEPENDENT"
+    },
+    "effects": {
+      "customPolicy": "VERSIONED_NATIVE_ENUM",
+      "sourceRole": "COMMAND_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true
+    },
+    "particles": {
+      "customPolicy": "EXTENSIBLE_NAMESPACED_ID",
+      "sourceRole": "VANILLA_RESOURCE_PACK",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "LOW"
+    },
+    "families": {
+      "customPolicy": "PROJECT_DEFINED_STRING",
+      "sourceRole": "VANILLA_BEHAVIOR_DERIVED_SUGGESTIONS",
+      "ownerScope": "Entity",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "CONTEXT_DEPENDENT"
+    },
+    "entity_events": {
+      "customPolicy": "OWNER_SCOPED_ID",
+      "sourceRole": "VANILLA_BEHAVIOR_DERIVED",
+      "ownerScope": "Entity",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "CONTEXT_DEPENDENT",
+      "relationshipModel": "OWNER_EVENT_RELATIONS",
+      "validationPolicy": "WARN_ONLY_WHEN_OWNER_IS_STATICALLY_KNOWN"
+    },
+    "spawn_events": {
+      "customPolicy": "OWNER_SCOPED_ID",
+      "sourceRole": "ENTITY_EVENTS_WITH_SPAWN_RECOMMENDATION",
+      "ownerScope": "Entity",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "CONTEXT_DEPENDENT",
+      "relationshipModel": "ALL_OWNER_EVENTS_WITH_SPAWN_RECOMMENDED_METADATA",
+      "validationPolicy": "OWNER_MISMATCH_WARNING_NONRECOMMENDED_INFO",
+      "notes": [
+        "All events defined by each vanilla entity remain selectable as summon spawnEvent values.",
+        "spawnRecommended is authoring metadata, not a whitelist or command-validity guarantee.",
+        "Unknown/custom owner-event relationships remain allowed for version/add-on compatibility."
+      ]
+    },
+    "block_states": {
+      "customPolicy": "VANILLA_STATE_PLUS_CUSTOM_FALLBACK",
+      "sourceRole": "VANILLA_BLOCK_RUNTIME_METADATA",
+      "ownerScope": "Block",
+      "valueSchema": [
+        "String",
+        "Number",
+        "Boolean"
+      ],
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH_FOR_KNOWN_VANILLA"
+    },
+    "sounds": {
+      "customPolicy": "EXTENSIBLE_STRING_ID",
+      "sourceRole": "VANILLA_RESOURCE_PACK",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "MEDIUM",
+      "requiresNamespace": false
+    },
+    "music_tracks": {
+      "customPolicy": "EXTENSIBLE_STRING_ID",
+      "sourceRole": "MUSIC_TRACK_EVENTS_FROM_VANILLA_RESOURCE_PACK",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "MEDIUM",
+      "requiresNamespace": false,
+      "notes": [
+        "Track Registry is distinct from the general Sound Registry.",
+        "Mojang music_definitions event_name and record.* sound entries are candidate tracks.",
+        "Unknown/add-on/forward-version track IDs remain authorable."
+      ]
+    },
+    "music_repeat_modes": {
+      "customPolicy": "VERSIONED_COMMAND_ENUM",
+      "sourceRole": "COMMAND_GRAMMAR_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true,
+      "documentedValues": ["play_once", "loop"]
+    },
+    "gamerules": {
+      "customPolicy": "VERSIONED_NATIVE_ENUM",
+      "sourceRole": "COMMAND_TYPED_ENUM",
+      "valueSchema": [
+        "Boolean",
+        "Integer",
+        "Enum"
+      ],
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true,
+      "implementationStatus": "TYPED_REGISTRY_AND_COMMAND_0.0.42"
+    },
+    "enchantments": {
+      "customPolicy": "VERSIONED_NATIVE_ENUM",
+      "sourceRole": "COMMAND_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true
+    },
+    "selector_filters": {
+      "customPolicy": "FIXED_COMMAND_SCHEMA",
+      "sourceRole": "TARGET_SELECTOR_DOCS",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH"
+    },
+    "gamemode_values": {
+      "customPolicy": "VERSIONED_COMMAND_ENUM",
+      "sourceRole": "COMMAND_GRAMMAR_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true,
+      "implementationStatus": "POLICY_ONLY"
+    },
+    "difficulty_values": {
+      "customPolicy": "VERSIONED_COMMAND_ENUM",
+      "sourceRole": "COMMAND_GRAMMAR_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true,
+      "implementationStatus": "POLICY_ONLY"
+    },
+    "weather_values": {
+      "customPolicy": "VERSIONED_COMMAND_ENUM",
+      "sourceRole": "COMMAND_GRAMMAR_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true,
+      "implementationStatus": "POLICY_ONLY"
+    },
+    "fill_modes": {
+      "customPolicy": "VERSIONED_COMMAND_ENUM",
+      "sourceRole": "COMMAND_GRAMMAR_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true,
+      "implementationStatus": "POLICY_ONLY"
+    },
+    "clone_modes": {
+      "customPolicy": "VERSIONED_COMMAND_ENUM",
+      "sourceRole": "COMMAND_GRAMMAR_ENUM",
+      "commandUsable": true,
+      "addonAuthoringOnly": false,
+      "runtimeValidationReliability": "HIGH",
+      "versionedByTarget": true,
+      "implementationStatus": "POLICY_ONLY"
+    }
+  },
+  "policyDefinitions": {
+    "VERSIONED_NATIVE_ENUM": {
+      "meaning": "Native values are owned by Mojang/Minecraft, not Add-on authors; the known set may change by Minecraft version/platform.",
+      "directInputPolicy": "Preserve unknown values for forward-version/import compatibility unless command syntax itself is malformed."
+    },
+    "VERSIONED_COMMAND_ENUM": {
+      "meaning": "Fixed choices in Minecraft command grammar; Add-ons do not extend them, but Mojang may change the set by version/platform."
+    },
+    "EXTENSIBLE_NAMESPACED_ID": {
+      "meaning": "Add-ons can define additional command-addressable namespaced content IDs."
+    },
+    "EXTENSIBLE_STRING_ID": {
+      "meaning": "Content can define additional command-addressable string IDs without requiring namespace:path syntax."
+    },
+    "OWNER_SCOPED_ID": {
+      "meaning": "The ID/value belongs to a specific owner such as an Entity; applicability is owner-dependent."
+    },
+    "PROJECT_DEFINED_STRING": {
+      "meaning": "Project/content-defined free string domain used by commands."
+    },
+    "VANILLA_STATE_PLUS_CUSTOM_FALLBACK": {
+      "meaning": "Vanilla state/type/value data is versioned and exact when known; custom blocks/states remain direct-input capable."
+    }
+  }
+}

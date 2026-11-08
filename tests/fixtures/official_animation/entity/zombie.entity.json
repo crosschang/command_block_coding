@@ -1,0 +1,1 @@
+{"minecraft:client_entity":{"description":{"identifier":"minecraft:zombie","animations":{"attack":"animation.humanoid.attack.rotations","controller":"controller.animation.humanoid.attack"}}}}

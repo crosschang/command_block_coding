@@ -1,0 +1,1541 @@
+{
+    "schemaVersion":  2,
+    "platform":  "bedrock",
+    "coverage":  "complete-vanilla-used-properties",
+    "source":  {
+                   "kind":  "vanilla-block-metadata-used-properties-derived",
+                   "provider":  "Mojang/bedrock-samples",
+                   "url":  "https://raw.githubusercontent.com/Mojang/bedrock-samples/main/metadata/vanilladata_modules/mojang-blocks.json",
+                   "fetchedAtUtc":  "2026-10-21T00:59:49.6279731Z"
+               },
+    "notes":  [
+                  "Contains only block properties actually referenced by vanilla data_items; Add-on-only definitions are not imported merely because a Creator schema defines them.",
+                  "Exact state ID, value type, and allowed values are preserved from Mojang metadata.",
+                  "Role is authoring UI metadata only and is not AST command meaning.",
+                  "Custom block/state Direct Input remains supported."
+              ],
+    "states":  [
+                   {
+                       "id":  "active",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "age",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "age_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "attached_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "attachment",
+                       "type":  "string",
+                       "values":  [
+                                      "standing",
+                                      "hanging",
+                                      "side",
+                                      "multiple"
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "bamboo_leaf_size",
+                       "type":  "string",
+                       "values":  [
+                                      "no_leaves",
+                                      "small_leaves",
+                                      "large_leaves"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "bamboo_stalk_thickness",
+                       "type":  "string",
+                       "values":  [
+                                      "thin",
+                                      "thick"
+                                  ],
+                       "role":  "variant"
+                   },
+                   {
+                       "id":  "big_dripleaf_head",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "big_dripleaf_tilt",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "unstable",
+                                      "partial_tilt",
+                                      "full_tilt"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "bite_counter",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "bloom",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "books_stored",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15,
+                                      16,
+                                      17,
+                                      18,
+                                      19,
+                                      20,
+                                      21,
+                                      22,
+                                      23,
+                                      24,
+                                      25,
+                                      26,
+                                      27,
+                                      28,
+                                      29,
+                                      30,
+                                      31,
+                                      32,
+                                      33,
+                                      34,
+                                      35,
+                                      36,
+                                      37,
+                                      38,
+                                      39,
+                                      40,
+                                      41,
+                                      42,
+                                      43,
+                                      44,
+                                      45,
+                                      46,
+                                      47,
+                                      48,
+                                      49,
+                                      50,
+                                      51,
+                                      52,
+                                      53,
+                                      54,
+                                      55,
+                                      56,
+                                      57,
+                                      58,
+                                      59,
+                                      60,
+                                      61,
+                                      62,
+                                      63
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "brewing_stand_slot_a_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "brewing_stand_slot_b_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "brewing_stand_slot_c_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "brushed_progress",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "button_pressed_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "can_summon",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "candles",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "cauldron_liquid",
+                       "type":  "string",
+                       "values":  [
+                                      "water",
+                                      "lava",
+                                      "powder_snow"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "cluster_count",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "composter_fill_level",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "conditional_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "coral_direction",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "coral_fan_direction",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "covered_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "cracked_state",
+                       "type":  "string",
+                       "values":  [
+                                      "no_cracks",
+                                      "cracked",
+                                      "max_cracked"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "crafting",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "creaking_heart_state",
+                       "type":  "string",
+                       "values":  [
+                                      "uprooted",
+                                      "dormant",
+                                      "awake"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "dead_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "deprecated",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "special"
+                   },
+                   {
+                       "id":  "direction",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "disarmed_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "door_hinge_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "drag_down",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "dripstone_thickness",
+                       "type":  "string",
+                       "values":  [
+                                      "tip",
+                                      "frustum",
+                                      "middle",
+                                      "base",
+                                      "merge"
+                                  ],
+                       "role":  "variant"
+                   },
+                   {
+                       "id":  "end_portal_eye_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "explode_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "extinguished",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "facing_direction",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "fill_level",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "ground_sign_direction",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "growing_plant_age",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15,
+                                      16,
+                                      17,
+                                      18,
+                                      19,
+                                      20,
+                                      21,
+                                      22,
+                                      23,
+                                      24,
+                                      25
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "growth",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "hanging",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "head_piece_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "height",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "honey_level",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "huge_mushroom_bits",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "in_wall_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "infiniburn_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "item_frame_map_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "item_frame_photo_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "kelp_age",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15,
+                                      16,
+                                      17,
+                                      18,
+                                      19,
+                                      20,
+                                      21,
+                                      22,
+                                      23,
+                                      24,
+                                      25
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "lever_direction",
+                       "type":  "string",
+                       "values":  [
+                                      "down_east_west",
+                                      "east",
+                                      "west",
+                                      "south",
+                                      "north",
+                                      "up_north_south",
+                                      "up_east_west",
+                                      "down_north_south"
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "liquid_depth",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "lit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "minecraft:block_face",
+                       "type":  "string",
+                       "values":  [
+                                      "down",
+                                      "up",
+                                      "north",
+                                      "south",
+                                      "west",
+                                      "east"
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "minecraft:cardinal_direction",
+                       "type":  "string",
+                       "values":  [
+                                      "south",
+                                      "west",
+                                      "north",
+                                      "east"
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "minecraft:connection_east",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "minecraft:connection_north",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "minecraft:connection_south",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "minecraft:connection_west",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "minecraft:corner",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "inner_left",
+                                      "inner_right",
+                                      "outer_left",
+                                      "outer_right"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "minecraft:facing_direction",
+                       "type":  "string",
+                       "values":  [
+                                      "down",
+                                      "up",
+                                      "north",
+                                      "south",
+                                      "west",
+                                      "east"
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "minecraft:vertical_half",
+                       "type":  "string",
+                       "values":  [
+                                      "bottom",
+                                      "top"
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "moisturized_amount",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "multi_face_direction_bits",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15,
+                                      16,
+                                      17,
+                                      18,
+                                      19,
+                                      20,
+                                      21,
+                                      22,
+                                      23,
+                                      24,
+                                      25,
+                                      26,
+                                      27,
+                                      28,
+                                      29,
+                                      30,
+                                      31,
+                                      32,
+                                      33,
+                                      34,
+                                      35,
+                                      36,
+                                      37,
+                                      38,
+                                      39,
+                                      40,
+                                      41,
+                                      42,
+                                      43,
+                                      44,
+                                      45,
+                                      46,
+                                      47,
+                                      48,
+                                      49,
+                                      50,
+                                      51,
+                                      52,
+                                      53,
+                                      54,
+                                      55,
+                                      56,
+                                      57,
+                                      58,
+                                      59,
+                                      60,
+                                      61,
+                                      62,
+                                      63
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "natural",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "occupied_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "ominous",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "open_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "orientation",
+                       "type":  "string",
+                       "values":  [
+                                      "down_east",
+                                      "down_north",
+                                      "down_south",
+                                      "down_west",
+                                      "up_east",
+                                      "up_north",
+                                      "up_south",
+                                      "up_west",
+                                      "west_up",
+                                      "east_up",
+                                      "north_up",
+                                      "south_up"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "output_lit_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "output_subtract_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "pale_moss_carpet_side_east",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "short",
+                                      "tall"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "pale_moss_carpet_side_north",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "short",
+                                      "tall"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "pale_moss_carpet_side_south",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "short",
+                                      "tall"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "pale_moss_carpet_side_west",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "short",
+                                      "tall"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "persistent_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "pillar_axis",
+                       "type":  "string",
+                       "values":  [
+                                      "y",
+                                      "x",
+                                      "z"
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "portal_axis",
+                       "type":  "string",
+                       "values":  [
+                                      "unknown",
+                                      "x",
+                                      "z"
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "potent_sulfur_state",
+                       "type":  "string",
+                       "values":  [
+                                      "dry",
+                                      "wet",
+                                      "dormant",
+                                      "erupting",
+                                      "continuous"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "powered_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "powered_shelf_type",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "propagule_stage",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "rail_data_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "rail_direction",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "redstone_signal",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "rehydration_level",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "repeater_delay",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "respawn_anchor_charge",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "rotation",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "sculk_sensor_phase",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "sea_grass_type",
+                       "type":  "string",
+                       "values":  [
+                                      "default",
+                                      "double_top",
+                                      "double_bot"
+                                  ],
+                       "role":  "variant"
+                   },
+                   {
+                       "id":  "stability",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "stability_check",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "structure_block_type",
+                       "type":  "string",
+                       "values":  [
+                                      "data",
+                                      "save",
+                                      "load",
+                                      "corner",
+                                      "invalid",
+                                      "export"
+                                  ],
+                       "role":  "variant"
+                   },
+                   {
+                       "id":  "suspended_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "tip",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "toggle_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "torch_facing_direction",
+                       "type":  "string",
+                       "values":  [
+                                      "unknown",
+                                      "west",
+                                      "east",
+                                      "north",
+                                      "south",
+                                      "top"
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "trial_spawner_state",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "triggered_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "activation"
+                   },
+                   {
+                       "id":  "turtle_egg_count",
+                       "type":  "string",
+                       "values":  [
+                                      "one_egg",
+                                      "two_egg",
+                                      "three_egg",
+                                      "four_egg"
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "twisting_vines_age",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15,
+                                      16,
+                                      17,
+                                      18,
+                                      19,
+                                      20,
+                                      21,
+                                      22,
+                                      23,
+                                      24,
+                                      25
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "update_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "upper_block_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "upside_down_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "vault_state",
+                       "type":  "string",
+                       "values":  [
+                                      "inactive",
+                                      "active",
+                                      "unlocking",
+                                      "ejecting"
+                                  ],
+                       "role":  "other"
+                   },
+                   {
+                       "id":  "vine_direction_bits",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15
+                                  ],
+                       "role":  "orientation"
+                   },
+                   {
+                       "id":  "wall_connection_type_east",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "short",
+                                      "tall"
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "wall_connection_type_north",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "short",
+                                      "tall"
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "wall_connection_type_south",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "short",
+                                      "tall"
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "wall_connection_type_west",
+                       "type":  "string",
+                       "values":  [
+                                      "none",
+                                      "short",
+                                      "tall"
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "wall_post_bit",
+                       "type":  "boolean",
+                       "values":  [
+                                      false,
+                                      true
+                                  ],
+                       "role":  "structure"
+                   },
+                   {
+                       "id":  "weeping_vines_age",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12,
+                                      13,
+                                      14,
+                                      15,
+                                      16,
+                                      17,
+                                      18,
+                                      19,
+                                      20,
+                                      21,
+                                      22,
+                                      23,
+                                      24,
+                                      25
+                                  ],
+                       "role":  "level"
+                   },
+                   {
+                       "id":  "weirdo_direction",
+                       "type":  "number",
+                       "values":  [
+                                      0,
+                                      1,
+                                      2,
+                                      3
+                                  ],
+                       "role":  "orientation"
+                   }
+               ]
+}
