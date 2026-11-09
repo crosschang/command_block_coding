@@ -79,8 +79,10 @@ namespace RuntimeBridge {
     export enum OrderedAckTransport {
         //% block="legacy TAG receipts"
         Tag = 0,
-        //% block="Scoreboard Fake Player receipts"
-        Scoreboard = 1
+        //% block="Scoreboard Fake Player receipts (legacy)"
+        Scoreboard = 1,
+        //% block="player-scoped Scoreboard ACK (multiplayer)"
+        PlayerScoreboard = 2
     }
 
     //% blockId=mcfunction_ordered_ack_transport
@@ -89,9 +91,12 @@ namespace RuntimeBridge {
     //% weight=61
     export function orderedAckTransport(mode: OrderedAckTransport): void {
         if (!FunctionFile.allowBridgeConfiguration()) return;
-        MCFunctionOrderedPreview.setAckTransport(mode == OrderedAckTransport.Scoreboard
-            ? MCFunctionOrderedPreview.AckTransport.Scoreboard
-            : MCFunctionOrderedPreview.AckTransport.Tag);
+        let choice = MCFunctionOrderedPreview.AckTransport.Tag;
+        if (mode == OrderedAckTransport.Scoreboard)
+            choice = MCFunctionOrderedPreview.AckTransport.Scoreboard;
+        if (mode == OrderedAckTransport.PlayerScoreboard)
+            choice = MCFunctionOrderedPreview.AckTransport.PlayerScoreboard;
+        MCFunctionOrderedPreview.setAckTransport(choice);
     }
 
     /** Explicit calibration can be called from a chat handler. */

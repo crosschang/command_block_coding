@@ -8,6 +8,12 @@
 namespace MCFunctionOrderedPreview {
     const EVENT_ID = "cbxp4o2c:batch";
     const SCORE_EVENT_ID = "cbxp4o2f:batch";
+    // P4-ORDER-2H: the receiving player is the ACK score participant.
+    // A per-request nonce prevents a late packet from becoming a fresh ACK.
+    // Legacy 2F remains independently selectable and unchanged.
+    const PLAYER_SCORE_EVENT_ID = "cbxp4o2h:batch";
+    const PLAYER_ACK_OBJECTIVE = "cbxo2h";
+    const PLAYER_NONCE_OBJECTIVE = "cbxo2hn";
     const SCORE_OBJECTIVE = "cbxo2f";
     const SCORE_FAKE_PREFIX = "cbx2f_";
     const HEX = "0123456789abcdef";
@@ -30,7 +36,8 @@ namespace MCFunctionOrderedPreview {
     /** ACK receipt transport is Preview-only, never part of command AST. */
     export enum AckTransport {
         Tag = 0,
-        Scoreboard = 1
+        Scoreboard = 1,
+        PlayerScoreboard = 2
     }
 
     let ackTransport = AckTransport.Tag;
@@ -86,6 +93,7 @@ namespace MCFunctionOrderedPreview {
     export function probeReadback(): boolean {
         if (inFlight) return false;
         if (ackTransport == AckTransport.Scoreboard) return probeScoreboardReadback();
+        if (ackTransport == AckTransport.PlayerScoreboard) return probePlayerScoreboardReadback();
         let marker = "cbxo2d_cal_" + sessionToken;
         let absentBefore = player.execute("testfor @s[tag=" + marker + "]");
         let added = player.execute("tag @s add " + marker);
@@ -133,6 +141,71 @@ namespace MCFunctionOrderedPreview {
         return good;
     }
 
+    // Keep arithmetic exact in JS Number and the MakeCode TypeScript subset.
+    // A nonzero 31-bit request code is written to the actual player, not to a
+    // world-global fake participant. This is an anti-stale marker, not a secret.
+    function playerRequestCode(id: string): number {
+        let n = 0;
+        for (let i = 0; i < id.length; i++) {
+            n = (n * 31 + id.charCodeAt(i)) % 2147483647;
+        }
+        return n == 0 ? 1 : n;
+    }
+
+    /** Require actual @s score readback before enabling player-scoped ACK.
+     * This test never touches the old cbxo2f fake-player objective. */
+    function probePlayerScoreboardReadback(): boolean {
+        let a = PLAYER_ACK_OBJECTIVE;
+        let n = PLAYER_NONCE_OBJECTIVE;
+        player.execute("scoreboard players reset @s " + a);
+        player.execute("scoreboard players reset @s " + n);
+        let absent = !player.execute("scoreboard players test @s " + a + " 0 3");
+        let pendingSet = player.execute("scoreboard players set @s " + a + " 0");
+        let pending = player.execute("scoreboard players test @s " + a + " 0 0");
+        let doneSet = player.execute("scoreboard players set @s " + a + " 2");
+        let done = player.execute("scoreboard players test @s " + a + " 2 2");
+        let errorSet = player.execute("scoreboard players set @s " + a + " 3");
+        let error = player.execute("scoreboard players test @s " + a + " 3 3");
+        let codeSet = player.execute("scoreboard players set @s " + n + " 1234567");
+        let codeRead = player.execute("scoreboard players test @s " + n + " 1234567 1234567");
+        let clearedA = player.execute("scoreboard players reset @s " + a) &&
+            !player.execute("scoreboard players test @s " + a + " 0 3");
+        let clearedN = player.execute("scoreboard players reset @s " + n) &&
+            !player.execute("scoreboard players test @s " + n + " 1234567 1234567");
+        let good = absent && pendingSet && pending && doneSet && done &&
+            errorSet && error && codeSet && codeRead && clearedA && clearedN;
+        readbackReady = good ? 1 : -1;
+        MCFunctionPreview.previewSay(good
+            ? "INFO [P4O2H_PLAYER_SCORE_PASS] @s receipt and nonce both verified."
+            : "ERROR [P4O2H_PLAYER_SCORE_FAIL] Player-scoped ACK disabled.");
+        return good;
+    }
+
+    function readPlayerScoreboardAck(id: string): AckStatus {
+        let code = playerRequestCode(id);
+        let check = "scoreboard players test @s " + PLAYER_NONCE_OBJECTIVE + " " + code + " " + code;
+        if (!player.execute(check)) {
+            MCFunctionPreview.previewSay("ERROR [P4O2H_NONCE_MISMATCH] id=" + id);
+            return AckStatus.Error;
+        }
+        let base = "scoreboard players test @s " + PLAYER_ACK_OBJECTIVE + " ";
+        if (player.execute(base + "2 2")) return AckStatus.Done;
+        if (player.execute(base + "3 3")) return AckStatus.Error;
+        if (player.execute(base + "0 0")) return AckStatus.Submitted;
+        MCFunctionPreview.previewSay("ERROR [P4O2H_UNKNOWN_PLAYER_SCORE] id=" + id);
+        return AckStatus.Error;
+    }
+
+    function resetPlayerScoreboardAck(): boolean {
+        let a = PLAYER_ACK_OBJECTIVE;
+        let n = PLAYER_NONCE_OBJECTIVE;
+        let removedA = player.execute("scoreboard players reset @s " + a);
+        let removedN = player.execute("scoreboard players reset @s " + n);
+        let clearedA = !player.execute("scoreboard players test @s " + a + " 0 3");
+        let clearedN = !player.execute("scoreboard players test @s " + n + " 0 2147483647");
+        return removedA && removedN && clearedA && clearedN;
+    }
+
     function scoreFakePlayer(id: string): string {
         return SCORE_FAKE_PREFIX + id;
     }
@@ -159,6 +232,7 @@ namespace MCFunctionOrderedPreview {
 
     function readAck(id: string): AckStatus {
         if (ackTransport == AckTransport.Scoreboard) return readScoreboardAck(id);
+        if (ackTransport == AckTransport.PlayerScoreboard) return readPlayerScoreboardAck(id);
         let done = player.execute("testfor @s[tag=" + ACK_DONE + id + "]");
         let error = player.execute("testfor @s[tag=" + ACK_ERROR + id + "]");
         if (done && error) return AckStatus.Error; // conflicting ACK => never accept as DONE
@@ -179,6 +253,11 @@ namespace MCFunctionOrderedPreview {
                     MCFunctionPreview.previewSay("ERROR [P4O2F_SCORE_CLEANUP] id=" + id);
                     return AckStatus.Error;
                 }
+            } else if (ackTransport == AckTransport.PlayerScoreboard) {
+                if (!resetPlayerScoreboardAck()) {
+                    MCFunctionPreview.previewSay("ERROR [P4O2H_SCORE_CLEANUP] id=" + id);
+                    return AckStatus.Error;
+                }
             } else {
                 // Remove only our own request's receipt tags.
                 player.execute("tag @s remove " + ACK_DONE + id);
@@ -194,6 +273,8 @@ namespace MCFunctionOrderedPreview {
         // receipt and independently expires Scoreboard results after 2 min.
         if (ackTransport == AckTransport.Scoreboard)
             resetScoreboardAck(id);
+        else if (ackTransport == AckTransport.PlayerScoreboard)
+            resetPlayerScoreboardAck();
         MCFunctionPreview.previewSay("ERROR [P4O2D_ACK_TIMEOUT] " + name +
             " id=" + id + " after=" + ACK_POLL_LIMIT + " polls.");
         return AckStatus.Timeout;
@@ -287,6 +368,22 @@ namespace MCFunctionOrderedPreview {
                     MCFunctionPreview.previewSay("ERROR [P4O2F_ARM_FAILED] id=" + requestId);
                     return;
                 }
+            } else if (ackTransport == AckTransport.PlayerScoreboard) {
+                // Two player-identity scores: PENDING and a request-specific code.
+                // No global fake-player slot. Do not send unless both arm checks pass.
+                let code = playerRequestCode(requestId);
+                let armN = "scoreboard players set @s " + PLAYER_NONCE_OBJECTIVE + " " + code;
+                let testN = "scoreboard players test @s " + PLAYER_NONCE_OBJECTIVE + " " + code + " " + code;
+                let armA = "scoreboard players set @s " + PLAYER_ACK_OBJECTIVE + " 0";
+                let testA = "scoreboard players test @s " + PLAYER_ACK_OBJECTIVE + " 0 0";
+                if (!player.execute(armN) || !player.execute(testN) ||
+                    !player.execute(armA) || !player.execute(testA)) {
+                    resetPlayerScoreboardAck();
+                    inFlight = false;
+                    lastReceipt = AckStatus.Unsupported;
+                    MCFunctionPreview.previewSay("ERROR [P4O2H_ARM_FAILED] id=" + requestId);
+                    return;
+                }
             } else {
                 // Legacy TAG fallback: remove only this request's stale receipts.
                 player.execute("tag @s remove " + ACK_DONE + requestId);
@@ -296,12 +393,17 @@ namespace MCFunctionOrderedPreview {
         // The single, tested P2c-4-style yield occurs before one batch,
         // NOT between individual commands; avoids fabricating a per-line delay.
         loops.pause(1);
-        let eventId = receiptMode && ackTransport == AckTransport.Scoreboard
-            ? SCORE_EVENT_ID : EVENT_ID;
+        let eventId = EVENT_ID;
+        if (receiptMode && ackTransport == AckTransport.Scoreboard)
+            eventId = SCORE_EVENT_ID;
+        if (receiptMode && ackTransport == AckTransport.PlayerScoreboard)
+            eventId = PLAYER_SCORE_EVENT_ID;
         let submitted = player.execute("scriptevent " + eventId + " " + requestId + " " + plan);
         if (!submitted) {
             if (receiptMode && ackTransport == AckTransport.Scoreboard)
                 resetScoreboardAck(requestId);
+            else if (receiptMode && ackTransport == AckTransport.PlayerScoreboard)
+                resetPlayerScoreboardAck();
             inFlight = false;
             lastReceipt = AckStatus.SendFailed;
             MCFunctionPreview.previewSay("ERROR [P4O2C_SEND] " + name + " id=" + requestId);
