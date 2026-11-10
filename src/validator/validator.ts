@@ -122,6 +122,10 @@ namespace MCFunctionValidator {
         }
 
         for (let i = 0; i < selector.scores.length; i++) {
+            if (!isValidScoreRange(selector.scores[i].range)) {
+                addIssue(issues, ValidationLevel.Error, "SELECTOR_SCORE_RANGE",
+                    "Score bounds must be ordered 32-bit integers.");
+            }
             for (let j = i + 1; j < selector.scores.length; j++) {
                 if (selector.scores[i].objective == selector.scores[j].objective) {
                     addIssue(
@@ -2416,6 +2420,19 @@ namespace MCFunctionValidator {
             addIssue(issues, ValidationLevel.Error, "EXECUTE_RUN_MISSING", "EXECUTE requires a RUN command.");
             return issues;
         }
+        // RUN links form a single chain. Detect cycles before recursive
+        // validation, without imposing an editor-only nesting depth limit.
+        let slow: MCFunctionAST.CommandNode = cmd;
+        let fast: MCFunctionAST.CommandNode = cmd;
+        while (fast && fast.kind == MCFunctionAST.CommandKind.Execute) {
+            slow = nextExecuteRun(slow);
+            fast = nextExecuteRun(nextExecuteRun(fast));
+            if (slow && slow == fast) {
+                addIssue(issues, ValidationLevel.Error, "EXECUTE_RUN_CYCLE",
+                    "Nested EXECUTE RUN contains a cycle.");
+                return issues;
+            }
+        }
         if (cmd.run.kind == MCFunctionAST.CommandKind.Execute) {
             // Nested Execute is legal in real Bedrock, but defer to explicit flat chains
             // while the current Preview interpreter handles only a simple RUN.
@@ -2431,7 +2448,7 @@ namespace MCFunctionValidator {
         // errors in a long chain must never be silently ignored.
         for (let i = 0; i < cmd.clauses.length; i++) {
             let c = cmd.clauses[i];
-            if (!c || c.kind < 0 || c.kind > MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare) {
+            if (!c || c.kind % 1 != 0 || c.kind < 0 || c.kind > MCFunctionAST.ExecuteClauseKind.UnlessScoreCompare) {
                 addIssue(issues, ValidationLevel.Error, "EXECUTE_CLAUSE_INVALID", "Invalid EXECUTE clause.");
                 continue;
             }
@@ -2451,12 +2468,19 @@ namespace MCFunctionValidator {
             if (k == MCFunctionAST.ExecuteClauseKind.FacingPosition ||
                 k == MCFunctionAST.ExecuteClauseKind.FacingEntity) {
                 if (!c.facing || (k == MCFunctionAST.ExecuteClauseKind.FacingPosition && !c.facing.position) ||
-                    (k == MCFunctionAST.ExecuteClauseKind.FacingEntity && !c.facing.entitySelector)) {
+                    (k == MCFunctionAST.ExecuteClauseKind.FacingEntity && !c.facing.entitySelector) ||
+                    (k == MCFunctionAST.ExecuteClauseKind.FacingPosition && c.facing.kind != MCFunctionAST.FacingKind.Position) ||
+                    (k == MCFunctionAST.ExecuteClauseKind.FacingEntity && c.facing.kind != MCFunctionAST.FacingKind.Entity)) {
                     addIssue(issues, ValidationLevel.Error, "EXECUTE_FACING_INVALID", "Facing input is required.");
                 } else if (k == MCFunctionAST.ExecuteClauseKind.FacingPosition) {
                     appendIssues(issues, validatePosition(c.facing.position));
                 } else {
                     appendIssues(issues, validateSelector(c.facing.entitySelector));
+                    if (c.facing.anchor != MCFunctionAST.EntityAnchor.Eyes &&
+                        c.facing.anchor != MCFunctionAST.EntityAnchor.Feet) {
+                        addIssue(issues, ValidationLevel.Error, "EXECUTE_FACING_ANCHOR",
+                            "Facing entity requires an eyes or feet anchor.");
+                    }
                 }
             }
             if (k == MCFunctionAST.ExecuteClauseKind.Rotated) {
@@ -2464,7 +2488,7 @@ namespace MCFunctionValidator {
                 else appendIssues(issues, validateRotation(c.rotation));
             }
             if (k == MCFunctionAST.ExecuteClauseKind.In &&
-                (c.dimension == undefined || c.dimension < 0 || c.dimension > 2))
+                (c.dimension == undefined || c.dimension % 1 != 0 || c.dimension < 0 || c.dimension > 2))
                 addIssue(issues, ValidationLevel.Error, "EXECUTE_DIMENSION_INVALID", "Invalid dimension.");
             if (k == MCFunctionAST.ExecuteClauseKind.Align &&
                 (!c.axes || c.axes.length < 1 || c.axes.length > 3 ||
@@ -2511,12 +2535,26 @@ namespace MCFunctionValidator {
                 k == MCFunctionAST.ExecuteClauseKind.UnlessScoreMatches) {
                 if (!c.objective || !isSafeCommandId(c.objective))
                     addIssue(issues, ValidationLevel.Error, "EXECUTE_SCORE_OBJECTIVE", "Invalid scoreboard objective.");
-                if (!c.scoreRange || (!c.scoreRange.hasMin && !c.scoreRange.hasMax) ||
-                    (c.scoreRange.hasMin && c.scoreRange.hasMax && c.scoreRange.min > c.scoreRange.max))
+                if (!isValidScoreRange(c.scoreRange))
                     addIssue(issues, ValidationLevel.Error, "EXECUTE_SCORE_RANGE", "Invalid score range.");
             }
         }
         return issues;
+    }
+    function nextExecuteRun(node: MCFunctionAST.CommandNode): MCFunctionAST.CommandNode {
+        return node && node.kind == MCFunctionAST.CommandKind.Execute
+            ? (<MCFunctionAST.ExecuteCommand>node).run : undefined;
+    }
+
+    /** Shared by EXECUTE matches and Selector scores; other ranges may be fractional. */
+    export function isValidScoreRange(range: MCFunctionAST.NumberRange): boolean {
+        if (!range || (!range.hasMin && !range.hasMax)) return false;
+        if (range.hasMin && !isScoreInteger(range.min)) return false;
+        if (range.hasMax && !isScoreInteger(range.max)) return false;
+        return !range.hasMin || !range.hasMax || range.min <= range.max;
+    }
+    function isScoreInteger(value: number): boolean {
+        return value % 1 == 0 && value >= -2147483648 && value <= 2147483647;
     }
     function executeValidAxes(s: string): boolean {
         for (let i = 0; i < s.length; i++) {
