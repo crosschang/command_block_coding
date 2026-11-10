@@ -13,9 +13,11 @@ namespace MCFunctionCBX12Bridge {
     let enabled = false;
     let unifiedTransport = false;
     let selectiveTransport = false;
+    let playerScopedTransport = false;
 
     /** Opt in at runtime. No in-game command is sent during initialization. */
     export function enable(): void {
+        playerScopedTransport = false;
         enabled = true;
         unifiedTransport = false; // Existing callers always get their original CBX12 route.
         selectiveTransport = false;
@@ -23,6 +25,7 @@ namespace MCFunctionCBX12Bridge {
 
     /** Restore the original PXT Preview execution routes. */
     export function disable(): void {
+        playerScopedTransport = false;
         enabled = false;
         unifiedTransport = false;
         selectiveTransport = false;
@@ -30,6 +33,7 @@ namespace MCFunctionCBX12Bridge {
 
     /** CBX12 old path stays available; this opts in to the unified CBXCORE pack. */
     export function enableUnified(): void {
+        playerScopedTransport = false;
         enabled = true;
         unifiedTransport = true;
         selectiveTransport = false;
@@ -37,12 +41,24 @@ namespace MCFunctionCBX12Bridge {
 
     /** EXPERIMENTAL: compiled AST line, only @/%/non-ASCII selectively escaped. */
     export function enableSelective(): void {
+        playerScopedTransport = false;
         enabled = true;
         unifiedTransport = true;
         selectiveTransport = true;
     }
 
     export function isSelective(): boolean { return isUnified() && selectiveTransport; }
+
+    /** Reuse the tested P4O2H receiver for single canonical AST commands.
+     * Receipt configuration is explicit in RuntimeBridge.select(). */
+    export function enablePlayerScoped(): void {
+        enabled = true;
+        unifiedTransport = false;
+        selectiveTransport = false;
+        playerScopedTransport = true;
+    }
+
+    export function isPlayerScoped(): boolean { return enabled && playerScopedTransport; }
 
     export function isUnified(): boolean { return enabled && unifiedTransport; }
 
@@ -59,12 +75,33 @@ namespace MCFunctionCBX12Bridge {
             MCFunctionPreview.previewSay("ERROR [CBX12_MISSING_AST] Command is missing.");
             return;
         }
+        if (isPlayerScoped()) {
+            // Do not silently downgrade a confirmed native request to a
+            // fire-and-forget or world-global receipt transport.
+            if (!MCFunctionOrderedPreview.isReceiptMode() ||
+                MCFunctionOrderedPreview.selectedAckTransport() !=
+                    MCFunctionOrderedPreview.AckTransport.PlayerScoreboard) {
+                MCFunctionOrderedPreview.markRejected();
+                MCFunctionPreview.previewSay("ERROR [NATIVE_ACK_CONFIGURATION] Select player-scoped ACK with confirmation; command not sent.");
+                return;
+            }
+            // submit() validates and compiles the original AST again, applies
+            // packet limits, and waits for the existing per-player receipt.
+            // No TP emulation, execute interpretation or direct retry here.
+            MCFunctionOrderedPreview.submit("native_command", [command]);
+            return;
+        }
         let compiled = MCFunctionCompiler.compileCommand(command);
         sendCompiled(compiled);
     }
 
     /** Diagnostic only. The behavior pack reports its own PING_OK message. */
     export function ping(): void {
+        if (isPlayerScoped()) {
+            let sent = player.execute("scriptevent cbxp4o2h:ping MAKECODE_NATIVE");
+            if (!sent) MCFunctionPreview.previewSay("WARNING [NATIVE_PING_SEND] Check P4O2H behavior pack.");
+            return;
+        }
         if (isUnified()) {
             MCFunctionCBXCore.ping();
             return;

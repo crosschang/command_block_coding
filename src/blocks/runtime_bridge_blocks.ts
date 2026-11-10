@@ -16,7 +16,9 @@ namespace RuntimeBridge {
         //% block="CBXCORE SELECTIVE (diagnostic)"
         CBXCoreSelective = 3,
         //% block="AUTO: MakeCode + CBXCORE (requires Behavior Pack)"
-        Auto = 4
+        Auto = 4,
+        //% block="P4O2H native + player ACK (requires Behavior Pack)"
+        NativePlayerAck = 5
     }
     //% blockId=mcfunction_runtime_bridge_select
     //% block="PREVIEW bridge route $mode"
@@ -33,6 +35,10 @@ namespace RuntimeBridge {
         else if (mode == Transport.Auto) {
             MCFunctionCBX12Bridge.enableSelective();
             MCFunctionRuntime.enableAutomatic();
+        } else if (mode == Transport.NativePlayerAck) {
+            MCFunctionCBX12Bridge.enablePlayerScoped();
+            MCFunctionOrderedPreview.setAckTransport(MCFunctionOrderedPreview.AckTransport.PlayerScoreboard);
+            MCFunctionOrderedPreview.setReceiptMode(true);
         } else MCFunctionPreview.previewSay("ERROR [BRIDGE_MODE_UNKNOWN] Unsupported Preview bridge route.");
     }
 
