@@ -58,6 +58,13 @@ namespace MCFunctionOrderedPreview {
     let inFlight = false;
     let lastReceipt = AckStatus.Idle;
     let lastId = "";
+    // Diagnostic only; OFF by default. No command or transport rewriting.
+    let traceEnabled = false;
+    export function setTraceEnabled(value: boolean): void { traceEnabled = value; }
+    function trace(step: string, id: string): void {
+        if (traceEnabled)
+            MCFunctionPreview.previewSay("INFO [NATIVE_TRACE] " + step + " id=" + id);
+    }
     const ACK_DONE = "cbxo2d_done_";
     const ACK_ERROR = "cbxo2d_error_";
     const ACK_POLL_PAUSE = 100;
@@ -306,13 +313,18 @@ namespace MCFunctionOrderedPreview {
 
     /** Fail closed; no fallback to per-line execution after an uncertain submit. */
     export function submit(name: string, nodes: MCFunctionAST.CommandNode[]): void {
+        trace("SUBMIT_ENTER " + name, "pending");
         if (inFlight) {
             MCFunctionPreview.previewSay("ERROR [P4O2D_ACK_BUSY] " + name);
             return;
         }
         lastId = "";
         lastReceipt = AckStatus.Rejected;
-        if (receiptMode && readbackReady == 0) probeReadback();
+        if (receiptMode && readbackReady == 0) {
+            trace("CALIBRATE_BEGIN", "pending");
+            probeReadback();
+            trace("CALIBRATE_RETURN", "pending");
+        }
         if (receiptMode && readbackReady != 1) {
             lastReceipt = AckStatus.Unsupported;
             MCFunctionPreview.previewSay("ERROR [P4O2D_ACK_NOT_VERIFIED] " + name);
@@ -355,6 +367,7 @@ namespace MCFunctionOrderedPreview {
         if (sequence > 999999) sequence = 1;
         let requestId = "q" + sessionToken + "_" + sequence;
         lastId = requestId;
+        trace("PLAN_READY", requestId);
         if (receiptMode) {
             inFlight = true;
             if (ackTransport == AckTransport.Scoreboard) {
@@ -392,13 +405,16 @@ namespace MCFunctionOrderedPreview {
         }
         // The single, tested P2c-4-style yield occurs before one batch,
         // NOT between individual commands; avoids fabricating a per-line delay.
+        trace("BEFORE_YIELD", requestId);
         loops.pause(1);
         let eventId = EVENT_ID;
         if (receiptMode && ackTransport == AckTransport.Scoreboard)
             eventId = SCORE_EVENT_ID;
         if (receiptMode && ackTransport == AckTransport.PlayerScoreboard)
             eventId = PLAYER_SCORE_EVENT_ID;
+        trace("SEND_BEGIN", requestId);
         let submitted = player.execute("scriptevent " + eventId + " " + requestId + " " + plan);
+        trace(submitted ? "SEND_RETURN_TRUE" : "SEND_RETURN_FALSE", requestId);
         if (!submitted) {
             if (receiptMode && ackTransport == AckTransport.Scoreboard)
                 resetScoreboardAck(requestId);
@@ -415,6 +431,7 @@ namespace MCFunctionOrderedPreview {
             // from ScriptEvent. Do not allow another request in this wait window.
             lastReceipt = waitReceipt(name, requestId);
             inFlight = false;
+            trace("RECEIPT_RETURN status=" + lastReceipt, requestId);
             return;
         }
         if (!introShown) {
