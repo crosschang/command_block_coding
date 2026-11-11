@@ -3,7 +3,9 @@
  * This is Preview-only runtime metadata, NEVER a Minecraft Command AST node.
  * P2b FAST cbxq3 is in-game PASS; this V4 codec needs separate game verification.
  *
- * V4 wire cbxq4; requires P2b FAST lab pack (not old cbxq2 pack).
+ * V4 wire cbxq4; requires a compatible receiver (not old cbxq2/cbxq3).
+ * SCALAR_V1 lab pack supports Daytime/KeepInventory only; list codecs below
+ * remain separate experimental paths, not implicitly supported by that pack.
  * Fast64 alphabet, ASCII7, full UTF-16; scalar numbers/booleans have dedicated wire.
  * Two-phase contract (no worker / loops.pause / busy wait):
  *   ticket = request(kind, page);

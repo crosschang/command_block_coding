@@ -32,3 +32,18 @@ ACK=9로 분리한다. 그 상태를 조건 false 확정값으로 반환하지 �
 - 6: 의도적으로 tag add 인수를 누락한 Raw RUN 음성 검사. API 예외라면 ACK=3 예상.
 - 새 수신팩·새 상태의 실제 게임 검증은 PENDING이다.
 - 전체 Execute 조항·Selector·멀티플레이·정밀 시간 측정의 전수 PASS가 아니다.
+
+## ZERO_ACK_V1 후속 실게임 결과
+
+기존 위 기록은 보존한다. 아래는 교체팩을 사용한 후속 관찰이다.
+
+| 단계 | 관찰 | 판정 |
+|---|---|---|
+| 0 | receipt 0/2/3/9 검증, READY=true | 새 ACK 교정 대표 PASS |
+| 5 | q181581_1, successCount=0, ZERO_RESULT, cause=UNCONFIRMED, ACK=9, TAG_OBSERVED=false, rxTick=doneTick=14017824 | 결과 0 분리 대표 GAME PASS. 모든 zero의 사유를 확정한 것은 아님 |
+| 1 | 바로 다음 요청 q181581_2, DONE, ACK=2, TAG_OBSERVED=true, rxTick=doneTick=14018064 | zero 처리 후 새 요청 실행·정리 대표 GAME PASS |
+| 6 최초 | ENTER 후 빨간 오류, ACCEPT/ACK 없음, 5단계 안내는 이전 문구 | 이전 사용자 테스트 프로그램으로 보이며 음성 검사 PASS 아님 |
+| 6 재시험 | ZERO_ACK_V1 STARTED, q333190_1 ACCEPT → 실제 CommandError(태그 이름 인수 누락) → ACK=3, TAG_OBSERVED=false | 의도한 구문 오류의 예외 처리 대표 GAME PASS |
+
+판정 범위는 정상 완료(2)·유효한 결과 0(9)·실제 API 예외(3)의 대표 구분이다.
+전체 명령의 zero/예외 정책, 배치 zero 후 자동 계속, 조회 데이터 반환은 검증하지 않았다.
