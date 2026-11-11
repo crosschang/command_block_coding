@@ -58,6 +58,10 @@ namespace QueryReadback {
         booleanValue: boolean;
         items: string[];
         total: number;
+        // Diagnostic metadata only. Never a query value or execution ACK.
+        hasReadMetrics: boolean;
+        readProbes: number;
+        readTicks: number;
         constructor(requestId: string) {
             this.requestId = requestId;
             this.state = State.Pending;
@@ -67,6 +71,9 @@ namespace QueryReadback {
             this.booleanValue = false;
             this.items = [];
             this.total = -1;
+            this.hasReadMetrics = false;
+            this.readProbes = 0;
+            this.readTicks = 0;
         }
     }
 
@@ -118,7 +125,18 @@ namespace QueryReadback {
         // Read the snapshot from this ticket ourselves. Do not let a caller
         // accidentally pair a result from another request with this ticket.
         if (!ticket) return failed("", "MISSING_TICKET");
-        return fromLiveResult(ticket, MCFunctionLiveQuery.tryRead(ticket));
+        let snapshot = MCFunctionLiveQuery.tryRead(ticket);
+        let response = fromLiveResult(ticket, snapshot);
+        let measured = snapshot && (snapshot.ready === true || snapshot.status == "EXPIRED" ||
+            (snapshot.status == "PENDING" && snapshot.ready === false && snapshot.ok === false));
+        if (measured && finiteNumber(snapshot.probeCalls) && snapshot.probeCalls >= 0 &&
+            snapshot.probeCalls % 1 == 0 && finiteNumber(snapshot.readTicks) &&
+            snapshot.readTicks >= 0 && snapshot.readTicks % 1 == 0) {
+            response.hasReadMetrics = true;
+            response.readProbes = snapshot.probeCalls;
+            response.readTicks = snapshot.readTicks;
+        }
+        return response;
     }
     function fromLiveResult(ticket: MCFunctionLiveQuery.Ticket,
         snapshot: MCFunctionLiveQuery.Result): Response {
@@ -183,6 +201,16 @@ namespace QueryReadback {
     //% blockId=cbx_readback_page_count_or block="QUERY RESULT page item count $response or $fallback" weight=73
     export function pageCountOr(response: Response, fallback: number): number {
         return hasTextList(response) ? response.items.length : fallback;
+    }
+    /** Number of Boolean tag probes; excludes ACK and log output calls. */
+    //% blockId=cbx_readback_probes_or block="QUERY RESULT read probes $response or $fallback" weight=72
+    export function readProbesOr(response: Response, fallback: number): number {
+        return response && response.hasReadMetrics ? response.readProbes : fallback;
+    }
+    /** GameTime ticks in the decoder; not wall-clock milliseconds. */
+    //% blockId=cbx_readback_ticks_or block="QUERY RESULT read ticks $response or $fallback" weight=71
+    export function readTicksOr(response: Response, fallback: number): number {
+        return response && response.hasReadMetrics ? response.readTicks : fallback;
     }
     //% blockId=cbx_readback_boolean_or block="QUERY RESULT Boolean $response or $fallback" weight=77
     export function booleanOr(response: Response, fallback: boolean): boolean {

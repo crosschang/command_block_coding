@@ -1,5 +1,6 @@
 /**
- * P2b V4 HUFF: nonblocking live readback for Minecraft Education MakeCode.
+ * P2b V4 HUFF: two-phase live readback for Minecraft Education MakeCode.
+ * Requests do not wait; a bounded synchronous read can still take visible time.
  * This is Preview-only runtime metadata, NEVER a Minecraft Command AST node.
  * P2b FAST cbxq3 is in-game PASS; this V4 codec needs separate game verification.
  *
@@ -7,7 +8,8 @@
  * SCALAR_V1 supports Daytime/KeepInventory; SCALAR_SCORE_V2 adds score values.
  * The score request reuses the shared PlayerTarget AST, with explicit limits.
  * DATA_LIST_V3 adds the bounded paged list receiver (modes 0/1/2).
- * Huffman mode 3 decoding stays experimental and is not emitted by that pack.
+ * DATA_HUFF_V4 also emits existing Huffman mode 3 when it uses fewer probes.
+ * Each receiving pack needs its own in-game verification.
  * Fast64 alphabet, ASCII7, full UTF-16; scalar numbers/booleans have dedicated wire.
  * Two-phase contract (no worker / loops.pause / busy wait):
  *   ticket = request(kind, page);
@@ -367,6 +369,10 @@ namespace MCFunctionLiveQuery {
                     let value = HUFF_SYMBOL[state];
                     if (value >= 0) {
                         if (value == HUFF_ESCAPE_INDEX) {
+                            if (cursor + 16 > MAX_HUFF_BITS) {
+                                result.status = "INVALID_HUFF_STREAM";
+                                return completed(result, ticket, started);
+                            }
                             let unit = 0;
                             let power = 1;
                             for (let bit = 0; bit < 16; bit++) {

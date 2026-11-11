@@ -27,4 +27,16 @@ test('Oversized item format is rejected without truncation',()=>{const h=fixture
 test('Checksum mismatch blocks list use',()=>{const h=fixture();packet(h,['alpha'],1,0,{badHash:true});assert.equal(h.Q.readLive(h.ticket).reason,'INVALID_PACKET_CHECKSUM');});
 test('Pending is not an empty list',()=>{const h=fixture(),r=h.Q.readLive(h.ticket);assert(!h.Q.hasTextList(r));assert.equal(h.Q.pageCountOr(r,-1),-1);});
 test('Scalar responses do not expose a page count',()=>{const h=fixture();assert.equal(h.Q.pageCountOr(h.Q.numberResponse('n',0),-1),-1);});
+// Build independent prefix codes from the canonical decoder tree, not receiver code.
+const decoder=fs.readFileSync(path.join(root,'src/preview/cbx_live_query.ts'),'utf8');
+const tree={};for(const n of ['HUFF_TOKENS','HUFF_ZERO','HUFF_ONE','HUFF_SYMBOL'])tree[n]=JSON.parse(decoder.match(new RegExp('const '+n+': (?:string|number)\\[\\] = (\\[[^;]*\\]);'))[1]);
+const codes={};function walk(node,code){const v=tree.HUFF_SYMBOL[node];if(v>=0)codes[tree.HUFF_TOKENS[v]]=code;else{walk(tree.HUFF_ZERO[node],code+'0');walk(tree.HUFF_ONE[node],code+'1');}}walk(0,'');
+function literalHuff(text){let stream='';for(let i=0;i<text.length;i++){const s=text.charAt(i);if(codes[s])stream+=codes[s];else{stream+=codes['<ESC>'];const unit=text.charCodeAt(i);for(let b=0;b<16;b++)stream+=Math.floor(unit/2**b)%2?'1':'0';}}return stream;}
+function huffPacket(h,text,stream=literalHuff(text)){
+ const b=h.ticket.token+'_';bits(h,b+'n',1,2);bits(h,b+'t',1,12);bits(h,b+'l0x',text.length,6);bits(h,b+'m0x',3,2);
+ for(let i=0;i<stream.length;i++)if(stream[i]==='1')h.tags.add(b+'c0x'+i+'x');bits(h,b+'h',hash([text],1,h.ticket.page),8);h.tags.add(b+'r');
+}
+for(const text of ['minecraft:','000_cbxql_a','000_제주','😀',String.fromCharCode(65535),String.fromCharCode(65535).repeat(32)])test('Existing Huffman mode restores '+JSON.stringify(text),()=>{const h=fixture();huffPacket(h,text,text==='minecraft:'?codes['minecraft:']:literalHuff(text));const r=h.Q.readLive(h.ticket);assert(h.Q.hasTextList(r));assert.equal(h.Q.textOr(r,0,''),text);assert(h.Q.readProbesOr(r,-1)>0);});
+test('Huffman token overshoot cannot become a truncated string',()=>{const h=fixture();huffPacket(h,'a',codes['minecraft:']);assert.equal(h.Q.readLive(h.ticket).reason,'INVALID_HUFF_LENGTH');});
+test('Transport metrics are distinct from query values',()=>{const h=fixture();packet(h,['alpha'],1);const r=h.Q.readLive(h.ticket);assert(r.hasReadMetrics);assert.equal(h.Q.readTicksOr(r,-1),0);assert(h.Q.readProbesOr(r,-1)>0);assert.equal(h.Q.readProbesOr(h.Q.numberResponse('fake',0),-1),-1);const closed=h.Q.readLive(h.ticket);assert(!closed.hasReadMetrics);assert.equal(h.Q.readProbesOr(closed,-1),-1);});
 console.log('TOTAL',count,'LOCAL PASS; tag fixtures, GAME PENDING');
