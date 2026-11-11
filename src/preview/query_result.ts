@@ -175,6 +175,15 @@ namespace QueryReadback {
     export function hasBoolean(response: Response): boolean {
         return success(response) && response.valueKind == ValueKind.Boolean;
     }
+    //% blockId=cbx_readback_has_list block="QUERY RESULT has text list $response" weight=74
+    export function hasTextList(response: Response): boolean {
+        return success(response) && response.valueKind == ValueKind.TextList;
+    }
+    /** Page size, distinct from totalOr() which is the full snapshot count. */
+    //% blockId=cbx_readback_page_count_or block="QUERY RESULT page item count $response or $fallback" weight=73
+    export function pageCountOr(response: Response, fallback: number): number {
+        return hasTextList(response) ? response.items.length : fallback;
+    }
     //% blockId=cbx_readback_boolean_or block="QUERY RESULT Boolean $response or $fallback" weight=77
     export function booleanOr(response: Response, fallback: boolean): boolean {
         return hasBoolean(response) ? response.booleanValue : fallback;

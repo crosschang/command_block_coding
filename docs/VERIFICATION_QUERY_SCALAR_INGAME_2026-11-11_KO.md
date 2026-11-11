@@ -24,3 +24,26 @@ V1의 성공을 후속 V2 수신팩의 전체 PASS로 확대하지 않는다.
 회귀 검사는 유지한다. 실제 멀티플레이, 응답 혼합·동시성·재접속 전수는 대기다.
 
 현재 순서: 싱글플레이 경계 확인 → scoreboard 등 공통 반환 확장 → 기능 통합 후 멀티.
+
+## V2 경계·점수 후속 실게임 확인
+
+근거: image(20261111-105430).png, image(20261111-110204).png,
+image(20261111-110218).png 및 QUERY_SCORE_V2_MAKECODE_MAIN.ts.
+
+| 항목 | 관찰 | 판정 |
+|---|---|---|
+| daytime 0 | DATA SCALAR_SCORE_V2 시작·ping, API value=0 → STATE=1 REASON=OK → NUMBER=0 ADD_100=100 | 숫자 0 경계 대표 GAME PASS |
+| keepInventory true | API value=true → STATE=1 REASON=OK → BOOLEAN=true BRANCH=TRUE | 불리언 true 경계 대표 GAME PASS |
+| 자기 점수 0 | score_self value=0 → NUMBER=0 ADD_10=10 BRANCH=ZERO | 점수 0 대표 GAME PASS |
+| fake holder 음수 | score_name value=-7 → NUMBER=-7 ADD_10=3 BRANCH=NEGATIVE | #cbxq_probe 단일 이름 조회 대표 GAME PASS |
+| 점수 없음 | MISSING_SCORE → STATE=5 REASON=SCORE_NOT_FOUND → no new value used | 값 없음과 0 구분 대표 GAME PASS |
+| 저장 변수 유지 | 누락 응답 후 STORED_SCORE=-7 | 마지막 유효값 보존 대표 GAME PASS |
+| 테스트 설정 | 시간 1000, keepinventory=false, dodaylightcycle=false 적용 메시지 | 사용자가 선택한 테스트 상태 확인. 원래 설정을 추정 복구했다고 주장하지 않음 |
+
+사용자는 원래 설정을 따로 기록하지 않았다고 했으며, 시간이 멈춘 상태였을 것이라고
+정정했다. 따라서 향후 설정을 바꾸는 테스트는 현재 값을 먼저 확인·기록하고 복구한다.
+
+미검증으로 남길 것: Objective 없음, 실제 named player의 점수, 중복 이름,
+int32 최솟값·최댓값, 모든 Selector, 목록, 실제 만료/취소, 부하, 멀티 실게임.
+이전 위 표의 미검증은 당시 상태이며 이 후속 표가 해당 대표 사례를 갱신한다.
+후속 V3 수신팩에 이 결과를 자동으로 옮겨 GAME PASS를 부여하지 않는다.

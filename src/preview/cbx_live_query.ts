@@ -6,8 +6,8 @@
  * V4 wire cbxq4; requires a compatible receiver (not old cbxq2/cbxq3).
  * SCALAR_V1 supports Daytime/KeepInventory; SCALAR_SCORE_V2 adds score values.
  * The score request reuses the shared PlayerTarget AST, with explicit limits.
- * The list codecs below
- * remain separate experimental paths, not implicitly supported by that pack.
+ * DATA_LIST_V3 adds the bounded paged list receiver (modes 0/1/2).
+ * Huffman mode 3 decoding stays experimental and is not emitted by that pack.
  * Fast64 alphabet, ASCII7, full UTF-16; scalar numbers/booleans have dedicated wire.
  * Two-phase contract (no worker / loops.pause / busy wait):
  *   ticket = request(kind, page);
@@ -334,8 +334,11 @@ namespace MCFunctionLiveQuery {
 
         let count = bits(base + "n", 2);
         let total = bits(base + "t", 12);
+        let expectedCount = total - ticket.page * PAGE_SIZE;
+        if (expectedCount < 0) expectedCount = 0;
+        if (expectedCount > PAGE_SIZE) expectedCount = PAGE_SIZE;
         if (count > PAGE_SIZE || total > 4095 || count > total ||
-            (ticket.page * PAGE_SIZE >= total && count != 0)) {
+            count != expectedCount) {
             result.status = "INVALID_PACKET_COUNT";
             return completed(result, ticket, started);
         }
@@ -407,12 +410,14 @@ namespace MCFunctionLiveQuery {
             result.status = "INVALID_PACKET_CHECKSUM";
             return completed(result, ticket, started);
         }
-        if (probe(base + "o")) {
-            if (count != 0 || total == 0 || ticket.page * PAGE_SIZE < total) {
-                result.status = "INVALID_PACKET_RANGE";
-            } else {
-                result.status = "PAGE_OUT_OF_RANGE";
-            }
+        let rangeMarker = probe(base + "o");
+        let outside = total > 0 && ticket.page * PAGE_SIZE >= total;
+        if (rangeMarker != outside) {
+            result.status = "INVALID_PACKET_RANGE";
+            return completed(result, ticket, started);
+        }
+        if (outside) {
+            result.status = "PAGE_OUT_OF_RANGE";
             return completed(result, ticket, started);
         }
         result.status = "OK";
