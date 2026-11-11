@@ -46,7 +46,7 @@ namespace MCFunctionPreview {
  */
 //% color=#477D95 weight=91 block="QUERY RESULT"
 namespace QueryReadback {
-    export enum State { Pending = 0, Ready = 1, Error = 2, Timeout = 3, Closed = 4 }
+    export enum State { Pending = 0, Ready = 1, Error = 2, Timeout = 3, Closed = 4, Missing = 5 }
     export enum ValueKind { None = 0, Number = 1, Boolean = 2, TextList = 3 }
 
     export class Response {
@@ -134,9 +134,15 @@ namespace QueryReadback {
             r.state = snapshot.status == "EXPIRED" ? State.Timeout : State.Closed;
             return r;
         }
+        if (ticket.kind == MCFunctionLiveQuery.Kind.ScoreboardValue && snapshot.ready === true &&
+            snapshot.ok === false && (snapshot.status == "OBJECTIVE_NOT_FOUND" || snapshot.status == "SCORE_NOT_FOUND")) {
+            let r = failed(id, snapshot.status);
+            r.state = State.Missing;
+            return r;
+        }
         if (snapshot.ready !== true || snapshot.ok !== true || snapshot.status != "OK")
             return failed(id, snapshot.status || "INVALID_RESULT");
-        if (ticket.kind == MCFunctionLiveQuery.Kind.Daytime)
+        if (ticket.kind == MCFunctionLiveQuery.Kind.Daytime || ticket.kind == MCFunctionLiveQuery.Kind.ScoreboardValue)
             return numberResponse(id, snapshot.numberValue);
         if (ticket.kind == MCFunctionLiveQuery.Kind.KeepInventory)
             return booleanResponse(id, snapshot.booleanValue);

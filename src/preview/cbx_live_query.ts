@@ -4,7 +4,9 @@
  * P2b FAST cbxq3 is in-game PASS; this V4 codec needs separate game verification.
  *
  * V4 wire cbxq4; requires a compatible receiver (not old cbxq2/cbxq3).
- * SCALAR_V1 lab pack supports Daytime/KeepInventory only; list codecs below
+ * SCALAR_V1 supports Daytime/KeepInventory; SCALAR_SCORE_V2 adds score values.
+ * The score request reuses the shared PlayerTarget AST, with explicit limits.
+ * The list codecs below
  * remain separate experimental paths, not implicitly supported by that pack.
  * Fast64 alphabet, ASCII7, full UTF-16; scalar numbers/booleans have dedicated wire.
  * Two-phase contract (no worker / loops.pause / busy wait):
@@ -48,7 +50,9 @@ namespace MCFunctionLiveQuery {
         //% block="daytime"
         Daytime = 4,
         //% block="keepInventory gamerule"
-        KeepInventory = 5
+        KeepInventory = 5,
+        //% block="scoreboard value (use request score block)"
+        ScoreboardValue = 6
     }
 
     export class Ticket {
@@ -164,6 +168,8 @@ namespace MCFunctionLiveQuery {
     //% page.defl=0
     //% weight=90
     export function request(kind: Kind, page: number): Ticket {
+        if (kind == Kind.ScoreboardValue)
+            return new Ticket("", kind, page, false, "USE_REQUEST_SCORE_BLOCK");
         if (!validPage(page) || op(kind).length == 0) {
             return new Ticket("", kind, page, false, "BAD_ARGUMENT");
         }
@@ -173,6 +179,62 @@ namespace MCFunctionLiveQuery {
         let token = sourceToken();
         let sent = player.execute("scriptevent cbxq4:req " + token + "|" + op(kind) + "|" + page);
         return new Ticket(token, kind, page, sent, sent ? "" : "SEND_FAILED");
+    }
+
+    /** Query-only metadata, not command-string construction or a new command AST.
+     * Phase 1 supports unfiltered @s and an exact literal score holder.
+     * Never replace a filtered/multiple target with unfiltered @s. */
+    //% blockId=cbxq4_request_score
+    //% block="LIVE QUERY request score $target objective $objective"
+    //% target.shadow="mcfunction_target_selector"
+    //% objective.shadow="text" objective.defl="points"
+    //% weight=89
+    export function requestScore(target: MCFunctionFields.TargetValue, objective: string): Ticket {
+        let kind = Kind.ScoreboardValue;
+        if (!wireText(objective)) return new Ticket("", kind, 0, false, "INVALID_SCORE_OBJECTIVE");
+        let value = target ? target.target : undefined;
+        if (!value) return new Ticket("", kind, 0, false, "MISSING_SCORE_TARGET");
+        let queryOp = "";
+        let holder = "";
+        if (value.kind == MCFunctionAST.PlayerTargetKind.Selector) {
+            let s = value.selector;
+            if (!s || s.base != MCFunctionAST.SelectorBase.Self ||
+                (s.filters && s.filters.length > 0) || (s.scores && s.scores.length > 0) ||
+                (s.hasItems && s.hasItems.length > 0))
+                return new Ticket("", kind, 0, false, "UNSUPPORTED_SCORE_SELECTOR");
+            queryOp = "score_self";
+        } else if (value.kind == MCFunctionAST.PlayerTargetKind.Name) {
+            holder = value.name;
+            if (!wireText(holder) || holder.charAt(0) == "@" || holder == "*")
+                return new Ticket("", kind, 0, false, "INVALID_SCORE_HOLDER");
+            queryOp = "score_name";
+        } else return new Ticket("", kind, 0, false, "UNSUPPORTED_SCORE_TARGET");
+        let token = sourceToken();
+        let message = token + "|" + queryOp + "|0|" + wireHex(objective);
+        if (queryOp == "score_name") message += "|" + wireHex(holder);
+        let sent = player.execute("scriptevent cbxq4:req " + message);
+        return new Ticket(token, kind, 0, sent, sent ? "" : "SEND_FAILED");
+    }
+    // Protocol limit, not a new restriction on canonical Minecraft IDs.
+    function wireText(value: string): boolean {
+        if (!value || value.length > 64) return false;
+        for (let i = 0; i < value.length; i++) {
+            let c = value.charCodeAt(i);
+            if (c < 32 || c == 127) return false;
+        }
+        return true;
+    }
+    function wireHex(value: string): string {
+        let out = "";
+        let alphabet = "0123456789abcdef";
+        for (let i = 0; i < value.length; i++) {
+            let c = value.charCodeAt(i);
+            out += alphabet.charAt(Math.floor(c / 4096));
+            out += alphabet.charAt(Math.floor(c / 256) % 16);
+            out += alphabet.charAt(Math.floor(c / 16) % 16);
+            out += alphabet.charAt(c % 16);
+        }
+        return out;
     }
 
     /** One bounded read; the value is ready before this is called. */
@@ -210,6 +272,35 @@ namespace MCFunctionLiveQuery {
             return completed(result, ticket, started);
         }
         let base = ticket.token + "_";
+
+        if (ticket.kind == Kind.ScoreboardValue) {
+            let missingObjective = probe(base + "j");
+            let missingScore = probe(base + "k");
+            if (missingObjective && missingScore) {
+                result.status = "INVALID_SCORE_PACKET";
+                return completed(result, ticket, started);
+            }
+            if (missingObjective || missingScore) {
+                result.status = missingObjective ? "OBJECTIVE_NOT_FOUND" : "SCORE_NOT_FOUND";
+                return completed(result, ticket, started);
+            }
+            // Unsigned bias wire avoids JavaScript bitwise sign truncation.
+            let encoded = bits(base + "v", 32);
+            let score = encoded - 2147483648;
+            let hash = 109;
+            for (let byte = 0; byte < 4; byte++)
+                hash = (hash * 31 + Math.floor(encoded / Math.pow(256, byte)) % 256) % 256;
+            if (bits(base + "h", 8) != hash) {
+                result.status = "INVALID_SCORE_PACKET";
+                return completed(result, ticket, started);
+            }
+            result.total = 1;
+            result.numberValue = score;
+            result.items.push("" + score);
+            result.status = "OK";
+            result.ok = true;
+            return completed(result, ticket, started);
+        }
 
         // Direct scalar packets avoid decoding "1000" or "false" as UTF-16.
         if (ticket.kind == Kind.Daytime) {
@@ -358,7 +449,10 @@ namespace MCFunctionLiveQuery {
     //% blockId=cbxq2_number
     //% block="LIVE QUERY number value $result"
     //% weight=66
-    export function numberValue(result: Result): number { return result && result.ok && result.kind == Kind.Daytime ? result.numberValue : 0; }
+    export function numberValue(result: Result): number {
+        return result && result.ok && (result.kind == Kind.Daytime || result.kind == Kind.ScoreboardValue)
+            ? result.numberValue : 0;
+    }
     //% blockId=cbxq2_boolean
     //% block="LIVE QUERY Boolean value $result"
     //% weight=65
