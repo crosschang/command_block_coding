@@ -1,5 +1,9 @@
 # V5: 요청 플레이어의 태그 보유 여부 조회
 
+2026-11-12 실게임 추가: 한글 태그 있음·없음과 Boolean 분기, 저장 false 100회 재사용을
+대표 GAME PASS로 확인했다. 두 읽기는 각각 PROBES=4 READ_TICKS=2였다.
+상세 범위와 제한은 VERIFICATION_QUERY_OWN_TAG_V5_INGAME_2026-11-12_KO.md를 따른다.
+
 ## 목적과 범위
 
 목록 전체를 읽지 않고 특정 태그가 있는지만 참·거짓으로 받는다.
@@ -98,8 +102,9 @@ LAB_TAG 이름을 기준으로 확인한다. 새로 시작한 프로그램이 �
 
 TypeScript 5.7.3 의미 검사: 기존 진단 52→52, 신규 0. 사용자 예제 진단 0.
 실제 @minecraft/server 2.8.0 타입을 사용한 행동팩 JS 검사 진단 0.
-전체 PXT 컴파일은 미수행이며 새 기능 실게임·성능 개선은 PENDING이다.
-V4의 기존 대표 GAME PASS를 새 기능이나 V5 팩 전체의 GAME PASS로 확대하지 않는다.
+전체 PXT 컴파일은 미수행이다. 최초 구현 당시 실게임·성능은 PENDING이었고,
+이후 위 추가 기록의 한글 태그 있음·없음·저장 재사용만 대표 GAME PASS로 확인했다.
+V4의 기존 대표 GAME PASS나 이번 좁은 조회의 결과를 V5 팩 전체의 GAME PASS로 확대하지 않는다.
 
 공식 API 근거:
 https://learn.microsoft.com/en-us/minecraft/creator/scriptapi/minecraft/server/entity?view=minecraft-bedrock-stable#hastag

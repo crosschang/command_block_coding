@@ -2,7 +2,8 @@
 
 > 아래는 공통 구조 도입 시점의 기록이다. 이후 시간·게임 규칙·점수·목록은 각 후속 구현과
 > 대표 실게임 기록이 추가됐다. 현재 태그 보유 여부 구현·팩 교체·검증 범위는
-> QUERY_OWN_TAG_READBACK_V5_KO.md를 따른다. 새 V5 기능의 실게임 검증은 아직 대기다.
+> QUERY_OWN_TAG_READBACK_V5_KO.md를 따른다. V5의 한글 태그 있음·없음과 저장 재사용은
+> VERIFICATION_QUERY_OWN_TAG_V5_INGAME_2026-11-12_KO.md에서 대표 실게임 PASS로 확인했다.
 
 ## 범위와 구현 위치
 
