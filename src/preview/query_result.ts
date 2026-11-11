@@ -160,10 +160,11 @@ namespace QueryReadback {
         }
         if (snapshot.ready !== true || snapshot.ok !== true || snapshot.status != "OK")
             return failed(id, snapshot.status || "INVALID_RESULT");
-        if (ticket.kind == MCFunctionLiveQuery.Kind.Daytime || ticket.kind == MCFunctionLiveQuery.Kind.ScoreboardValue)
+        if (ticket.kind == MCFunctionLiveQuery.Kind.Daytime || ticket.kind == MCFunctionLiveQuery.Kind.ScoreboardValue ||
+            ticket.kind == MCFunctionLiveQuery.Kind.GameruleInteger)
             return numberResponse(id, snapshot.numberValue);
         if (ticket.kind == MCFunctionLiveQuery.Kind.KeepInventory ||
-            ticket.kind == MCFunctionLiveQuery.Kind.OwnTagPresent)
+            ticket.kind == MCFunctionLiveQuery.Kind.OwnTagPresent || ticket.kind == MCFunctionLiveQuery.Kind.GameruleBoolean)
             return booleanResponse(id, snapshot.booleanValue);
         if (ticket.kind == MCFunctionLiveQuery.Kind.Players ||
             ticket.kind == MCFunctionLiveQuery.Kind.Objectives ||

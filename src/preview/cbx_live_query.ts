@@ -10,6 +10,7 @@
  * DATA_LIST_V3 adds the bounded paged list receiver (modes 0/1/2).
  * DATA_HUFF_V4 also emits existing Huffman mode 3 when it uses fewer probes.
  * DATA_TAG_V5 adds exact requesting-player tag membership as a Boolean.
+ * DATA_RULE_V6 adds Registry-typed Boolean/integer gamerule queries.
  * Each receiving pack needs its own in-game verification.
  * Fast64 alphabet, ASCII7, full UTF-16; scalar numbers/booleans have dedicated wire.
  * Two-phase contract (no worker / loops.pause / busy wait):
@@ -57,7 +58,11 @@ namespace MCFunctionLiveQuery {
         //% block="scoreboard value (use request score block)"
         ScoreboardValue = 6,
         //% block="own tag present (use request own tag block)"
-        OwnTagPresent = 7
+        OwnTagPresent = 7,
+        //% block="Boolean gamerule (use request gamerule block)"
+        GameruleBoolean = 8,
+        //% block="integer gamerule (use request gamerule block)"
+        GameruleInteger = 9
     }
 
     export class Ticket {
@@ -177,6 +182,8 @@ namespace MCFunctionLiveQuery {
             return new Ticket("", kind, page, false, "USE_REQUEST_SCORE_BLOCK");
         if (kind == Kind.OwnTagPresent)
             return new Ticket("", kind, page, false, "USE_REQUEST_OWN_TAG_BLOCK");
+        if (kind == Kind.GameruleBoolean || kind == Kind.GameruleInteger)
+            return new Ticket("", kind, page, false, "USE_REQUEST_GAMERULE_BLOCK");
         if (!validPage(page) || op(kind).length == 0) {
             return new Ticket("", kind, page, false, "BAD_ARGUMENT");
         }
@@ -234,6 +241,26 @@ namespace MCFunctionLiveQuery {
             return new Ticket("", kind, 0, false, "INVALID_TAG_NAME");
         let token = sourceToken();
         let sent = player.execute("scriptevent cbxq4:req " + token + "|tag_self|0|" + wireHex(tag));
+        return new Ticket(token, kind, 0, sent, sent ? "" : "SEND_FAILED");
+    }
+    /** Read-only native gamerule query. Reuses the existing typed Registry/ref.
+     * Enum rules are not Boolean/number data and remain unsupported here. */
+    //% blockId=cbxq4_request_gamerule
+    //% block="LIVE QUERY request gamerule $rule"
+    //% rule.shadow="mcfunction_gamerule_registry_keepinventory"
+    //% weight=87
+    export function requestGamerule(rule: MCFunctionGameruleLibrary.GameRuleRef): Ticket {
+        let id = rule ? rule.ruleId : "";
+        if (typeof id != "string" || !wireText(id))
+            return new Ticket("", Kind.GameruleBoolean, 0, false, "INVALID_GAMERULE_REF");
+        let valueKind = MCFunctionGameruleRegistry.valueKindOf(id);
+        if (valueKind != 1 && valueKind != 2)
+            return new Ticket("", Kind.GameruleBoolean, 0, false,
+                valueKind == 3 ? "UNSUPPORTED_GAMERULE_VALUE_KIND" : "UNKNOWN_GAMERULE");
+        let kind = valueKind == 1 ? Kind.GameruleBoolean : Kind.GameruleInteger;
+        let token = sourceToken();
+        let queryOp = valueKind == 1 ? "rule_boolean" : "rule_integer";
+        let sent = player.execute("scriptevent cbxq4:req " + token + "|" + queryOp + "|0|" + wireHex(id));
         return new Ticket(token, kind, 0, sent, sent ? "" : "SEND_FAILED");
     }
     // Protocol limit, not a new restriction on canonical Minecraft IDs or tag names.
@@ -294,16 +321,18 @@ namespace MCFunctionLiveQuery {
         }
         let base = ticket.token + "_";
 
-        if (ticket.kind == Kind.ScoreboardValue) {
-            let missingObjective = probe(base + "j");
-            let missingScore = probe(base + "k");
-            if (missingObjective && missingScore) {
-                result.status = "INVALID_SCORE_PACKET";
-                return completed(result, ticket, started);
-            }
-            if (missingObjective || missingScore) {
-                result.status = missingObjective ? "OBJECTIVE_NOT_FOUND" : "SCORE_NOT_FOUND";
-                return completed(result, ticket, started);
+        if (ticket.kind == Kind.ScoreboardValue || ticket.kind == Kind.GameruleInteger) {
+            if (ticket.kind == Kind.ScoreboardValue) {
+                let missingObjective = probe(base + "j");
+                let missingScore = probe(base + "k");
+                if (missingObjective && missingScore) {
+                    result.status = "INVALID_SCORE_PACKET";
+                    return completed(result, ticket, started);
+                }
+                if (missingObjective || missingScore) {
+                    result.status = missingObjective ? "OBJECTIVE_NOT_FOUND" : "SCORE_NOT_FOUND";
+                    return completed(result, ticket, started);
+                }
             }
             // Unsigned bias wire avoids JavaScript bitwise sign truncation.
             let encoded = bits(base + "v", 32);
@@ -312,7 +341,7 @@ namespace MCFunctionLiveQuery {
             for (let byte = 0; byte < 4; byte++)
                 hash = (hash * 31 + Math.floor(encoded / Math.pow(256, byte)) % 256) % 256;
             if (bits(base + "h", 8) != hash) {
-                result.status = "INVALID_SCORE_PACKET";
+                result.status = ticket.kind == Kind.ScoreboardValue ? "INVALID_SCORE_PACKET" : "INVALID_INTEGER_PACKET";
                 return completed(result, ticket, started);
             }
             result.total = 1;
@@ -338,7 +367,8 @@ namespace MCFunctionLiveQuery {
             result.ok = true;
             return completed(result, ticket, started);
         }
-        if (ticket.kind == Kind.KeepInventory || ticket.kind == Kind.OwnTagPresent) {
+        if (ticket.kind == Kind.KeepInventory || ticket.kind == Kind.OwnTagPresent ||
+            ticket.kind == Kind.GameruleBoolean) {
             let yes = probe(base + "v");
             let no = probe(base + "z");
             if (yes == no) {
