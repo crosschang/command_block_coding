@@ -162,7 +162,8 @@ namespace QueryReadback {
             return failed(id, snapshot.status || "INVALID_RESULT");
         if (ticket.kind == MCFunctionLiveQuery.Kind.Daytime || ticket.kind == MCFunctionLiveQuery.Kind.ScoreboardValue)
             return numberResponse(id, snapshot.numberValue);
-        if (ticket.kind == MCFunctionLiveQuery.Kind.KeepInventory)
+        if (ticket.kind == MCFunctionLiveQuery.Kind.KeepInventory ||
+            ticket.kind == MCFunctionLiveQuery.Kind.OwnTagPresent)
             return booleanResponse(id, snapshot.booleanValue);
         if (ticket.kind == MCFunctionLiveQuery.Kind.Players ||
             ticket.kind == MCFunctionLiveQuery.Kind.Objectives ||

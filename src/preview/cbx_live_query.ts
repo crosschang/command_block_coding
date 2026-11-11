@@ -9,6 +9,7 @@
  * The score request reuses the shared PlayerTarget AST, with explicit limits.
  * DATA_LIST_V3 adds the bounded paged list receiver (modes 0/1/2).
  * DATA_HUFF_V4 also emits existing Huffman mode 3 when it uses fewer probes.
+ * DATA_TAG_V5 adds exact requesting-player tag membership as a Boolean.
  * Each receiving pack needs its own in-game verification.
  * Fast64 alphabet, ASCII7, full UTF-16; scalar numbers/booleans have dedicated wire.
  * Two-phase contract (no worker / loops.pause / busy wait):
@@ -54,7 +55,9 @@ namespace MCFunctionLiveQuery {
         //% block="keepInventory gamerule"
         KeepInventory = 5,
         //% block="scoreboard value (use request score block)"
-        ScoreboardValue = 6
+        ScoreboardValue = 6,
+        //% block="own tag present (use request own tag block)"
+        OwnTagPresent = 7
     }
 
     export class Ticket {
@@ -172,6 +175,8 @@ namespace MCFunctionLiveQuery {
     export function request(kind: Kind, page: number): Ticket {
         if (kind == Kind.ScoreboardValue)
             return new Ticket("", kind, page, false, "USE_REQUEST_SCORE_BLOCK");
+        if (kind == Kind.OwnTagPresent)
+            return new Ticket("", kind, page, false, "USE_REQUEST_OWN_TAG_BLOCK");
         if (!validPage(page) || op(kind).length == 0) {
             return new Ticket("", kind, page, false, "BAD_ARGUMENT");
         }
@@ -217,7 +222,21 @@ namespace MCFunctionLiveQuery {
         let sent = player.execute("scriptevent cbxq4:req " + message);
         return new Ticket(token, kind, 0, sent, sent ? "" : "SEND_FAILED");
     }
-    // Protocol limit, not a new restriction on canonical Minecraft IDs.
+    /** Exact tag membership on the requesting player. No list scan or selector rewrite.
+     * Requires DATA_TAG_V5 receiver; older query receivers do not serve this operation. */
+    //% blockId=cbxq4_request_own_tag
+    //% block="LIVE QUERY request own tag $tag present"
+    //% tag.defl="lesson_done"
+    //% weight=88
+    export function requestOwnTag(tag: string): Ticket {
+        let kind = Kind.OwnTagPresent;
+        if (typeof tag != "string" || !wireText(tag))
+            return new Ticket("", kind, 0, false, "INVALID_TAG_NAME");
+        let token = sourceToken();
+        let sent = player.execute("scriptevent cbxq4:req " + token + "|tag_self|0|" + wireHex(tag));
+        return new Ticket(token, kind, 0, sent, sent ? "" : "SEND_FAILED");
+    }
+    // Protocol limit, not a new restriction on canonical Minecraft IDs or tag names.
     function wireText(value: string): boolean {
         if (!value || value.length > 64) return false;
         for (let i = 0; i < value.length; i++) {
@@ -319,7 +338,7 @@ namespace MCFunctionLiveQuery {
             result.ok = true;
             return completed(result, ticket, started);
         }
-        if (ticket.kind == Kind.KeepInventory) {
+        if (ticket.kind == Kind.KeepInventory || ticket.kind == Kind.OwnTagPresent) {
             let yes = probe(base + "v");
             let no = probe(base + "z");
             if (yes == no) {
