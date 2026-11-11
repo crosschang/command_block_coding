@@ -29,7 +29,10 @@ namespace MCFunctionOrderedPreview {
         Unsupported = 5,
         SendFailed = 6,
         Rejected = 7,
-        Busy = 8
+        Busy = 8,
+        // Receiver returned successCount=0, without an API exception.
+        // Not DONE and not proof that an EXECUTE condition was false.
+        ZeroResult = 9
     }
 
 
@@ -166,24 +169,29 @@ namespace MCFunctionOrderedPreview {
         let n = PLAYER_NONCE_OBJECTIVE;
         player.execute("scoreboard players reset @s " + a);
         player.execute("scoreboard players reset @s " + n);
-        let absent = !player.execute("scoreboard players test @s " + a + " 0 3");
+        let absent = !player.execute("scoreboard players test @s " + a + " 0 9");
         let pendingSet = player.execute("scoreboard players set @s " + a + " 0");
         let pending = player.execute("scoreboard players test @s " + a + " 0 0");
         let doneSet = player.execute("scoreboard players set @s " + a + " 2");
         let done = player.execute("scoreboard players test @s " + a + " 2 2");
         let errorSet = player.execute("scoreboard players set @s " + a + " 3");
         let error = player.execute("scoreboard players test @s " + a + " 3 3");
+        let zeroSet = player.execute("scoreboard players set @s " + a + " 9");
+        let zero = player.execute("scoreboard players test @s " + a + " 9 9");
+        let zeroNotDone = !player.execute("scoreboard players test @s " + a + " 2 2");
+        let zeroNotError = !player.execute("scoreboard players test @s " + a + " 3 3");
         let codeSet = player.execute("scoreboard players set @s " + n + " 1234567");
         let codeRead = player.execute("scoreboard players test @s " + n + " 1234567 1234567");
         let clearedA = player.execute("scoreboard players reset @s " + a) &&
-            !player.execute("scoreboard players test @s " + a + " 0 3");
+            !player.execute("scoreboard players test @s " + a + " 0 9");
         let clearedN = player.execute("scoreboard players reset @s " + n) &&
             !player.execute("scoreboard players test @s " + n + " 1234567 1234567");
         let good = absent && pendingSet && pending && doneSet && done &&
-            errorSet && error && codeSet && codeRead && clearedA && clearedN;
+            errorSet && error && zeroSet && zero && zeroNotDone && zeroNotError &&
+            codeSet && codeRead && clearedA && clearedN;
         readbackReady = good ? 1 : -1;
         MCFunctionPreview.previewSay(good
-            ? "INFO [P4O2H_PLAYER_SCORE_PASS] @s receipt and nonce both verified."
+            ? "INFO [P4O2H_PLAYER_SCORE_PASS] @s receipt 0/2/3/9 and nonce verified."
             : "ERROR [P4O2H_PLAYER_SCORE_FAIL] Player-scoped ACK disabled.");
         return good;
     }
@@ -198,6 +206,7 @@ namespace MCFunctionOrderedPreview {
         let base = "scoreboard players test @s " + PLAYER_ACK_OBJECTIVE + " ";
         if (player.execute(base + "2 2")) return AckStatus.Done;
         if (player.execute(base + "3 3")) return AckStatus.Error;
+        if (player.execute(base + "9 9")) return AckStatus.ZeroResult;
         if (player.execute(base + "0 0")) return AckStatus.Submitted;
         MCFunctionPreview.previewSay("ERROR [P4O2H_UNKNOWN_PLAYER_SCORE] id=" + id);
         return AckStatus.Error;
@@ -208,7 +217,7 @@ namespace MCFunctionOrderedPreview {
         let n = PLAYER_NONCE_OBJECTIVE;
         let removedA = player.execute("scoreboard players reset @s " + a);
         let removedN = player.execute("scoreboard players reset @s " + n);
-        let clearedA = !player.execute("scoreboard players test @s " + a + " 0 3");
+        let clearedA = !player.execute("scoreboard players test @s " + a + " 0 2147483647");
         let clearedN = !player.execute("scoreboard players test @s " + n + " 0 2147483647");
         return removedA && removedN && clearedA && clearedN;
     }
@@ -271,7 +280,8 @@ namespace MCFunctionOrderedPreview {
                 player.execute("tag @s remove " + ACK_ERROR + id);
             }
             MCFunctionPreview.previewSay((status == AckStatus.Done
-                ? "INFO [P4O2D_ACK_DONE] " : "ERROR [P4O2D_ACK_ERROR] ") +
+                ? "INFO [P4O2D_ACK_DONE] " : status == AckStatus.ZeroResult
+                ? "WARNING [P4O2H_ACK_ZERO_RESULT] " : "ERROR [P4O2D_ACK_ERROR] ") +
                 name + " id=" + id + " poll=" + (attempt + 1));
             return status;
         }

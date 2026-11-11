@@ -118,7 +118,9 @@ namespace RuntimeBridge {
     export enum OrderedAckResult {
         Idle = 0, Submitted = 1, Done = 2, Error = 3,
         Timeout = 4, Unsupported = 5, SendFailed = 6,
-        Rejected = 7, Busy = 8
+        Rejected = 7, Busy = 8,
+        //% block="zero result (cause unconfirmed)"
+        ZeroResult = 9
     }
     //% blockId=mcfunction_ordered_ack_last_status
     //% block="PREVIEW last ordered receipt"
