@@ -159,6 +159,8 @@ namespace MCFunctionLiveQuery {
     //% blockId=cbxq2_calibrate
     //% block="LIVE QUERY calibrate tag channel"
     //% weight=100
+    //% blockHidden=true
+    //% hidden=true
     export function calibrate(): boolean {
         let yes = player.execute("testfor @s");
         let no = player.execute("testfor @s[tag=cbxq2_absent_marker_819273]");
@@ -168,6 +170,8 @@ namespace MCFunctionLiveQuery {
     //% blockId=cbxq2_ping
     //% block="LIVE QUERY ping behavior pack"
     //% weight=95
+    //% blockHidden=true
+    //% hidden=true
     export function ping(): boolean {
         return player.execute("scriptevent cbxq4:ping MAKECODE");
     }
@@ -177,6 +181,8 @@ namespace MCFunctionLiveQuery {
     //% block="LIVE QUERY request $kind page $page"
     //% page.defl=0
     //% weight=90
+    //% blockHidden=true
+    //% hidden=true
     export function request(kind: Kind, page: number): Ticket {
         if (kind == Kind.ScoreboardValue)
             return new Ticket("", kind, page, false, "USE_REQUEST_SCORE_BLOCK");
@@ -203,6 +209,8 @@ namespace MCFunctionLiveQuery {
     //% target.shadow="mcfunction_target_selector"
     //% objective.shadow="text" objective.defl="points"
     //% weight=89
+    //% blockHidden=true
+    //% hidden=true
     export function requestScore(target: MCFunctionFields.TargetValue, objective: string): Ticket {
         let kind = Kind.ScoreboardValue;
         if (!wireText(objective)) return new Ticket("", kind, 0, false, "INVALID_SCORE_OBJECTIVE");
@@ -235,6 +243,8 @@ namespace MCFunctionLiveQuery {
     //% block="LIVE QUERY request own tag $tag present"
     //% tag.defl="lesson_done"
     //% weight=88
+    //% blockHidden=true
+    //% hidden=true
     export function requestOwnTag(tag: string): Ticket {
         let kind = Kind.OwnTagPresent;
         if (typeof tag != "string" || !wireText(tag))
@@ -249,6 +259,8 @@ namespace MCFunctionLiveQuery {
     //% block="LIVE QUERY request gamerule $rule"
     //% rule.shadow="mcfunction_gamerule_registry_keepinventory"
     //% weight=87
+    //% blockHidden=true
+    //% hidden=true
     export function requestGamerule(rule: MCFunctionGameruleLibrary.GameRuleRef): Ticket {
         let id = rule ? rule.ruleId : "";
         if (typeof id != "string" || !wireText(id))
@@ -297,6 +309,8 @@ namespace MCFunctionLiveQuery {
     //% blockId=cbxq2_tryread
     //% block="LIVE QUERY read $ticket now"
     //% weight=85
+    //% blockHidden=true
+    //% hidden=true
     export function tryRead(ticket: Ticket): Result {
         let result = new Result(ticket ? ticket.kind : Kind.Players, ticket ? ticket.page : 0);
         if (!ticket) { result.status = "MISSING_TICKET"; return result; }
@@ -482,6 +496,8 @@ namespace MCFunctionLiveQuery {
     //% blockId=cbxq2_cancel
     //% block="LIVE QUERY cancel $ticket"
     //% weight=80
+    //% blockHidden=true
+    //% hidden=true
     export function cancel(ticket: Ticket): void {
         if (!ticket || ticket.closed || !ticket.sent) return;
         player.execute("scriptevent cbxq4:cancel " + ticket.token);
@@ -490,6 +506,8 @@ namespace MCFunctionLiveQuery {
     //% blockId=cbxq2_item
     //% block="LIVE QUERY item $index of $result"
     //% weight=70
+    //% blockHidden=true
+    //% hidden=true
     export function item(result: Result, index: number): string {
         if (!result || !result.ok || index < 0 || index >= result.items.length || index % 1 != 0) return "";
         return result.items[index];
@@ -497,18 +515,26 @@ namespace MCFunctionLiveQuery {
     //% blockId=cbxq2_total
     //% block="LIVE QUERY total $result"
     //% weight=69
+    //% blockHidden=true
+    //% hidden=true
     export function total(result: Result): number { return result && result.ok ? result.total : -1; }
     //% blockId=cbxq2_success
     //% block="LIVE QUERY success $result"
     //% weight=68
+    //% blockHidden=true
+    //% hidden=true
     export function success(result: Result): boolean { return !!result && result.ok; }
     //% blockId=cbxq2_status
     //% block="LIVE QUERY status $result"
     //% weight=67
+    //% blockHidden=true
+    //% hidden=true
     export function status(result: Result): string { return result ? result.status : "MISSING_RESULT"; }
     //% blockId=cbxq2_number
     //% block="LIVE QUERY number value $result"
     //% weight=66
+    //% blockHidden=true
+    //% hidden=true
     export function numberValue(result: Result): number {
         return result && result.ok && (result.kind == Kind.Daytime || result.kind == Kind.ScoreboardValue)
             ? result.numberValue : 0;
@@ -516,5 +542,7 @@ namespace MCFunctionLiveQuery {
     //% blockId=cbxq2_boolean
     //% block="LIVE QUERY Boolean value $result"
     //% weight=65
+    //% blockHidden=true
+    //% hidden=true
     export function booleanValue(result: Result): boolean { return !!result && result.ok && result.kind == Kind.KeepInventory && result.booleanValue; }
 }

@@ -6,6 +6,15 @@
  */
 //% color=#B65C29 weight=94 icon="\uf0ec" block="RUNTIME BRIDGE"
 namespace RuntimeBridge {
+    let previewConfigured = false;
+
+    /** Internal default for the installed unified pack. No world access here.
+     * Explicit JavaScript transport selection remains available for diagnostics. */
+    export function initializePreview(): void {
+        if (previewConfigured) return;
+        select(Transport.NativePlayerAck);
+    }
+
     export enum Transport {
         //% block="MakeCode original (bridge OFF)"
         Original = 0,
@@ -25,8 +34,11 @@ namespace RuntimeBridge {
     //% topblock=true
     //% blockAllowMultiple=1
     //% weight=100
+    //% blockHidden=true
+    //% hidden=true
     export function select(mode: Transport): void {
         if (!FunctionFile.allowBridgeConfiguration()) return;
+        previewConfigured = true;
         MCFunctionRuntime.disableAutomatic();
         if (mode == Transport.Original) MCFunctionCBX12Bridge.disable();
         else if (mode == Transport.CBX12Hex) MCFunctionCBX12Bridge.enable();
@@ -53,6 +65,8 @@ namespace RuntimeBridge {
     //% block="PREVIEW FunctionFile order $mode"
     //% topblock=true
     //% weight=63
+    //% blockHidden=true
+    //% hidden=true
     export function orderedMode(mode: OrderedMode): void {
         if (!FunctionFile.allowBridgeConfiguration()) return;
         MCFunctionOrderedPreview.setEnabled(mode == OrderedMode.On);
@@ -75,6 +89,8 @@ namespace RuntimeBridge {
     //% block="PREVIEW ordered receipt $mode"
     //% topblock=true
     //% weight=62
+    //% blockHidden=true
+    //% hidden=true
     export function orderedAckMode(mode: OrderedAckMode): void {
         if (!FunctionFile.allowBridgeConfiguration()) return;
         MCFunctionOrderedPreview.setReceiptMode(mode == OrderedAckMode.Confirm);
@@ -95,6 +111,8 @@ namespace RuntimeBridge {
     //% block="PREVIEW ordered ACK transport $mode"
     //% topblock=true
     //% weight=61
+    //% blockHidden=true
+    //% hidden=true
     export function orderedAckTransport(mode: OrderedAckTransport): void {
         if (!FunctionFile.allowBridgeConfiguration()) return;
         let choice = MCFunctionOrderedPreview.AckTransport.Tag;
@@ -109,6 +127,8 @@ namespace RuntimeBridge {
     //% blockId=mcfunction_ordered_ack_calibrate
     //% block="PREVIEW test ACK readback"
     //% weight=59
+    //% blockHidden=true
+    //% hidden=true
     export function orderedAckCalibrate(): boolean {
         if (!FunctionFile.allowBridgeConfiguration()) return false;
         return MCFunctionOrderedPreview.probeReadback();
@@ -125,6 +145,8 @@ namespace RuntimeBridge {
     //% blockId=mcfunction_ordered_ack_last_status
     //% block="PREVIEW last ordered receipt"
     //% weight=58
+    //% blockHidden=true
+    //% hidden=true
     export function lastOrderedAck(): OrderedAckResult {
         return <OrderedAckResult>MCFunctionOrderedPreview.lastAckStatus();
     }
@@ -144,6 +166,8 @@ namespace RuntimeBridge {
     //% block="PREVIEW TAG LIST display $mode"
     //% weight=61
     //% blockAllowMultiple=1
+    //% blockHidden=true
+    //% hidden=true
     export function tagListPreviewOutput(mode: TagListOutputMode): void {
         if (!FunctionFile.allowBridgeConfiguration()) return;
         MCFunctionTagListDirect.setSummaryOutput(mode == TagListOutputMode.Summary);
@@ -158,6 +182,8 @@ namespace RuntimeBridge {
     //% blockId=mcfunction_taglist_preview_prepare_batch
     //% block="PREVIEW prepare TAG LIST batch (yield 1ms)"
     //% weight=60
+    //% blockHidden=true
+    //% hidden=true
     export function prepareTagListBatch(): void {
         if (!MCFunctionRuntime.isAutomatic() || !FunctionFile.allowCommandExecution()) return;
         loops.pause(1);

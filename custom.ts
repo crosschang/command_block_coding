@@ -14,6 +14,7 @@
 //% groups='["EXECUTE", "SCOREBOARD", "RIDE", "DIALOGUE", "PLAYANIMATION", "FOG", "DAMAGE", "EVENT", "CONTROLSCHEME", "AIMASSIST", "SETBLOCK", "FILL", "CLONE", "PARTICLE", "SOUND", "MUSIC", "ENCHANT", "TELL", "TIME", "WEATHER", "DIFFICULTY", "CAMERASHAKE", "CAMERA", "HUD", "INPUTPERMISSION", "SPAWNPOINT", "SETWORLDSPAWN", "GAMERULE", "TAG", "GAMEMODE", "KILL", "CLEAR", "SUMMON", "EFFECT", "TELEPORT", "GIVE", "SAY", "FUNCTION", "RAW COMMAND"]'
 namespace Command {
     function executeValidatedCommandNow(command: MCFunctionAST.CommandNode): void {
+        RuntimeBridge.initializePreview();
         // P2c-3: AUTO typed TAG LIST direct display.
         if (MCFunctionTagListDirect.tryDisplay(command)) return;
         // P1a shared route; no worker, queue, or extra delay is introduced.

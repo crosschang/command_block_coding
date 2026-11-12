@@ -121,6 +121,8 @@ namespace QueryReadback {
     //% blockId=cbx_readback_read_live
     //% block="QUERY RESULT read LIVE QUERY ticket $ticket now"
     //% weight=90
+    //% blockHidden=true
+    //% hidden=true
     export function readLive(ticket: MCFunctionLiveQuery.Ticket): Response {
         // Read the snapshot from this ticket ourselves. Do not let a caller
         // accidentally pair a result from another request with this ticket.
@@ -175,54 +177,80 @@ namespace QueryReadback {
     }
 
     //% blockId=cbx_readback_success block="QUERY RESULT succeeded $response" weight=85
+    //% blockHidden=true
+    //% hidden=true
     export function success(response: Response): boolean {
         return !!response && response.state == State.Ready && response.valueKind != ValueKind.None;
     }
     //% blockId=cbx_readback_state block="QUERY RESULT state $response" weight=84
+    //% blockHidden=true
+    //% hidden=true
     export function state(response: Response): State { return response ? response.state : State.Error; }
     //% blockId=cbx_readback_reason block="QUERY RESULT reason $response" weight=83
+    //% blockHidden=true
+    //% hidden=true
     export function reason(response: Response): string { return response ? response.reason : "MISSING_RESULT"; }
     //% blockId=cbx_readback_has_number block="QUERY RESULT has number $response" weight=80
+    //% blockHidden=true
+    //% hidden=true
     export function hasNumber(response: Response): boolean {
         return success(response) && response.valueKind == ValueKind.Number;
     }
     /** Caller chooses a fallback explicitly; Pending/Error is never a zero measurement. */
     //% blockId=cbx_readback_number_or block="QUERY RESULT number $response or $fallback" weight=79
+    //% blockHidden=true
+    //% hidden=true
     export function numberOr(response: Response, fallback: number): number {
         return hasNumber(response) ? response.numberValue : fallback;
     }
     //% blockId=cbx_readback_has_boolean block="QUERY RESULT has Boolean $response" weight=78
+    //% blockHidden=true
+    //% hidden=true
     export function hasBoolean(response: Response): boolean {
         return success(response) && response.valueKind == ValueKind.Boolean;
     }
     //% blockId=cbx_readback_has_list block="QUERY RESULT has text list $response" weight=74
+    //% blockHidden=true
+    //% hidden=true
     export function hasTextList(response: Response): boolean {
         return success(response) && response.valueKind == ValueKind.TextList;
     }
     /** Page size, distinct from totalOr() which is the full snapshot count. */
     //% blockId=cbx_readback_page_count_or block="QUERY RESULT page item count $response or $fallback" weight=73
+    //% blockHidden=true
+    //% hidden=true
     export function pageCountOr(response: Response, fallback: number): number {
         return hasTextList(response) ? response.items.length : fallback;
     }
     /** Number of Boolean tag probes; excludes ACK and log output calls. */
     //% blockId=cbx_readback_probes_or block="QUERY RESULT read probes $response or $fallback" weight=72
+    //% blockHidden=true
+    //% hidden=true
     export function readProbesOr(response: Response, fallback: number): number {
         return response && response.hasReadMetrics ? response.readProbes : fallback;
     }
     /** GameTime ticks in the decoder; not wall-clock milliseconds. */
     //% blockId=cbx_readback_ticks_or block="QUERY RESULT read ticks $response or $fallback" weight=71
+    //% blockHidden=true
+    //% hidden=true
     export function readTicksOr(response: Response, fallback: number): number {
         return response && response.hasReadMetrics ? response.readTicks : fallback;
     }
     //% blockId=cbx_readback_boolean_or block="QUERY RESULT Boolean $response or $fallback" weight=77
+    //% blockHidden=true
+    //% hidden=true
     export function booleanOr(response: Response, fallback: boolean): boolean {
         return hasBoolean(response) ? response.booleanValue : fallback;
     }
     //% blockId=cbx_readback_total_or block="QUERY RESULT total $response or $fallback" weight=76
+    //% blockHidden=true
+    //% hidden=true
     export function totalOr(response: Response, fallback: number): number {
         return success(response) ? response.total : fallback;
     }
     //% blockId=cbx_readback_text_or block="QUERY RESULT item $index of $response or $fallback" weight=75
+    //% blockHidden=true
+    //% hidden=true
     export function textOr(response: Response, index: number, fallback: string): string {
         if (!success(response) || response.valueKind != ValueKind.TextList || index % 1 != 0 ||
             index < 0 || index >= response.items.length) return fallback;

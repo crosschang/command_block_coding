@@ -10,6 +10,10 @@
 * 톱니바퀴 모양 메뉴에서 **확장**을 클릭합니다
 * **https://github.com/crosschang/command_block_coding**으로 검색하고 가져오기
 
+## 인게임 Preview 실행 계층
+
+현재 개발 소스의 기본 Preview는 별도 제공하는 **CBX Runtime Unified DEV** 행동팩을 사용합니다. 명령 작성에 브릿지·조회·ACK 설정 블록은 필요하지 않습니다. 기존 분리 팩의 교체 및 검증 범위는 [통합팩·블록 정리 안내](docs/UNIFIED_RUNTIME_AND_BLOCK_SURFACE_KO.md)를 확인하세요. 행동팩은 이 저장소에 포함하지 않습니다.
+
 ## 이 프로젝트 편집
 
 MakeCode에서 이 저장소를 편집합니다.
