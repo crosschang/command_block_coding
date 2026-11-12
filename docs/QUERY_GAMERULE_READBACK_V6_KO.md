@@ -1,5 +1,10 @@
 # V6: Registry를 재사용하는 Boolean·정수 게임 규칙 조회
 
+2026-11-12 실게임 추가: dodaylightcycle=false, randomtickspeed=1이 기본 명령의 조회값과
+일치했고 조건 분기·계산·저장값 100회 재사용을 대표 GAME PASS로 확인했다.
+Boolean은 PROBES=4 READ_TICKS=4, 정수는 PROBES=42 READ_TICKS=20이었다.
+상세 범위와 앞선 구성/준비 차단 기록은 VERIFICATION_QUERY_GAMERULE_V6_INGAME_2026-11-12_KO.md를 따른다.
+
 ## 구현 범위
 
 `MCFunctionLiveQuery.requestGamerule(rule: MCFunctionGameruleLibrary.GameRuleRef): Ticket`를 추가했다.
@@ -111,7 +116,8 @@ Pending이면 같은 읽기 단계 2 또는 4를 나중에 다시 입력한다. 
 
 TypeScript 5.7.3 의미 검사: 기존 52→52, 신규 진단 0. 사용자 예제 진단 0.
 실제 @minecraft/server 2.8.0 타입을 이용한 행동팩 JS 검사 진단 0.
-전체 PXT 컴파일·새 기능 실게임·성능 개선은 미검증이다.
+전체 PXT 컴파일은 미수행이다. 최초 구현 시점의 새 기능 실게임·성능은 미검증이었고,
+이후 위 추가 기록의 두 규칙과 조건·계산·저장 재사용만 대표 실게임 PASS로 확인했다.
 이전 V5 한글 태그 대표 GAME PASS와 새 V6 팩 전체의 GAME PASS는 구분한다.
 멀티 실게임은 기존 사용자 결정대로 기능 완성 후 최종 통합 단계에서 수행한다.
 

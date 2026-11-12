@@ -5,7 +5,8 @@
 > QUERY_OWN_TAG_READBACK_V5_KO.md를 따른다. V5의 한글 태그 있음·없음과 저장 재사용은
 > VERIFICATION_QUERY_OWN_TAG_V5_INGAME_2026-11-12_KO.md에서 대표 실게임 PASS로 확인했다.
 > 추가 게임 규칙 Boolean·정수 조회는 QUERY_GAMERULE_READBACK_V6_KO.md에 구현 범위와
-> 별도 V6 팩을 기록했다. 새 V6 기능의 실게임 검증은 아직 대기다.
+> 별도 V6 팩을 기록했다. dodaylightcycle=false·randomtickspeed=1의 조회·조건·계산·저장
+> 재사용은 VERIFICATION_QUERY_GAMERULE_V6_INGAME_2026-11-12_KO.md에서 대표 GAME PASS로 확인했다.
 
 ## 범위와 구현 위치
 
