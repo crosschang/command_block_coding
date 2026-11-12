@@ -659,8 +659,6 @@ namespace Preview {
     //% blockId=mcfunction_preview_ready
     //% block="▶ PREVIEW READY"
     //% weight=100
-    //% blockHidden=true
-    //% hidden=true
     export function ready(): void {
         Command.say("MCFunction Preview Ready")
         // Show the guidance once, after top-level FunctionFile.define calls.

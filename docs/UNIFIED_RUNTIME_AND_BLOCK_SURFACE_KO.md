@@ -2,7 +2,7 @@
 
 ## 목적
 
-제작자의 도구상자는 mcfunction 명령과 파일 정의에 집중한다. 브릿지 선택, ACK, 조회 요청/응답, 진단은 실행 계층의 내부 기능으로 보존한다. API 조회 값을 MakeCode 변수로 돌려주는 실험을 기본 mcfunction 작성 기능으로 확대하지 않는다.
+제작자의 도구상자는 mcfunction 명령과 파일 정의에 집중한다. 브릿지 선택, ACK, 조회 요청/응답, 실행 진단은 실행 계층의 내부 기능으로 보존한다. `▶ PREVIEW READY` 시작 블록은 사용 안내용으로 공개 유지한다. API 조회 값을 MakeCode 변수로 돌려주는 실험을 기본 mcfunction 작성 기능으로 확대하지 않는다.
 
 ## 행동팩
 
@@ -27,10 +27,9 @@
 | RuntimeBridge: 실행 경로·묶음·ACK·TAG LIST 진단 설정 | 8 |
 | MCFunctionLiveQuery: 요청·교정·읽기·응답 | 14 |
 | QueryReadback: 공통 결과 상태·값·측정 | 14 |
-| Preview.ready: 준비 진단 | 1 |
-| 합계 | 37 |
+| 합계 | 36 |
 
-명령 블록과 FunctionFile/tick.json 블록은 유지한다. 숨긴 API는 이전 테스트 JavaScript에서 계속 호출할 수 있다. 기존 작업 공간에 이미 놓인 블록을 삭제하거나 변환했다고 주장하지 않는다.
+명령 블록과 FunctionFile/tick.json 블록, `▶ PREVIEW READY` 시작·안내 블록은 유지한다. 숨긴 API는 이전 테스트 JavaScript에서 계속 호출할 수 있다. 기존 작업 공간에 이미 놓인 블록을 삭제하거나 변환했다고 주장하지 않는다.
 
 공식 근거: https://makecode.com/defining-blocks (`blockHidden`, `hidden` 설명).
 
@@ -60,7 +59,7 @@
 ## 사용자 확인 순서
 
 1. 통합팩을 가져오고 월드에서 활성화한다. 별도 조회팩과 예전 실행팩의 중복 활성화를 해제한다.
-2. Extension을 최신 소스로 갱신하고, RUNTIME BRIDGE / LIVE QUERY / QUERY RESULT / PREVIEW 진단 블록이 신규 도구상자에서 숨겨졌는지 확인한다. 캐시된 이전 Extension은 자동 반영되지 않을 수 있다.
+2. Extension을 최신 소스로 갱신하고, RUNTIME BRIDGE / LIVE QUERY / QUERY RESULT 내부 블록이 신규 도구상자에서 숨겨지고, PREVIEW의 `▶ PREVIEW READY` 블록은 계속 보이는지 확인한다. 캐시된 이전 Extension은 자동 반영되지 않을 수 있다.
 3. 사용자 MakeCode 프로그램 `UNIFIED_PREVIEW_MAKECODE_MAIN.ts`를 실행한다. Extension main.ts에 덮어쓰지 않는다.
 4. 채팅에 `unified_preview` 입력. `UNIFIED_BEGIN`, `UNIFIED_MODERN_EXECUTE`, `UNIFIED_END`와 실행 ACK를 확인한다.
 5. 조회 수신기 호환 재검증이 필요하면 기존 qflow 예제를 그대로 사용한다. 일반 제작자는 조회 블록을 구성할 필요가 없다.
