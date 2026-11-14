@@ -51,6 +51,7 @@ namespace RuntimeBridge {
             MCFunctionCBX12Bridge.enablePlayerScoped();
             MCFunctionOrderedPreview.setAckTransport(MCFunctionOrderedPreview.AckTransport.PlayerScoreboard);
             MCFunctionOrderedPreview.setReceiptMode(true);
+            MCFunctionOrderedPreview.setEnabled(true);
         } else MCFunctionPreview.previewSay("ERROR [BRIDGE_MODE_UNKNOWN] Unsupported Preview bridge route.");
     }
 

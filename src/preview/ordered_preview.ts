@@ -16,9 +16,14 @@ namespace MCFunctionOrderedPreview {
     const PLAYER_NONCE_OBJECTIVE = "cbxo2hn";
     const SCORE_OBJECTIVE = "cbxo2f";
     const SCORE_FAKE_PREFIX = "cbx2f_";
+    const CHUNK_BEGIN = "cbxp4o2h:begin";
+    const CHUNK_PART = "cbxp4o2h:part";
+    const CHUNK_COMMIT = "cbxp4o2h:commit";
+    const CHUNK_CHARS = 96;
+    const MAX_NATIVE_CHARS = 200; // experimental transport cap, not a game limit
     const HEX = "0123456789abcdef";
-    const MAX_STEPS = 12;
-    const MAX_PACKET = 1400;
+    const LEGACY_MAX_STEPS = 12;
+    const LEGACY_MAX_PACKET = 1400;
     /** Transport result, not a new canonical command or .mcfunction construct. */
     export enum AckStatus {
         Idle = 0,
@@ -45,6 +50,7 @@ namespace MCFunctionOrderedPreview {
 
     let ackTransport = AckTransport.Tag;
     export function setAckTransport(value: AckTransport): void {
+        if (inFlight) return;
         ackTransport = value;
         readbackReady = 0;
         lastReceipt = AckStatus.Idle;
@@ -74,6 +80,7 @@ namespace MCFunctionOrderedPreview {
     const ACK_POLL_LIMIT = 13; // first quick poll + 12 standard fallback polls
 
     export function setReceiptMode(value: boolean): void {
+        if (inFlight) return;
         receiptMode = value;
         lastReceipt = AckStatus.Idle;
     }
@@ -306,7 +313,8 @@ namespace MCFunctionOrderedPreview {
     }
 
     export function maxSteps(): number {
-        return MAX_STEPS;
+        // Zero means no configured command-count cap on the chunked player-ACK route.
+        return receiptMode && ackTransport == AckTransport.PlayerScoreboard ? 0 : LEGACY_MAX_STEPS;
     }
 
     function encodeUtf16(input: string): string {
@@ -321,8 +329,119 @@ namespace MCFunctionOrderedPreview {
         return encoded;
     }
 
+    // Stored diagnostics only: reading these does not query the game clock.
+    let clockStage = "NOT_ENTERED";
+    let clockTick = -1;
+    export function lastClockStage(): string { return clockStage; }
+    export function lastClockTick(): number { return clockTick; }
+    function clockMark(stage: string): void {
+        clockStage = stage + "_CLOCK_WAIT";
+        clockTick = gameplay.timeQuery(TimeQuery.GameTime);
+        clockStage = stage;
+    }
+    function chunkFailure(status: AckStatus, reason: string): void {
+        lastReceipt = status;
+        MCFunctionPreview.previewSay("ERROR [P4O2H_CHUNK_" + reason + "] id=" + lastId);
+        inFlight = false;
+    }
+    function sendChunkFrame(command: string): boolean {
+        if (command.length > MAX_NATIVE_CHARS) {
+            chunkFailure(AckStatus.Rejected, "FRAME_LIMIT");
+            return false;
+        }
+        if (!player.execute(command)) {
+            // No fallback/resend after an uncertain transfer, including commit.
+            chunkFailure(AckStatus.SendFailed, "SEND_FAILED");
+            return false;
+        }
+        return true;
+    }
+    function chunkHash(plan: string): number {
+        let n = 0;
+        for (let i = 0; i < plan.length; i++) n = (n * 31 + plan.charCodeAt(i)) % 2147483647;
+        return n;
+    }
+    /** Freeze all canonical command strings before the first clock/native yield.
+     * Later edits to AST objects cannot change an assembling request.
+     * World selectors/scores are still evaluated by Minecraft at execution time. */
+    function submitChunk(name: string, nodes: MCFunctionAST.CommandNode[]): void {
+        if (inFlight) {
+            MCFunctionPreview.previewSay("ERROR [P4O2D_ACK_BUSY] " + name);
+            return;
+        }
+        inFlight = true;
+        lastId = "";
+        lastReceipt = AckStatus.Rejected;
+        if (!nodes || nodes.length == 0) {
+            chunkFailure(AckStatus.Rejected, "STEP_LIMIT");
+            return;
+        }
+        let lines: string[] = [];
+        for (let i = 0; i < nodes.length; i++) {
+            let issues = MCFunctionValidator.validateCommand(nodes[i]);
+            if (MCFunctionValidator.hasError(issues)) {
+                chunkFailure(AckStatus.Rejected, "VALIDATION");
+                return;
+            }
+            let line = MCFunctionCompiler.compileCommand(nodes[i]);
+            if (!line || line != line.trim() || line.charAt(0) == "/" ||
+                line.indexOf("\n") >= 0 || line.indexOf("\r") >= 0 ||
+                line.indexOf("\u0000") >= 0 || line.indexOf("@initiator") >= 0) {
+                chunkFailure(AckStatus.Rejected, "BAD_LINE");
+                return;
+            }
+            // Only a full line beginning # is a mcfunction comment.
+            // Embedded # (fake player names etc.) is preserved verbatim.
+            if (line.charAt(0) == "#") continue;
+            lines.push(line);
+        }
+        if (lines.length == 0) {
+            chunkFailure(AckStatus.Rejected, "EMPTY");
+            return;
+        }
+        clockMark("ENTER");
+        let plan = "";
+        for (let i = 0; i < lines.length; i++) {
+            if (i > 0) plan += ".";
+            plan += encodeUtf16(lines[i]);
+        }
+        let hash = chunkHash(plan);
+        sequence++;
+        if (sequence > 999999) sequence = 1;
+        let id = "q" + sessionToken + "_" + sequence;
+        lastId = id;
+        clockMark("PLAN_READY");
+        if (readbackReady == 0) probePlayerScoreboardReadback();
+        if (readbackReady != 1) {
+            chunkFailure(AckStatus.Unsupported, "READBACK");
+            return;
+        }
+        let code = playerRequestCode(id);
+        if (!sendChunkFrame("scoreboard players set @s " + PLAYER_NONCE_OBJECTIVE + " " + code)) return;
+        if (!sendChunkFrame("scoreboard players test @s " + PLAYER_NONCE_OBJECTIVE + " " + code + " " + code)) return;
+        if (!sendChunkFrame("scoreboard players set @s " + PLAYER_ACK_OBJECTIVE + " 0")) return;
+        if (!sendChunkFrame("scoreboard players test @s " + PLAYER_ACK_OBJECTIVE + " 0 0")) return;
+        clockMark("PREPARED");
+        let count = Math.ceil(plan.length / CHUNK_CHARS);
+        if (!sendChunkFrame("scriptevent " + CHUNK_BEGIN + " " + id + " " + count + " " + plan.length + " " + hash)) return;
+        for (let i = 0; i < count; i++) {
+            if (!sendChunkFrame("scriptevent " + CHUNK_PART + " " + id + " " + i + " " + plan.substr(i * CHUNK_CHARS, CHUNK_CHARS))) return;
+        }
+        if (!sendChunkFrame("scriptevent " + CHUNK_COMMIT + " " + id)) return;
+        lastReceipt = AckStatus.Submitted;
+        clockMark("TRANSFER_RETURN");
+        clockMark("VERIFY_ENTER");
+        lastReceipt = waitReceipt(name, id);
+        clockMark("VERIFY_EXIT");
+        inFlight = false;
+    }
+
     /** Fail closed; no fallback to per-line execution after an uncertain submit. */
     export function submit(name: string, nodes: MCFunctionAST.CommandNode[]): void {
+        if (receiptMode && ackTransport == AckTransport.PlayerScoreboard) {
+            submitChunk(name, nodes);
+            return;
+        }
         trace("SUBMIT_ENTER " + name, "pending");
         if (inFlight) {
             MCFunctionPreview.previewSay("ERROR [P4O2D_ACK_BUSY] " + name);
@@ -344,7 +463,7 @@ namespace MCFunctionOrderedPreview {
             MCFunctionPreview.previewSay("INFO [P4O2C_EMPTY] " + name + " has no commands.");
             return;
         }
-        if (nodes.length > MAX_STEPS) {
+        if (nodes.length > LEGACY_MAX_STEPS) {
             MCFunctionPreview.previewSay("ERROR [P4O2C_TOO_MANY_STEPS] " + name);
             return;
         }
@@ -368,7 +487,7 @@ namespace MCFunctionOrderedPreview {
             let part = encodeUtf16(line);
             if (plan.length > 0) plan += ".";
             plan += part;
-            if (plan.length > MAX_PACKET) {
+            if (plan.length > LEGACY_MAX_PACKET) {
                 MCFunctionPreview.previewSay("ERROR [P4O2C_PACKET_LIMIT] " + name);
                 return;
             }
@@ -422,8 +541,15 @@ namespace MCFunctionOrderedPreview {
             eventId = SCORE_EVENT_ID;
         if (receiptMode && ackTransport == AckTransport.PlayerScoreboard)
             eventId = PLAYER_SCORE_EVENT_ID;
+        let frame = "scriptevent " + eventId + " " + requestId + " " + plan;
+        if (frame.length > MAX_NATIVE_CHARS) {
+            inFlight = false;
+            lastReceipt = AckStatus.Rejected;
+            MCFunctionPreview.previewSay("ERROR [P4O2C_LEGACY_FRAME_LIMIT] Use player ACK chunk transport.");
+            return;
+        }
         trace("SEND_BEGIN", requestId);
-        let submitted = player.execute("scriptevent " + eventId + " " + requestId + " " + plan);
+        let submitted = player.execute(frame);
         trace(submitted ? "SEND_RETURN_TRUE" : "SEND_RETURN_FALSE", requestId);
         if (!submitted) {
             if (receiptMode && ackTransport == AckTransport.Scoreboard)

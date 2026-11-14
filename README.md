@@ -14,6 +14,8 @@
 
 현재 개발 소스의 기본 Preview는 별도 제공하는 **CBX Runtime Unified DEV** 행동팩을 사용합니다. 명령 작성에 브릿지·조회·ACK 설정 블록은 필요하지 않습니다. 기존 분리 팩의 교체 및 검증 범위는 [통합팩·블록 정리 안내](docs/UNIFIED_RUNTIME_AND_BLOCK_SURFACE_KO.md)를 확인하세요. 행동팩은 이 저장소에 포함하지 않습니다.
 
+분할 전송·단계별 ON 처리와 기존 12명령/1,400자 제한 해제를 통합했습니다. 새 행동팩 **0.0.6** 및 실제 FunctionFile 시험 순서는 [통합·검증 안내](docs/CHUNK_FUNCTIONFILE_INTEGRATION_2026-11-14_KO.md)를 참고하세요. 새 통합본의 실게임 검증은 진행 전입니다.
+
 ## 이 프로젝트 편집
 
 MakeCode에서 이 저장소를 편집합니다.

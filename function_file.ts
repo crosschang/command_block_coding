@@ -426,7 +426,8 @@ namespace FunctionFile {
                 }
             }
             result.push(node);
-            if (result.length > MCFunctionOrderedPreview.maxSteps()) {
+            let limit = MCFunctionOrderedPreview.maxSteps();
+            if (limit > 0 && result.length > limit) {
                 MCFunctionPreview.previewSay("ERROR [P4O2C_PLAN_LIMIT] " + name);
                 return false;
             }
