@@ -25,3 +25,15 @@
 - 앞0~4순서에서는 성공하고 새0→4에서 멈추면: 단계 분리/최초 준비 또는 호출 재개 관련 조건이 후보다. 근본 원인 확정 전 반복 대조와 대기 지점이 필요하다.
 
 기존 FunctionFile 스모크·# 대조·큰 요청·멀티플레이 성공은 여전히 미확인이다. 원래 목표는 기능 개발 우선이며 성능 최적화를 재개했다는 뜻이 아니다. 코드·행동팩·pxt.json 버전을 이 판독 때문에 변경하지 않는다.
+
+## 재접속 후0→4 별도 사례
+
+추가 영상2026-11-16 08-22-48.mp4, 길이24.933333초. 사용자는 월드에서 나갔다 들어와 실행했다고 명시했다. 재접속 과정 자체는 영상에 없으므로 사용자 보고로 기록한다. 영상은 MakeCode 화면에서 게임으로 복귀한 뒤 linkprobe0 → LINK_CHAT_OK → linkprobe4 순서이며1·2·3 입력은 보이지 않는다.
+
+4번 안에서 PLAYER_SCORE_PASS → CHUNK_BEGIN parts=1 → CHUNK_ACCEPT steps=1 → LINK_ONE_OK → DONE steps=1 → ACK_DONE poll=1 → LINK_SUBMIT_RETURN ack=2 확인. 요청ID q527791_1, rxTick=15881808, doneTick=15881808.
+
+판정: 이 재접속 후 실행에서 작은 단일 요청의 최초 ACK보정과 전송·실행·반환은 PASS다.3번 사전 보정이 반드시 있어야만 동작한다는 가설은 이 사례에서 지지되지 않는다. 이전 동일 월드의 무응답을 재접속으로 해결했다고 판정하거나 같은 조건으로 합치지 않는다. 모든 최초 실행·큰 요청·FunctionFile에 일반화하지 않는다.
+
+다음 최소 사례는 같은 월드에서 재접속하지 않고 사용자 프로그램만 tests/SMOKE_FUNCTION_ONE_MAIN.ts로 교체해 단일 SAY FunctionFile을 실행하는 것이다. 정의 완료 ffone OK 뒤 ffone을 한 번 입력하고 FF_ONE_OK·steps1 DONE/ACK를 확인한다. 기존 일반 FunctionFile→AST→검사/컴파일→분할→ACK 경로와 ON6회를 사용한다. 추가 설정·사용자 목표 생성·PXT버전변경은 없다.
+
+해당 새 단일 함수 시험의 전체 TS ES5·로컬 수신기 모의 실행 및 Minecraft PXT 컴파일/블록 변환은 별도 사전검사로 확인하며, 실제 Education 결과는 미검증이다.
