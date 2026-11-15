@@ -78,7 +78,6 @@ namespace FunctionFile {
     //% blockAllowMultiple=1
     //% topblock=true
     export function define(name: string, handler: () => void): void {
-        StartupProbe.noteDefinition();
         // Human-facing diagnostics viewer. Multiple define() calls are safe because
         // the runtime registers this chat command only once per program run.
         MCFunctionDiagnostics.ensureChatRegistered();
@@ -125,10 +124,6 @@ namespace FunctionFile {
      * unrelated Behavior Pack function with the same ID.
      */
     export function runPreview(name: string): boolean {
-        if (StartupProbe.isProbe()) {
-            player.say("BENCH_EXECUTION_DISABLED");
-            return true;
-        }
         for (let i = 0; i < functionNames.length; i++) {
             if (functionNames[i] == name) {
                 if (!functionValid[i]) {
@@ -263,10 +258,7 @@ namespace FunctionFile {
             // validation errors. Store them for ?, functionName?, and the
             // Definition summary without altering the AST/compiler.
             if (command) {
-                StartupProbe.enter("CHECK");
-                let compatibilityIssues: MCFunctionValidator.ValidationIssue[] = [];
-                if (!StartupProbe.skip("CHECK")) compatibilityIssues = MCFunctionPreview.previewCompatibilityIssues(command);
-                StartupProbe.leave("CHECK");
+                let compatibilityIssues = MCFunctionPreview.previewCompatibilityIssues(command);
                 for (let i = 0; i < compatibilityIssues.length; i++) {
                     addDefinitionIssueUnique(compatibilityIssues[i]);
                 }
@@ -347,9 +339,7 @@ namespace FunctionFile {
         definitionHasGameruleList = false;
 
         functionExecutionDepth++;
-        StartupProbe.enter("CAPTURE");
         handler();
-        StartupProbe.leave("CAPTURE");
         functionExecutionDepth--;
 
         let actions = definitionActions;
@@ -465,19 +455,7 @@ namespace FunctionFile {
         return count;
     }
 
-    function reportDefinitionComplete(name: string,
-        issues: MCFunctionValidator.ValidationIssue[], structureError: boolean): void {
-        // Preserve current master behavior unless the explicit startup experiment is active.
-        if (!StartupProbe.isProbe()) {
-            if (structureError || MCFunctionValidator.hasError(issues))
-                MCFunctionDiagnostics.showBlockedExecutionHint(name);
-            return;
-        }
-        StartupProbe.enter("OUTPUT");
-        if (!StartupProbe.skip("OUTPUT")) reportDefinitionCompleteCore(name, issues, structureError);
-        StartupProbe.leave("OUTPUT");
-    }
-    function reportDefinitionCompleteCore(
+    function reportDefinitionComplete(
         name: string,
         issues: MCFunctionValidator.ValidationIssue[],
         structureError: boolean
@@ -575,7 +553,7 @@ namespace FunctionFile {
             if (registeredChatFunctionNames[i] == name) return;
         }
         registeredChatFunctionNames.push(name);
-        StartupProbe.registerChat(name, function () {
+        player.onChat(name, function () {
             for (let i = 0; i < functionNames.length; i++) {
                 if (functionNames[i] != name) continue;
                 if (!functionValid[i]) {
@@ -604,15 +582,13 @@ namespace FunctionFile {
             if (registeredChatDiagnosticNames[i] == queryName) return;
         }
         registeredChatDiagnosticNames.push(queryName);
-        StartupProbe.registerChat(queryName, function () {
+        player.onChat(queryName, function () {
             MCFunctionDiagnostics.showFunctionDetailsOnly(name);
         });
     }
 
     function register(name: string, handler: () => void, valid: boolean,
         commands: MCFunctionAST.CommandNode[], complete: boolean): void {
-        StartupProbe.enter("STORE");
-        if (StartupProbe.skip("STORE")) { StartupProbe.leave("STORE"); return; }
         // If Blocks <-> JavaScript is refreshed, replace an existing definition
         // rather than keeping duplicate entries in our own preview registry.
         for (let i = 0; i < functionNames.length; i++) {
@@ -621,7 +597,6 @@ namespace FunctionFile {
                 functionValid[i] = valid;
                 functionCommands[i] = commands;
                 functionPlanComplete[i] = complete;
-                StartupProbe.leave("STORE");
                 return;
             }
         }
@@ -631,7 +606,6 @@ namespace FunctionFile {
         functionValid.push(valid);
         functionCommands.push(commands);
         functionPlanComplete.push(complete);
-        StartupProbe.leave("STORE");
     }
 
     function reportInvalidFunctionRun(name: string): void {
@@ -687,183 +661,12 @@ namespace Preview {
     //% block="▶ PREVIEW READY"
     //% weight=100
     export function ready(): void {
-        Command.say("MCFunction Preview Ready");
-        // Only the explicit experiment replays the historical definition-time guide.
-        // Ordinary master use retains captured manual READY without startup output.
-        if (StartupProbe.isProbe() && !diagnosticGuideShown) {
+        Command.say("MCFunction Preview Ready")
+        // Show the guidance once, after top-level FunctionFile.define calls.
+        // This is Preview metadata; it is never part of .mcfunction output.
+        if (!diagnosticGuideShown) {
             diagnosticGuideShown = true;
-            StartupProbe.enter("OUTPUT");
-            if (!StartupProbe.skip("OUTPUT")) MCFunctionDiagnostics.showReadyGuide();
-            StartupProbe.leave("OUTPUT");
+            MCFunctionDiagnostics.showReadyGuide();
         }
-    }
-}
-
-/** Startup exclusion experiment, OFF unless begin() is explicitly called.
- * Legacy begin() adds no clocks; scale() can explicitly query GameTime. Counters are not milliseconds.
- */
-namespace StartupProbe {
-    let enabled = false;
-    let scaleActive = false;
-    let scaleSkipChat = false;
-    let scaleStarted = false;
-    let scaleClockOn = false;
-    let scaleClockQueries = 0;
-    let scaleClockFirst = -1;
-    let scaleClockLast = -1;
-    let collecting = false;
-    let mode = 0;
-    let definitions = 0;
-    let finishStage = "NOT_STARTED";
-    let lastStep = "NOT_STARTED";
-    let stages: string[] = ["CAPTURE", "CHECK", "STORE", "DIAG", "CHAT", "OUTPUT"];
-    let entered: number[] = [0, 0, 0, 0, 0, 0];
-    let returned: number[] = [0, 0, 0, 0, 0, 0];
-    let omitted: number[] = [0, 0, 0, 0, 0, 0];
-    export function begin(value: number): void {
-        mode = value;
-        if (mode < 0 || mode > 5 || mode % 1 != 0) mode = 0;
-        definitions = 0;
-        finishStage = "DEFINITIONS";
-        lastStep = "BEGIN";
-        for (let i = 0; i < stages.length; i++) { entered[i] = 0; returned[i] = 0; omitted[i] = 0; }
-        enabled = true;
-        collecting = true;
-    }
-    function scaleClockMark(stage: string): void {
-        if (!scaleClockOn) return;
-        lastStep = "SCALE_" + stage + "_CLOCK_WAIT";
-        let tick = gameplay.timeQuery(TimeQuery.GameTime);
-        if (scaleClockQueries == 0) scaleClockFirst = tick;
-        scaleClockLast = tick;
-        scaleClockQueries++;
-        lastStep = "SCALE_" + stage + "_CLOCK_RETURN";
-    }
-    /** Isolated size experiment. Restart the user program between cases. No game commands execute. */
-    //% blockId=startup_probe_scale
-    //% block="STARTUP scale test %caseId clock ON %clockOn"
-    //% clockOn.defl=true
-    //% caseId.min=1 caseId.max=8 caseId.defl=1
-    //% advanced=true group="STARTUP TEST"
-    export function scale(caseId: number, clockOn: boolean = true): void {
-        if (caseId < 1 || caseId > 8 || caseId % 1 != 0) {
-            player.say("SCALE_INVALID case=1..8");
-            return;
-        }
-        if (scaleStarted || enabled) {
-            player.say("SCALE_RESTART_REQUIRED");
-            return;
-        }
-        scaleStarted = true;
-        scaleActive = true;
-        scaleSkipChat = caseId >= 6;
-        scaleClockOn = clockOn;
-        scaleClockQueries = 0;
-        scaleClockFirst = -1;
-        scaleClockLast = -1;
-        begin(0);
-        scaleClockMark("ENTER");
-        let functionCount = 1;
-        let commandCount = 64;
-        if (caseId == 1) commandCount = 8;
-        if (caseId == 3) commandCount = 256;
-        if (caseId == 4 || caseId == 7) { functionCount = 8; commandCount = 8; }
-        if (caseId == 5 || caseId == 8) { functionCount = 32; commandCount = 2; }
-        scaleClockMark("PLAN_READY");
-        scaleClockMark("PREPARED");
-        // Same public AST adapters and FunctionFile definition path in every case.
-        // These local loops generate definitions, never send/execute native commands.
-        for (let f = 0; f < functionCount; f++) {
-            FunctionFile.define("scale" + (f + 1), function () {
-                for (let c = 0; c < commandCount; c++) {
-                    Command.scoreboard(Command.scoreboardPlayersScore(Command.ScoreboardNumberMode.Add,
-                        Command.scoreboardFakePlayer("#r"), "cbx_scale", 1));
-                }
-            });
-        }
-        scaleClockMark("DEFINITIONS_RETURN");
-        scaleClockMark("VERIFY_ENTER");
-        let complete = definitions == functionCount;
-        for (let i = 0; i < stages.length; i++) {
-            if (entered[i] != returned[i]) complete = false;
-        }
-        scaleClockMark("VERIFY_EXIT");
-        finishStage = "SNAPSHOT";
-        let result = "SCALE_RESULT case=" + caseId + " defs=" + definitions +
-            " commands=" + (functionCount * commandCount) + " CLOCK=" + (scaleClockOn ? "ON" : "OFF") +
-            " QUERIES=" + scaleClockQueries + " CLOCK_TICKS=" + (scaleClockOn ? scaleClockLast - scaleClockFirst : -1) +
-            " complete=" + complete + " chat=" + (scaleSkipChat ? "OFF" : "ON") +
-            " UNIT=CALLS" + counts() + " SKIP" + omissions() + " EXECUTION_DISABLED";
-        collecting = false;
-        finishStage = "SCALE_SAY_WAIT";
-        player.say(result);
-        finishStage = "FINISHED";
-    }
-    export function isProbe(): boolean { return enabled; }
-    export function noteDefinition(): void { if (enabled && collecting) definitions++; }
-    export function skip(stage: string): boolean {
-        if (!enabled || !collecting) return false;
-        if (scaleActive && stage == "OUTPUT") return true;
-        if (scaleActive && scaleSkipChat && stage == "CHAT") return true;
-        return (stage == "CHAT" && (mode == 1 || mode == 4 || mode == 5)) ||
-            (stage == "STORE" && mode == 2) || (stage == "OUTPUT" && mode == 3) ||
-            (stage == "DIAG" && (mode == 4 || mode == 5)) ||
-            (stage == "CHECK" && mode == 5);
-    }
-    export function enter(stage: string): void {
-        if (!enabled || !collecting) return;
-        let i = stages.indexOf(stage);
-        if (i < 0) return;
-        lastStep = stage + "_WAIT";
-        entered[i]++;
-        if (skip(stage)) omitted[i]++;
-    }
-    export function leave(stage: string): void {
-        if (!enabled || !collecting) return;
-        let i = stages.indexOf(stage);
-        if (i >= 0) {
-            returned[i]++;
-            lastStep = stage + "_RETURN";
-        }
-    }
-    export function registerChat(name: string, handler: () => void): void {
-        enter("CHAT");
-        if (!skip("CHAT")) player.onChat(name, handler);
-        leave("CHAT");
-    }
-    /** Query-free snapshot strings. These values are call counts, never elapsed time. */
-    export function counts(): string {
-        let text = "";
-        for (let i = 0; i < stages.length; i++) text += " " + stages[i] + "=" + returned[i] + "/" + entered[i];
-        return text;
-    }
-    export function omissions(): string {
-        let text = "";
-        for (let i = 0; i < stages.length; i++) text += " " + stages[i] + "=" + omitted[i];
-        return text;
-    }
-    /** Snapshot before any output; callable through the existing ? handler only in probe mode. */
-    export function report(): void {
-        let m = mode;
-        let n = definitions;
-        let f = finishStage;
-        let step = lastStep;
-        let countText = counts();
-        player.say("BENCH_STATE mode=" + m + " defs=" + n + " finish=" + f + " last=" + step);
-        player.say("BENCH_COUNTS UNIT=CALLS" + countText);
-    }
-    export function finish(): void {
-        finishStage = "SNAPSHOT";
-        // Freeze counters before the two common report calls. No report event is registered.
-        let countText = counts();
-        let skipText = omissions();
-        let n = definitions;
-        let m = mode;
-        collecting = false;
-        finishStage = "READY_SAY_WAIT";
-        player.say("BENCH_READY mode=" + m + " defs=" + n + " UNIT=CALLS" + countText);
-        finishStage = "SKIP_SAY_WAIT";
-        player.say("BENCH_SKIP mode=" + m + skipText + " EXECUTION_DISABLED");
-        finishStage = "FINISHED";
     }
 }

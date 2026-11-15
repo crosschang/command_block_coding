@@ -2566,13 +2566,6 @@ namespace MCFunctionValidator {
     }
 
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
-        StartupProbe.enter("CHECK");
-        let result: ValidationIssue[] = [];
-        if (!StartupProbe.skip("CHECK")) result = validateCommandCore(command);
-        StartupProbe.leave("CHECK");
-        return result;
-    }
-    function validateCommandCore(command: MCFunctionAST.CommandNode): ValidationIssue[] {
         if (command.kind == MCFunctionAST.CommandKind.Execute) return validateExecuteCommand(<MCFunctionAST.ExecuteCommand>command);
         let issues: ValidationIssue[] = [];
         if (command.kind == MCFunctionAST.CommandKind.Scoreboard) {

@@ -60,7 +60,7 @@ namespace MCFunctionDiagnostics {
 
     /** Register a number-specific chat event without requiring any chat args. */
     function registerPageChat(page: number): void {
-        StartupProbe.registerChat("?" + page, function () {
+        player.onChat("?" + page, function () {
             showPage(page);
         });
     }
@@ -88,7 +88,7 @@ namespace MCFunctionDiagnostics {
     export function ensureChatRegistered(): void {
         if (chatRegistered) return;
         chatRegistered = true;
-        StartupProbe.registerChat(allDiagnosticsChatCommandName(), function () {
+        player.onChat(allDiagnosticsChatCommandName(), function () {
             showAll();
         });
         ensurePageChatsRegistered();
@@ -102,13 +102,7 @@ namespace MCFunctionDiagnostics {
     }
 
     /** Replace only this function's Definition diagnostics. */
-    export function replaceDefinitionIssues(functionName: string,
-        issues: MCFunctionValidator.ValidationIssue[]): void {
-        StartupProbe.enter("DIAG");
-        if (!StartupProbe.skip("DIAG")) replaceDefinitionIssuesCore(functionName, issues);
-        StartupProbe.leave("DIAG");
-    }
-    function replaceDefinitionIssuesCore(
+    export function replaceDefinitionIssues(
         functionName: string,
         issues: MCFunctionValidator.ValidationIssue[]
     ): void {
@@ -596,10 +590,6 @@ namespace MCFunctionDiagnostics {
 
     /** Short project summary, invoked by the ? chat command. */
     export function showAll(): void {
-        if (StartupProbe.isProbe()) {
-            StartupProbe.report();
-            return;
-        }
         showPage(1);
     }
 
