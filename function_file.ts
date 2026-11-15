@@ -444,66 +444,16 @@ namespace FunctionFile {
         };
     }
 
-    function countDefinitionIssues(
-        issues: MCFunctionValidator.ValidationIssue[],
-        level: MCFunctionValidator.ValidationLevel
-    ): number {
-        let count = 0;
-        for (let i = 0; i < issues.length; i++) {
-            if (issues[i].level == level) count++;
-        }
-        return count;
-    }
-
     function reportDefinitionComplete(
         name: string,
         issues: MCFunctionValidator.ValidationIssue[],
         structureError: boolean
     ): void {
-        let errorCount = countDefinitionIssues(
-            issues,
-            MCFunctionValidator.ValidationLevel.Error
-        );
-        let warningCount = countDefinitionIssues(
-            issues,
-            MCFunctionValidator.ValidationLevel.Warning
-        );
-        let infoCount = countDefinitionIssues(
-            issues,
-            MCFunctionValidator.ValidationLevel.Info
-        );
-
-        // Structural errors captured inside a FunctionFile are also inserted into
-        // definitionIssues by reportStructureError(), so do not double-count them.
-        let valid = !structureError && errorCount == 0;
-
-        if (errorCount == 0 && warningCount == 0 && infoCount == 0) {
-            MCFunctionPreview.previewSay(name + ": OK.");
-            return;
-        }
-
-        let summary = name + ":";
-        if (errorCount > 0) {
-            summary = summary + " " + errorCount +
-                (errorCount == 1 ? " error" : " errors");
-        }
-        if (warningCount > 0) {
-            summary = summary + " " + warningCount +
-                (warningCount == 1 ? " warning" : " warnings");
-        }
-        if (infoCount > 0) {
-            summary = summary + " " + infoCount + " info";
-        }
-        summary = summary + ".";
-
-        // Keep each definition line short. The once-only Preview.ready() guide
-        // explains ? and name? after all definitions are registered.
-        if (!valid) {
-            summary = summary + " Execution blocked.";
-        } else {
-            summary = summary + " Execution allowed.";
-        }
-        MCFunctionPreview.previewSay(summary);
+        // Definitions already have cached diagnostics and registered name? handlers.
+        // Normal capture must not wait for native tellraw/SAY before registering
+        // the remaining FunctionFiles. WARNING/INFO are still inspectable via ?.
+        if (!structureError && !MCFunctionValidator.hasError(issues)) return;
+        MCFunctionDiagnostics.showBlockedExecutionHint(name);
     }
 
     function startTickPreview(): void {
@@ -655,18 +605,12 @@ namespace FunctionFile {
  */
 //% color="#00A67E" weight=96 icon="\uf144" block="PREVIEW"
 namespace Preview {
-    let diagnosticGuideShown = false;
-
     //% blockId=mcfunction_preview_ready
     //% block="▶ PREVIEW READY"
     //% weight=100
     export function ready(): void {
-        Command.say("MCFunction Preview Ready")
-        // Show the guidance once, after top-level FunctionFile.define calls.
-        // This is Preview metadata; it is never part of .mcfunction output.
-        if (!diagnosticGuideShown) {
-            diagnosticGuideShown = true;
-            MCFunctionDiagnostics.showReadyGuide();
-        }
+        // Command.say is captured inside a FunctionFile and executes only when
+        // that function runs. Do not print a diagnostic guide during definition.
+        Command.say("MCFunction Preview Ready");
     }
 }
