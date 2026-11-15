@@ -596,6 +596,10 @@ namespace MCFunctionDiagnostics {
 
     /** Short project summary, invoked by the ? chat command. */
     export function showAll(): void {
+        if (StartupProbe.isProbe()) {
+            StartupProbe.report();
+            return;
+        }
         showPage(1);
     }
 

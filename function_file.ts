@@ -707,6 +707,8 @@ namespace StartupProbe {
     let collecting = false;
     let mode = 0;
     let definitions = 0;
+    let finishStage = "NOT_STARTED";
+    let lastStep = "NOT_STARTED";
     let stages: string[] = ["CAPTURE", "CHECK", "STORE", "DIAG", "CHAT", "OUTPUT"];
     let entered: number[] = [0, 0, 0, 0, 0, 0];
     let returned: number[] = [0, 0, 0, 0, 0, 0];
@@ -715,6 +717,8 @@ namespace StartupProbe {
         mode = value;
         if (mode < 0 || mode > 5 || mode % 1 != 0) mode = 0;
         definitions = 0;
+        finishStage = "DEFINITIONS";
+        lastStep = "BEGIN";
         for (let i = 0; i < stages.length; i++) { entered[i] = 0; returned[i] = 0; omitted[i] = 0; }
         enabled = true;
         collecting = true;
@@ -732,13 +736,17 @@ namespace StartupProbe {
         if (!enabled || !collecting) return;
         let i = stages.indexOf(stage);
         if (i < 0) return;
+        lastStep = stage + "_WAIT";
         entered[i]++;
         if (skip(stage)) omitted[i]++;
     }
     export function leave(stage: string): void {
         if (!enabled || !collecting) return;
         let i = stages.indexOf(stage);
-        if (i >= 0) returned[i]++;
+        if (i >= 0) {
+            returned[i]++;
+            lastStep = stage + "_RETURN";
+        }
     }
     export function registerChat(name: string, handler: () => void): void {
         enter("CHAT");
@@ -756,14 +764,28 @@ namespace StartupProbe {
         for (let i = 0; i < stages.length; i++) text += " " + stages[i] + "=" + omitted[i];
         return text;
     }
+    /** Snapshot before any output; callable through the existing ? handler only in probe mode. */
+    export function report(): void {
+        let m = mode;
+        let n = definitions;
+        let f = finishStage;
+        let step = lastStep;
+        let countText = counts();
+        player.say("BENCH_STATE mode=" + m + " defs=" + n + " finish=" + f + " last=" + step);
+        player.say("BENCH_COUNTS UNIT=CALLS" + countText);
+    }
     export function finish(): void {
+        finishStage = "SNAPSHOT";
         // Freeze counters before the two common report calls. No report event is registered.
         let countText = counts();
         let skipText = omissions();
         let n = definitions;
         let m = mode;
         collecting = false;
+        finishStage = "READY_SAY_WAIT";
         player.say("BENCH_READY mode=" + m + " defs=" + n + " UNIT=CALLS" + countText);
+        finishStage = "SKIP_SAY_WAIT";
         player.say("BENCH_SKIP mode=" + m + skipText + " EXECUTION_DISABLED");
+        finishStage = "FINISHED";
     }
 }

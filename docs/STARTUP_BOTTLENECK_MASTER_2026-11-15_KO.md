@@ -91,3 +91,7 @@ NODE_PATH=<TypeScript node_modules 경로> node tests/dev/startup_bottleneck_moc
 ```
 
 확인된 기존 진단 테스트 2개의 cbi_page/?1 불일치를 해결한 작업은 아니다. 실제 게임 병목 원인을 모의 검사 시간으로 대신 판정하지 않는다.
+
+## 모드3 장시간 무응답 추가 관측
+
+[상태 조회·영상 기록](STARTUP_MODE3_STATE_2026-11-15_KO.md)을 참고한다. 최신 master에서는 프로브를 켠 상태의 기존 `?` 명령으로 단계와 미반환 호출 수를 조회할 수 있다. 일반 사용의 진단 요약은 유지한다.
