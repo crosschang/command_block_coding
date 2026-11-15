@@ -78,6 +78,7 @@ namespace FunctionFile {
     //% blockAllowMultiple=1
     //% topblock=true
     export function define(name: string, handler: () => void): void {
+        StartupProbe.noteDefinition();
         // Human-facing diagnostics viewer. Multiple define() calls are safe because
         // the runtime registers this chat command only once per program run.
         MCFunctionDiagnostics.ensureChatRegistered();
@@ -124,6 +125,10 @@ namespace FunctionFile {
      * unrelated Behavior Pack function with the same ID.
      */
     export function runPreview(name: string): boolean {
+        if (StartupProbe.isProbe()) {
+            player.say("BENCH_EXECUTION_DISABLED");
+            return true;
+        }
         for (let i = 0; i < functionNames.length; i++) {
             if (functionNames[i] == name) {
                 if (!functionValid[i]) {
@@ -258,7 +263,10 @@ namespace FunctionFile {
             // validation errors. Store them for ?, functionName?, and the
             // Definition summary without altering the AST/compiler.
             if (command) {
-                let compatibilityIssues = MCFunctionPreview.previewCompatibilityIssues(command);
+                StartupProbe.enter("CHECK");
+                let compatibilityIssues: MCFunctionValidator.ValidationIssue[] = [];
+                if (!StartupProbe.skip("CHECK")) compatibilityIssues = MCFunctionPreview.previewCompatibilityIssues(command);
+                StartupProbe.leave("CHECK");
                 for (let i = 0; i < compatibilityIssues.length; i++) {
                     addDefinitionIssueUnique(compatibilityIssues[i]);
                 }
@@ -339,7 +347,9 @@ namespace FunctionFile {
         definitionHasGameruleList = false;
 
         functionExecutionDepth++;
+        StartupProbe.enter("CAPTURE");
         handler();
+        StartupProbe.leave("CAPTURE");
         functionExecutionDepth--;
 
         let actions = definitionActions;
@@ -444,16 +454,78 @@ namespace FunctionFile {
         };
     }
 
-    function reportDefinitionComplete(
+    function countDefinitionIssues(
+        issues: MCFunctionValidator.ValidationIssue[],
+        level: MCFunctionValidator.ValidationLevel
+    ): number {
+        let count = 0;
+        for (let i = 0; i < issues.length; i++) {
+            if (issues[i].level == level) count++;
+        }
+        return count;
+    }
+
+    function reportDefinitionComplete(name: string,
+        issues: MCFunctionValidator.ValidationIssue[], structureError: boolean): void {
+        // Preserve current master behavior unless the explicit startup experiment is active.
+        if (!StartupProbe.isProbe()) {
+            if (structureError || MCFunctionValidator.hasError(issues))
+                MCFunctionDiagnostics.showBlockedExecutionHint(name);
+            return;
+        }
+        StartupProbe.enter("OUTPUT");
+        if (!StartupProbe.skip("OUTPUT")) reportDefinitionCompleteCore(name, issues, structureError);
+        StartupProbe.leave("OUTPUT");
+    }
+    function reportDefinitionCompleteCore(
         name: string,
         issues: MCFunctionValidator.ValidationIssue[],
         structureError: boolean
     ): void {
-        // Definitions already have cached diagnostics and registered name? handlers.
-        // Normal capture must not wait for native tellraw/SAY before registering
-        // the remaining FunctionFiles. WARNING/INFO are still inspectable via ?.
-        if (!structureError && !MCFunctionValidator.hasError(issues)) return;
-        MCFunctionDiagnostics.showBlockedExecutionHint(name);
+        let errorCount = countDefinitionIssues(
+            issues,
+            MCFunctionValidator.ValidationLevel.Error
+        );
+        let warningCount = countDefinitionIssues(
+            issues,
+            MCFunctionValidator.ValidationLevel.Warning
+        );
+        let infoCount = countDefinitionIssues(
+            issues,
+            MCFunctionValidator.ValidationLevel.Info
+        );
+
+        // Structural errors captured inside a FunctionFile are also inserted into
+        // definitionIssues by reportStructureError(), so do not double-count them.
+        let valid = !structureError && errorCount == 0;
+
+        if (errorCount == 0 && warningCount == 0 && infoCount == 0) {
+            MCFunctionPreview.previewSay(name + ": OK.");
+            return;
+        }
+
+        let summary = name + ":";
+        if (errorCount > 0) {
+            summary = summary + " " + errorCount +
+                (errorCount == 1 ? " error" : " errors");
+        }
+        if (warningCount > 0) {
+            summary = summary + " " + warningCount +
+                (warningCount == 1 ? " warning" : " warnings");
+        }
+        if (infoCount > 0) {
+            summary = summary + " " + infoCount + " info";
+        }
+        summary = summary + ".";
+
+        // Keep each definition line short. The once-only Preview.ready() guide
+        // explains ? and name? after all definitions are registered.
+        if (!valid) {
+            summary = summary + " Execution blocked.";
+        } else {
+            summary = summary + " Execution allowed.";
+        }
+        MCFunctionPreview.previewSay(summary);
     }
 
     function startTickPreview(): void {
@@ -503,7 +575,7 @@ namespace FunctionFile {
             if (registeredChatFunctionNames[i] == name) return;
         }
         registeredChatFunctionNames.push(name);
-        player.onChat(name, function () {
+        StartupProbe.registerChat(name, function () {
             for (let i = 0; i < functionNames.length; i++) {
                 if (functionNames[i] != name) continue;
                 if (!functionValid[i]) {
@@ -532,13 +604,15 @@ namespace FunctionFile {
             if (registeredChatDiagnosticNames[i] == queryName) return;
         }
         registeredChatDiagnosticNames.push(queryName);
-        player.onChat(queryName, function () {
+        StartupProbe.registerChat(queryName, function () {
             MCFunctionDiagnostics.showFunctionDetailsOnly(name);
         });
     }
 
     function register(name: string, handler: () => void, valid: boolean,
         commands: MCFunctionAST.CommandNode[], complete: boolean): void {
+        StartupProbe.enter("STORE");
+        if (StartupProbe.skip("STORE")) { StartupProbe.leave("STORE"); return; }
         // If Blocks <-> JavaScript is refreshed, replace an existing definition
         // rather than keeping duplicate entries in our own preview registry.
         for (let i = 0; i < functionNames.length; i++) {
@@ -547,6 +621,7 @@ namespace FunctionFile {
                 functionValid[i] = valid;
                 functionCommands[i] = commands;
                 functionPlanComplete[i] = complete;
+                StartupProbe.leave("STORE");
                 return;
             }
         }
@@ -556,6 +631,7 @@ namespace FunctionFile {
         functionValid.push(valid);
         functionCommands.push(commands);
         functionPlanComplete.push(complete);
+        StartupProbe.leave("STORE");
     }
 
     function reportInvalidFunctionRun(name: string): void {
@@ -605,12 +681,89 @@ namespace FunctionFile {
  */
 //% color="#00A67E" weight=96 icon="\uf144" block="PREVIEW"
 namespace Preview {
+    let diagnosticGuideShown = false;
+
     //% blockId=mcfunction_preview_ready
     //% block="▶ PREVIEW READY"
     //% weight=100
     export function ready(): void {
-        // Command.say is captured inside a FunctionFile and executes only when
-        // that function runs. Do not print a diagnostic guide during definition.
         Command.say("MCFunction Preview Ready");
+        // Only the explicit experiment replays the historical definition-time guide.
+        // Ordinary master use retains captured manual READY without startup output.
+        if (StartupProbe.isProbe() && !diagnosticGuideShown) {
+            diagnosticGuideShown = true;
+            StartupProbe.enter("OUTPUT");
+            if (!StartupProbe.skip("OUTPUT")) MCFunctionDiagnostics.showReadyGuide();
+            StartupProbe.leave("OUTPUT");
+        }
+    }
+}
+
+/** Startup exclusion experiment, OFF unless begin() is explicitly called.
+ * No clocks, pauses, packets, or console profiling. Counters are not milliseconds.
+ */
+namespace StartupProbe {
+    let enabled = false;
+    let collecting = false;
+    let mode = 0;
+    let definitions = 0;
+    let stages: string[] = ["CAPTURE", "CHECK", "STORE", "DIAG", "CHAT", "OUTPUT"];
+    let entered: number[] = [0, 0, 0, 0, 0, 0];
+    let returned: number[] = [0, 0, 0, 0, 0, 0];
+    let omitted: number[] = [0, 0, 0, 0, 0, 0];
+    export function begin(value: number): void {
+        mode = value;
+        if (mode < 0 || mode > 5 || mode % 1 != 0) mode = 0;
+        definitions = 0;
+        for (let i = 0; i < stages.length; i++) { entered[i] = 0; returned[i] = 0; omitted[i] = 0; }
+        enabled = true;
+        collecting = true;
+    }
+    export function isProbe(): boolean { return enabled; }
+    export function noteDefinition(): void { if (enabled && collecting) definitions++; }
+    export function skip(stage: string): boolean {
+        if (!enabled || !collecting) return false;
+        return (stage == "CHAT" && (mode == 1 || mode == 4 || mode == 5)) ||
+            (stage == "STORE" && mode == 2) || (stage == "OUTPUT" && mode == 3) ||
+            (stage == "DIAG" && (mode == 4 || mode == 5)) ||
+            (stage == "CHECK" && mode == 5);
+    }
+    export function enter(stage: string): void {
+        if (!enabled || !collecting) return;
+        let i = stages.indexOf(stage);
+        if (i < 0) return;
+        entered[i]++;
+        if (skip(stage)) omitted[i]++;
+    }
+    export function leave(stage: string): void {
+        if (!enabled || !collecting) return;
+        let i = stages.indexOf(stage);
+        if (i >= 0) returned[i]++;
+    }
+    export function registerChat(name: string, handler: () => void): void {
+        enter("CHAT");
+        if (!skip("CHAT")) player.onChat(name, handler);
+        leave("CHAT");
+    }
+    /** Query-free snapshot strings. These values are call counts, never elapsed time. */
+    export function counts(): string {
+        let text = "";
+        for (let i = 0; i < stages.length; i++) text += " " + stages[i] + "=" + returned[i] + "/" + entered[i];
+        return text;
+    }
+    export function omissions(): string {
+        let text = "";
+        for (let i = 0; i < stages.length; i++) text += " " + stages[i] + "=" + omitted[i];
+        return text;
+    }
+    export function finish(): void {
+        // Freeze counters before the two common report calls. No report event is registered.
+        let countText = counts();
+        let skipText = omissions();
+        let n = definitions;
+        let m = mode;
+        collecting = false;
+        player.say("BENCH_READY mode=" + m + " defs=" + n + " UNIT=CALLS" + countText);
+        player.say("BENCH_SKIP mode=" + m + skipText + " EXECUTION_DISABLED");
     }
 }

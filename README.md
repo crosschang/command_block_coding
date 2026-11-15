@@ -16,6 +16,8 @@
 
 분할 전송·단계별 ON 처리와 기존 12명령/1,400자 제한 해제를 통합했습니다. 새 행동팩 **0.0.6** 및 실제 FunctionFile 시험 순서는 [통합·검증 안내](docs/CHUNK_FUNCTIONFILE_INTEGRATION_2026-11-14_KO.md)를 참고하세요. 새 통합본의 실게임 검증은 진행 전입니다.
 
+시작 병목 측정 기능도 master에 통합되어 있지만 **기본 OFF**입니다. [병목 비교 시험 안내](docs/STARTUP_BOTTLENECK_MASTER_2026-11-15_KO.md)의 전용 시험 코드에서만 활성화합니다.
+
 ## 이 프로젝트 편집
 
 MakeCode에서 이 저장소를 편집합니다.
