@@ -704,6 +704,9 @@ namespace Preview {
  */
 namespace StartupProbe {
     let enabled = false;
+    let scaleActive = false;
+    let scaleSkipChat = false;
+    let scaleStarted = false;
     let collecting = false;
     let mode = 0;
     let definitions = 0;
@@ -723,10 +726,55 @@ namespace StartupProbe {
         enabled = true;
         collecting = true;
     }
+    /** Isolated size experiment. Restart the user program between cases. No game commands execute. */
+    //% blockId=startup_probe_scale
+    //% block="STARTUP scale test %caseId"
+    //% caseId.min=1 caseId.max=8 caseId.defl=1
+    //% advanced=true group="STARTUP TEST"
+    export function scale(caseId: number): void {
+        if (caseId < 1 || caseId > 8 || caseId % 1 != 0) {
+            player.say("SCALE_INVALID case=1..8");
+            return;
+        }
+        if (scaleStarted || enabled) {
+            player.say("SCALE_RESTART_REQUIRED");
+            return;
+        }
+        scaleStarted = true;
+        scaleActive = true;
+        scaleSkipChat = caseId >= 6;
+        let functionCount = 1;
+        let commandCount = 64;
+        if (caseId == 1) commandCount = 8;
+        if (caseId == 3) commandCount = 256;
+        if (caseId == 4 || caseId == 7) { functionCount = 8; commandCount = 8; }
+        if (caseId == 5 || caseId == 8) { functionCount = 32; commandCount = 2; }
+        begin(0);
+        // Same public AST adapters and FunctionFile definition path in every case.
+        // These local loops generate definitions, never send/execute native commands.
+        for (let f = 0; f < functionCount; f++) {
+            FunctionFile.define("scale" + (f + 1), function () {
+                for (let c = 0; c < commandCount; c++) {
+                    Command.scoreboard(Command.scoreboardPlayersScore(Command.ScoreboardNumberMode.Add,
+                        Command.scoreboardFakePlayer("#r"), "cbx_scale", 1));
+                }
+            });
+        }
+        finishStage = "SNAPSHOT";
+        let result = "SCALE_RESULT case=" + caseId + " defs=" + definitions +
+            " commands=" + (functionCount * commandCount) + " chat=" + (scaleSkipChat ? "OFF" : "ON") +
+            " UNIT=CALLS" + counts() + " SKIP" + omissions() + " EXECUTION_DISABLED";
+        collecting = false;
+        finishStage = "SCALE_SAY_WAIT";
+        player.say(result);
+        finishStage = "FINISHED";
+    }
     export function isProbe(): boolean { return enabled; }
     export function noteDefinition(): void { if (enabled && collecting) definitions++; }
     export function skip(stage: string): boolean {
         if (!enabled || !collecting) return false;
+        if (scaleActive && stage == "OUTPUT") return true;
+        if (scaleActive && scaleSkipChat && stage == "CHAT") return true;
         return (stage == "CHAT" && (mode == 1 || mode == 4 || mode == 5)) ||
             (stage == "STORE" && mode == 2) || (stage == "OUTPUT" && mode == 3) ||
             (stage == "DIAG" && (mode == 4 || mode == 5)) ||
