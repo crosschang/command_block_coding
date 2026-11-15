@@ -1,6 +1,6 @@
 {
     "name": "command_block_coding",
-    "version": "0.0.18",
+    "version": "0.0.19",
     "description": "Minecraft Education command blocks for MakeCode",
     "dependencies": {
         "core": "*",
