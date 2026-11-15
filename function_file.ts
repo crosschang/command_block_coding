@@ -700,13 +700,17 @@ namespace Preview {
 }
 
 /** Startup exclusion experiment, OFF unless begin() is explicitly called.
- * No clocks, pauses, packets, or console profiling. Counters are not milliseconds.
+ * Legacy begin() adds no clocks; scale() can explicitly query GameTime. Counters are not milliseconds.
  */
 namespace StartupProbe {
     let enabled = false;
     let scaleActive = false;
     let scaleSkipChat = false;
     let scaleStarted = false;
+    let scaleClockOn = false;
+    let scaleClockQueries = 0;
+    let scaleClockFirst = -1;
+    let scaleClockLast = -1;
     let collecting = false;
     let mode = 0;
     let definitions = 0;
@@ -726,12 +730,22 @@ namespace StartupProbe {
         enabled = true;
         collecting = true;
     }
+    function scaleClockMark(stage: string): void {
+        if (!scaleClockOn) return;
+        lastStep = "SCALE_" + stage + "_CLOCK_WAIT";
+        let tick = gameplay.timeQuery(TimeQuery.GameTime);
+        if (scaleClockQueries == 0) scaleClockFirst = tick;
+        scaleClockLast = tick;
+        scaleClockQueries++;
+        lastStep = "SCALE_" + stage + "_CLOCK_RETURN";
+    }
     /** Isolated size experiment. Restart the user program between cases. No game commands execute. */
     //% blockId=startup_probe_scale
-    //% block="STARTUP scale test %caseId"
+    //% block="STARTUP scale test %caseId clock ON %clockOn"
+    //% clockOn.defl=true
     //% caseId.min=1 caseId.max=8 caseId.defl=1
     //% advanced=true group="STARTUP TEST"
-    export function scale(caseId: number): void {
+    export function scale(caseId: number, clockOn: boolean = true): void {
         if (caseId < 1 || caseId > 8 || caseId % 1 != 0) {
             player.say("SCALE_INVALID case=1..8");
             return;
@@ -743,13 +757,20 @@ namespace StartupProbe {
         scaleStarted = true;
         scaleActive = true;
         scaleSkipChat = caseId >= 6;
+        scaleClockOn = clockOn;
+        scaleClockQueries = 0;
+        scaleClockFirst = -1;
+        scaleClockLast = -1;
+        begin(0);
+        scaleClockMark("ENTER");
         let functionCount = 1;
         let commandCount = 64;
         if (caseId == 1) commandCount = 8;
         if (caseId == 3) commandCount = 256;
         if (caseId == 4 || caseId == 7) { functionCount = 8; commandCount = 8; }
         if (caseId == 5 || caseId == 8) { functionCount = 32; commandCount = 2; }
-        begin(0);
+        scaleClockMark("PLAN_READY");
+        scaleClockMark("PREPARED");
         // Same public AST adapters and FunctionFile definition path in every case.
         // These local loops generate definitions, never send/execute native commands.
         for (let f = 0; f < functionCount; f++) {
@@ -760,9 +781,18 @@ namespace StartupProbe {
                 }
             });
         }
+        scaleClockMark("DEFINITIONS_RETURN");
+        scaleClockMark("VERIFY_ENTER");
+        let complete = definitions == functionCount;
+        for (let i = 0; i < stages.length; i++) {
+            if (entered[i] != returned[i]) complete = false;
+        }
+        scaleClockMark("VERIFY_EXIT");
         finishStage = "SNAPSHOT";
         let result = "SCALE_RESULT case=" + caseId + " defs=" + definitions +
-            " commands=" + (functionCount * commandCount) + " chat=" + (scaleSkipChat ? "OFF" : "ON") +
+            " commands=" + (functionCount * commandCount) + " CLOCK=" + (scaleClockOn ? "ON" : "OFF") +
+            " QUERIES=" + scaleClockQueries + " CLOCK_TICKS=" + (scaleClockOn ? scaleClockLast - scaleClockFirst : -1) +
+            " complete=" + complete + " chat=" + (scaleSkipChat ? "OFF" : "ON") +
             " UNIT=CALLS" + counts() + " SKIP" + omissions() + " EXECUTION_DISABLED";
         collecting = false;
         finishStage = "SCALE_SAY_WAIT";

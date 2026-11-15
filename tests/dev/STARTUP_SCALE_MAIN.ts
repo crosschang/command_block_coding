@@ -4,5 +4,7 @@
 // 4: 8/64, 5: 32/64 (함수 수 비교; 2와 비교)
 // 6: 1/64 CHAT OFF, 7: 8/64 CHAT OFF, 8: 32/64 CHAT OFF
 // 모든 시험은 안내 출력 생략, 검사·INFO 저장 유지. 세계 명령 실행 없음.
+// true=GameTime ON(고정6회), false=OFF. 먼저6번 ON 성공 여부 확인 후1~8 비교.
+// CLOCK_TICKS는 시계 응답 대기 포함, 시작/최종 채팅 전달 시간 제외.
 // 종료에 SCALE_RESULT 한 번. 숫자는 시간 아닌 호출 횟수. 시간은 영상으로 비교.
-StartupProbe.scale(1)
+StartupProbe.scale(6, true)
