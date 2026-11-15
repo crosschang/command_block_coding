@@ -1,3 +1,5 @@
+> **DEV 시작 병목 시험 브랜치** — 정식 실행용이 아닙니다. 이전 출력 제거 변경 전 소스 기준이며, [시험 안내](docs/STARTUP_BOTTLENECK_DEV_2026-11-15_KO.md)를 먼저 확인하세요.
+
 
 > 이 페이지를 [https://crosschang.github.io/command_block_coding/](https://crosschang.github.io/command_block_coding/)으로 열기
 

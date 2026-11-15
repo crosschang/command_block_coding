@@ -78,6 +78,7 @@ namespace FunctionFile {
     //% blockAllowMultiple=1
     //% topblock=true
     export function define(name: string, handler: () => void): void {
+        StartupProbe.noteDefinition();
         // Human-facing diagnostics viewer. Multiple define() calls are safe because
         // the runtime registers this chat command only once per program run.
         MCFunctionDiagnostics.ensureChatRegistered();
@@ -124,6 +125,10 @@ namespace FunctionFile {
      * unrelated Behavior Pack function with the same ID.
      */
     export function runPreview(name: string): boolean {
+        if (StartupProbe.isProbe()) {
+            player.say("BENCH_EXECUTION_DISABLED");
+            return true;
+        }
         for (let i = 0; i < functionNames.length; i++) {
             if (functionNames[i] == name) {
                 if (!functionValid[i]) {
@@ -258,7 +263,10 @@ namespace FunctionFile {
             // validation errors. Store them for ?, functionName?, and the
             // Definition summary without altering the AST/compiler.
             if (command) {
-                let compatibilityIssues = MCFunctionPreview.previewCompatibilityIssues(command);
+                StartupProbe.enter("CHECK");
+                let compatibilityIssues: MCFunctionValidator.ValidationIssue[] = [];
+                if (!StartupProbe.skip("CHECK")) compatibilityIssues = MCFunctionPreview.previewCompatibilityIssues(command);
+                StartupProbe.leave("CHECK");
                 for (let i = 0; i < compatibilityIssues.length; i++) {
                     addDefinitionIssueUnique(compatibilityIssues[i]);
                 }
@@ -339,7 +347,9 @@ namespace FunctionFile {
         definitionHasGameruleList = false;
 
         functionExecutionDepth++;
+        StartupProbe.enter("CAPTURE");
         handler();
+        StartupProbe.leave("CAPTURE");
         functionExecutionDepth--;
 
         let actions = definitionActions;
@@ -455,7 +465,13 @@ namespace FunctionFile {
         return count;
     }
 
-    function reportDefinitionComplete(
+    function reportDefinitionComplete(name: string,
+        issues: MCFunctionValidator.ValidationIssue[], structureError: boolean): void {
+        StartupProbe.enter("OUTPUT");
+        if (!StartupProbe.skip("OUTPUT")) reportDefinitionCompleteCore(name, issues, structureError);
+        StartupProbe.leave("OUTPUT");
+    }
+    function reportDefinitionCompleteCore(
         name: string,
         issues: MCFunctionValidator.ValidationIssue[],
         structureError: boolean
@@ -553,7 +569,7 @@ namespace FunctionFile {
             if (registeredChatFunctionNames[i] == name) return;
         }
         registeredChatFunctionNames.push(name);
-        player.onChat(name, function () {
+        StartupProbe.registerChat(name, function () {
             for (let i = 0; i < functionNames.length; i++) {
                 if (functionNames[i] != name) continue;
                 if (!functionValid[i]) {
@@ -582,13 +598,15 @@ namespace FunctionFile {
             if (registeredChatDiagnosticNames[i] == queryName) return;
         }
         registeredChatDiagnosticNames.push(queryName);
-        player.onChat(queryName, function () {
+        StartupProbe.registerChat(queryName, function () {
             MCFunctionDiagnostics.showFunctionDetailsOnly(name);
         });
     }
 
     function register(name: string, handler: () => void, valid: boolean,
         commands: MCFunctionAST.CommandNode[], complete: boolean): void {
+        StartupProbe.enter("STORE");
+        if (StartupProbe.skip("STORE")) { StartupProbe.leave("STORE"); return; }
         // If Blocks <-> JavaScript is refreshed, replace an existing definition
         // rather than keeping duplicate entries in our own preview registry.
         for (let i = 0; i < functionNames.length; i++) {
@@ -597,6 +615,7 @@ namespace FunctionFile {
                 functionValid[i] = valid;
                 functionCommands[i] = commands;
                 functionPlanComplete[i] = complete;
+                StartupProbe.leave("STORE");
                 return;
             }
         }
@@ -606,6 +625,7 @@ namespace FunctionFile {
         functionValid.push(valid);
         functionCommands.push(commands);
         functionPlanComplete.push(complete);
+        StartupProbe.leave("STORE");
     }
 
     function reportInvalidFunctionRun(name: string): void {
@@ -666,7 +686,78 @@ namespace Preview {
         // This is Preview metadata; it is never part of .mcfunction output.
         if (!diagnosticGuideShown) {
             diagnosticGuideShown = true;
-            MCFunctionDiagnostics.showReadyGuide();
+            StartupProbe.enter("OUTPUT");
+            if (!StartupProbe.skip("OUTPUT")) MCFunctionDiagnostics.showReadyGuide();
+            StartupProbe.leave("OUTPUT");
         }
+    }
+}
+
+/** DEV BRANCH ONLY. No clocks, pauses, packets, or console profiling.
+ * Completion counters are not milliseconds. Do not merge these bypasses into master.
+ */
+namespace StartupProbe {
+    let enabled = false;
+    let collecting = false;
+    let mode = 0;
+    let definitions = 0;
+    let stages: string[] = ["CAPTURE", "CHECK", "STORE", "DIAG", "CHAT", "OUTPUT"];
+    let entered: number[] = [0, 0, 0, 0, 0, 0];
+    let returned: number[] = [0, 0, 0, 0, 0, 0];
+    let omitted: number[] = [0, 0, 0, 0, 0, 0];
+    export function begin(value: number): void {
+        mode = value;
+        if (mode < 0 || mode > 5 || mode % 1 != 0) mode = 0;
+        definitions = 0;
+        for (let i = 0; i < stages.length; i++) { entered[i] = 0; returned[i] = 0; omitted[i] = 0; }
+        enabled = true;
+        collecting = true;
+    }
+    export function isProbe(): boolean { return enabled; }
+    export function noteDefinition(): void { if (enabled && collecting) definitions++; }
+    export function skip(stage: string): boolean {
+        if (!enabled || !collecting) return false;
+        return (stage == "CHAT" && (mode == 1 || mode == 4 || mode == 5)) ||
+            (stage == "STORE" && mode == 2) || (stage == "OUTPUT" && mode == 3) ||
+            (stage == "DIAG" && (mode == 4 || mode == 5)) ||
+            (stage == "CHECK" && mode == 5);
+    }
+    export function enter(stage: string): void {
+        if (!enabled || !collecting) return;
+        let i = stages.indexOf(stage);
+        if (i < 0) return;
+        entered[i]++;
+        if (skip(stage)) omitted[i]++;
+    }
+    export function leave(stage: string): void {
+        if (!enabled || !collecting) return;
+        let i = stages.indexOf(stage);
+        if (i >= 0) returned[i]++;
+    }
+    export function registerChat(name: string, handler: () => void): void {
+        enter("CHAT");
+        if (!skip("CHAT")) player.onChat(name, handler);
+        leave("CHAT");
+    }
+    /** Query-free snapshot strings. These values are call counts, never elapsed time. */
+    export function counts(): string {
+        let text = "";
+        for (let i = 0; i < stages.length; i++) text += " " + stages[i] + "=" + returned[i] + "/" + entered[i];
+        return text;
+    }
+    export function omissions(): string {
+        let text = "";
+        for (let i = 0; i < stages.length; i++) text += " " + stages[i] + "=" + omitted[i];
+        return text;
+    }
+    export function finish(): void {
+        // Freeze counters before the two common report calls. No report event is registered.
+        let countText = counts();
+        let skipText = omissions();
+        let n = definitions;
+        let m = mode;
+        collecting = false;
+        player.say("BENCH_READY mode=" + m + " defs=" + n + " UNIT=CALLS" + countText);
+        player.say("BENCH_SKIP mode=" + m + skipText + " EXECUTION_DISABLED");
     }
 }
