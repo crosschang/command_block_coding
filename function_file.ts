@@ -124,6 +124,7 @@ namespace FunctionFile {
      * unrelated Behavior Pack function with the same ID.
      */
     export function runPreview(name: string): boolean {
+        MCFunctionOrderedPreview.recordExecutionStage("RESOLVE " + name);
         for (let i = 0; i < functionNames.length; i++) {
             if (functionNames[i] == name) {
                 if (!functionValid[i]) {
@@ -134,7 +135,9 @@ namespace FunctionFile {
 
                 RuntimeBridge.initializePreview();
                 if (MCFunctionOrderedPreview.isEnabled()) {
+                    MCFunctionOrderedPreview.recordExecutionStage("FLATTEN_BEGIN " + name);
                     let ordered = buildOrderedPlan(name);
+                    MCFunctionOrderedPreview.recordExecutionStage("FLATTEN_RETURN steps=" + (ordered ? ordered.length : 0));
                     if (ordered) MCFunctionOrderedPreview.submit(name, ordered);
                     else MCFunctionOrderedPreview.markRejected();
                     // Never silently fall back to the legacy handler.
@@ -554,6 +557,7 @@ namespace FunctionFile {
         }
         registeredChatFunctionNames.push(name);
         player.onChat(name, function () {
+            MCFunctionOrderedPreview.recordExecutionStage("CHAT_ENTER " + name);
             for (let i = 0; i < functionNames.length; i++) {
                 if (functionNames[i] != name) continue;
                 if (!functionValid[i]) {

@@ -74,6 +74,18 @@ namespace MCFunctionOrderedPreview {
         if (traceEnabled)
             MCFunctionPreview.previewSay("INFO [NATIVE_TRACE] " + step + " id=" + id);
     }
+    // Opt-in diagnostic output can itself yield in MakeCode. Stored state
+    // distinguishes that output wait from the operation being investigated.
+    let executionStage = "NOT_ENTERED";
+    let nativeFrameIndex = 0;
+    export function lastExecutionStage(): string { return executionStage; }
+    export function recordExecutionStage(stage: string): void {
+        if (traceEnabled) {
+            executionStage = "TRACE_OUTPUT_WAIT " + stage;
+            trace(stage, lastId || "pending");
+        }
+        executionStage = stage;
+    }
     const ACK_DONE = "cbxo2d_done_";
     const ACK_ERROR = "cbxo2d_error_";
     const ACK_POLL_PAUSE = 100;
@@ -335,12 +347,16 @@ namespace MCFunctionOrderedPreview {
     export function lastClockStage(): string { return clockStage; }
     export function lastClockTick(): number { return clockTick; }
     function clockMark(stage: string): void {
+        recordExecutionStage(stage + "_CLOCK_BEFORE");
         clockStage = stage + "_CLOCK_WAIT";
+        executionStage = clockStage;
         clockTick = gameplay.timeQuery(TimeQuery.GameTime);
         clockStage = stage;
+        recordExecutionStage(stage + "_CLOCK_RETURN");
     }
     function chunkFailure(status: AckStatus, reason: string): void {
         lastReceipt = status;
+        recordExecutionStage("ERROR " + reason);
         MCFunctionPreview.previewSay("ERROR [P4O2H_CHUNK_" + reason + "] id=" + lastId);
         inFlight = false;
     }
@@ -349,7 +365,12 @@ namespace MCFunctionOrderedPreview {
             chunkFailure(AckStatus.Rejected, "FRAME_LIMIT");
             return false;
         }
-        if (!player.execute(command)) {
+        nativeFrameIndex++;
+        recordExecutionStage("NATIVE_" + nativeFrameIndex + "_BEFORE");
+        executionStage = "NATIVE_" + nativeFrameIndex + "_WAIT";
+        let sent = player.execute(command);
+        recordExecutionStage("NATIVE_" + nativeFrameIndex + "_RETURN");
+        if (!sent) {
             // No fallback/resend after an uncertain transfer, including commit.
             chunkFailure(AckStatus.SendFailed, "SEND_FAILED");
             return false;
@@ -370,8 +391,10 @@ namespace MCFunctionOrderedPreview {
             return;
         }
         inFlight = true;
+        nativeFrameIndex = 0;
         lastId = "";
         lastReceipt = AckStatus.Rejected;
+        recordExecutionStage("COMPILE_BEGIN " + name);
         if (!nodes || nodes.length == 0) {
             chunkFailure(AckStatus.Rejected, "STEP_LIMIT");
             return;
@@ -399,7 +422,9 @@ namespace MCFunctionOrderedPreview {
             chunkFailure(AckStatus.Rejected, "EMPTY");
             return;
         }
+        recordExecutionStage("COMPILE_RETURN steps=" + lines.length);
         clockMark("ENTER");
+        recordExecutionStage("ENCODE_BEGIN");
         let plan = "";
         for (let i = 0; i < lines.length; i++) {
             if (i > 0) plan += ".";
@@ -410,8 +435,11 @@ namespace MCFunctionOrderedPreview {
         if (sequence > 999999) sequence = 1;
         let id = "q" + sessionToken + "_" + sequence;
         lastId = id;
+        recordExecutionStage("ENCODE_RETURN chars=" + plan.length);
         clockMark("PLAN_READY");
+        recordExecutionStage("READBACK_BEGIN");
         if (readbackReady == 0) probePlayerScoreboardReadback();
+        recordExecutionStage("READBACK_RETURN ready=" + readbackReady);
         if (readbackReady != 1) {
             chunkFailure(AckStatus.Unsupported, "READBACK");
             return;
@@ -423,17 +451,23 @@ namespace MCFunctionOrderedPreview {
         if (!sendChunkFrame("scoreboard players test @s " + PLAYER_ACK_OBJECTIVE + " 0 0")) return;
         clockMark("PREPARED");
         let count = Math.ceil(plan.length / CHUNK_CHARS);
+        recordExecutionStage("BEGIN_BEFORE parts=" + count);
         if (!sendChunkFrame("scriptevent " + CHUNK_BEGIN + " " + id + " " + count + " " + plan.length + " " + hash)) return;
         for (let i = 0; i < count; i++) {
+            recordExecutionStage("PART_BEFORE " + (i + 1) + "/" + count);
             if (!sendChunkFrame("scriptevent " + CHUNK_PART + " " + id + " " + i + " " + plan.substr(i * CHUNK_CHARS, CHUNK_CHARS))) return;
         }
+        recordExecutionStage("COMMIT_BEFORE");
         if (!sendChunkFrame("scriptevent " + CHUNK_COMMIT + " " + id)) return;
         lastReceipt = AckStatus.Submitted;
         clockMark("TRANSFER_RETURN");
         clockMark("VERIFY_ENTER");
+        recordExecutionStage("ACK_WAIT");
         lastReceipt = waitReceipt(name, id);
+        recordExecutionStage("ACK_RETURN status=" + lastReceipt);
         clockMark("VERIFY_EXIT");
         inFlight = false;
+        recordExecutionStage("FINISHED");
     }
 
     /** Fail closed; no fallback to per-line execution after an uncertain submit. */
