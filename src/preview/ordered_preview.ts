@@ -201,9 +201,9 @@ namespace MCFunctionOrderedPreview {
     function probePlayerScoreboardReadback(): boolean {
         let a = PLAYER_ACK_OBJECTIVE;
         let n = PLAYER_NONCE_OBJECTIVE;
-        player.execute("scoreboard players reset @s " + a);
-        player.execute("scoreboard players reset @s " + n);
-        let absent = !player.execute("scoreboard players test @s " + a + " 0 9");
+        // Every calibration value is overwritten before it is read.
+        // The final reset + absence checks still verify cleanup. Avoid
+        // three redundant cold-start native calls before the first BEGIN.
         let pendingSet = player.execute("scoreboard players set @s " + a + " 0");
         let pending = player.execute("scoreboard players test @s " + a + " 0 0");
         let doneSet = player.execute("scoreboard players set @s " + a + " 2");
@@ -220,7 +220,7 @@ namespace MCFunctionOrderedPreview {
             !player.execute("scoreboard players test @s " + a + " 0 9");
         let clearedN = player.execute("scoreboard players reset @s " + n) &&
             !player.execute("scoreboard players test @s " + n + " 1234567 1234567");
-        let good = absent && pendingSet && pending && doneSet && done &&
+        let good = pendingSet && pending && doneSet && done &&
             errorSet && error && zeroSet && zero && zeroNotDone && zeroNotError &&
             codeSet && codeRead && clearedA && clearedN;
         readbackReady = good ? 1 : -1;
