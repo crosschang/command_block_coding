@@ -86,6 +86,21 @@ namespace MCFunctionOrderedPreview {
         }
         executionStage = stage;
     }
+    // Experimental pacing for chunk transport only. Default 0 preserves timing.
+    // Configuration is frozen per request and cannot change while in flight.
+    let chunkPauseMs = 0;
+    let activeChunkPauseMs = 0;
+    export function setChunkPauseMilliseconds(value: number): void {
+        if (inFlight || (value != 0 && value != 1 && value != 100)) return;
+        chunkPauseMs = value;
+    }
+    export function chunkPauseMilliseconds(): number { return chunkPauseMs; }
+    function pauseChunkTransport(point: string): void {
+        if (activeChunkPauseMs == 0) return;
+        executionStage = point + "_PAUSE_WAIT";
+        loops.pause(activeChunkPauseMs);
+        executionStage = point + "_PAUSE_RETURN";
+    }
     const ACK_DONE = "cbxo2d_done_";
     const ACK_ERROR = "cbxo2d_error_";
     const ACK_POLL_PAUSE = 100;
@@ -348,10 +363,12 @@ namespace MCFunctionOrderedPreview {
     export function lastClockTick(): number { return clockTick; }
     function clockMark(stage: string): void {
         recordExecutionStage(stage + "_CLOCK_BEFORE");
+        pauseChunkTransport(stage + "_CLOCK_BEFORE");
         clockStage = stage + "_CLOCK_WAIT";
         executionStage = clockStage;
         clockTick = gameplay.timeQuery(TimeQuery.GameTime);
         clockStage = stage;
+        pauseChunkTransport(stage + "_CLOCK_AFTER");
         recordExecutionStage(stage + "_CLOCK_RETURN");
     }
     function chunkFailure(status: AckStatus, reason: string): void {
@@ -367,8 +384,10 @@ namespace MCFunctionOrderedPreview {
         }
         nativeFrameIndex++;
         recordExecutionStage("NATIVE_" + nativeFrameIndex + "_BEFORE");
+        pauseChunkTransport("NATIVE_" + nativeFrameIndex + "_BEFORE");
         executionStage = "NATIVE_" + nativeFrameIndex + "_WAIT";
         let sent = player.execute(command);
+        pauseChunkTransport("NATIVE_" + nativeFrameIndex + "_AFTER");
         recordExecutionStage("NATIVE_" + nativeFrameIndex + "_RETURN");
         if (!sent) {
             // No fallback/resend after an uncertain transfer, including commit.
@@ -391,6 +410,7 @@ namespace MCFunctionOrderedPreview {
             return;
         }
         inFlight = true;
+        activeChunkPauseMs = chunkPauseMs;
         nativeFrameIndex = 0;
         lastId = "";
         lastReceipt = AckStatus.Rejected;
