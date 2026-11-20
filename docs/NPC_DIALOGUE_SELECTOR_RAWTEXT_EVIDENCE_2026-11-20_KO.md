@@ -63,6 +63,27 @@ execute if entity @s[tag=computer1] run tag @initiator add examination_1
 4. 호환성 우회 블록 후보는 `상호작용자 표시(임시 태그)` → `NPC 조건 검사` → `대상 확인` → `해제` 단계를 명시하되, 충돌·중복 대상·태그 정리 실패를 구분하고 실게임 검증 전 정식 PASS 처리하지 않는다.
 5. 프로젝트/버전별 기록은 정적 검사, 과거 사용자 실게임 기록, 신규 실게임 재현을 각각 분리. 공개 Mojira 이슈 번호는 이번 자료에도 없으므로 **특정 공식 버그와 동일하다고 확정하지 않는다**.
 
+## Dialogue 호환성 이슈 등록 (2026-11-20 사용자 보완 요청)
+
+**기록 원칙:** 사용자가 지적한 세 가지 문제를 모두 추적 대상으로 등록한다. 그러나 재현하지 않은 입력에 확정 FAIL을 부여하지 않는다. `[]`는 일반 Selector 필터와 `@initiator` 필터, 명령 실행의 Selector와 Dialogue RawText 표시의 Selector를 구분한다.
+
+| 이슈 ID | 사용자 문제 제기 / 관찰 | 현재 증거 수준 | IDE 대응 |
+|---|---|---|---|
+| `DIALOGUE_INITIATOR_FILTER_CONTEXT` | Dialogue에서 `@initiator[]` 조건이 제대로 적용되지 않는 문제 | **재현 필요.** 디지털 리터러시맵에서 확인된 FAIL은 `execute if entity @s[tag=computer1] run tag @initiator add examination_1`이며, 이 명령의 `@initiator`에는 `[]`가 없다. `@initiator[tag=...]` 직접 검사 결과는 없음 | NPC 전용 Selector 문맥을 구별하고 조건 필터를 삭제하지 않음. 복합 컨텍스트 사용 시 WARNING 및 실게임 확인 |
+| `DIALOGUE_EXECUTE_INITIATOR_NESTED` | Dialogue에서 `execute`를 거쳐 `@initiator`에게 태그 부여 실패 | **과거 사용자 실게임 FAIL 기록 있음.** 동일 `@s[tag=computer1]` 조건 아래 `run say`는 성공 | 별도 호환성 WARNING, `@s` 실행 문맥 보존, 원본 명령 자동 변경 금지 |
+| `DIALOGUE_DYNAMIC_SCORE_RENDER` | NPC 대화문에 동적 Scoreboard/Fake Player 점수가 표시되지 않음 | **마인마블 프로젝트 과거 실패 관찰 있음.** 점수 계산과 Tellraw는 정상, NPC 표시 불안정. 정확한 JSON 필드별 재현 로그는 추가 필요 | Dialogue 본문 표시에 WARNING, Function으로 점수 조건 판정 후 정적 Scene 선택 또는 Tellraw/Actionbar 표시 선택지 |
+| `DIALOGUE_DYNAMIC_SELECTOR_RENDER` | NPC 대화문에 동적 Selector 이름이 표시되지 않거나 불안정 | **사용자 문제 제기 및 채택 포기 기록**. 마인마블은 직접 조합 미채택, 디지털 리터러시맵 JSON 36개는 `"selector"` 사용 0건이어서 **직접 실패 재현은 미확인** | 지원 가능한 RawText 구조 보존, Education 호환성 WARNING, 직접 실게임 검증 전 미지원 확정 금지 |
+
+### 기능 등록·검증을 위한 최소 분리 테스트
+- **선택자 조건 정상 대조:** NPC의 `@s[tag=computer1]`에 대한 `execute if entity ... run say`를 기준선으로 유지.
+- **상호작용자 직접/필터 비교:** NPC 버튼 `tag @initiator add ...`와 `@initiator[tag=...]` 사용(실제 버전별 문법 지원 확인 후) 결과를 독립 비교.
+- **중첩 비교:** 동일 NPC 문맥에서 `execute ... run tag @initiator add ...`를 별도 시험하고 대상 태그를 검사.
+- **동적 데이터 표시 비교:** 같은 값으로 `tellraw` RawText `score`/`selector`와 NPC Dialogue 본문 `score`/`selector`를 나누어 확인. 함수의 점수 조건에 따른 정적 Scene 전환은 다른 기능으로 분리.
+- **멀티플레이 검증:** 상호작용자별 독립 식별, 2명 이상 동시 조작, 임시 태그 충돌·미정리 방지.
+- **기록 항목:** 게임 정확한 빌드, 행동팩/리소스팩 버전, 실행 컨텍스트, JSON 원본, 명령문, 관찰 결과, 재현 여부를 각각 보존한다.
+
+**구현 정책:** 원문을 보존하는 Parser/AST/Compiler 및 RawText/Dialogue 전용 블록 모두 기능을 제공한다. 의심 조합은 경고하고 검증된 대체 설계를 선택하도록 안내하되, 보이지 않게 Selector를 `@p`로 대체하거나 `[]` 필터를 삭제하지 않는다. Script API 우회도 별도 실게임 검증 전 성공 처리하지 않는다.
+
 ## 후속 기능 개발에 적용
 1. C4 RawText는 `text/translate/selector/score/with` 전체를 보존하며 `tellraw/titleraw/dialogue` 사용자 인터페이스를 공통 타입으로 재사용.
 2. DialogueFile 정의 블록은 정적 장면 생성과 실행시점 동적 값 해석의 차이를 구분. 현재 확인된 실패를 자동으로 해결한 척 하지 않는다.
