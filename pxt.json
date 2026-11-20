@@ -68,6 +68,7 @@
         "commands/c2_scoreboard.ts",
         "src/blocks/command_adapter.ts",
         "src/compiler/compiler.ts",
+        "src/parser/mcfunction_parser.ts",
         "src/registry/registry_lookup.generated.ts",
         "src/registry/block_state_registry.generated.ts",
         "src/registry/entity_event_registry.generated.ts",
