@@ -42,6 +42,14 @@ Project references -> scene_tag / translate key / locale mapping
 - 문자열 ID는 임의로 번역·치환하지 않는다. 사용자 정의 이름공간 허용, 충돌/미정의 키 경고와 런타임 지원 여부를 구분한다.
 - 일반 텍스트/RawText/번역 항목의 Preview를 구분하여, 실제 Education 언어 설정에 따른 표시를 확인하기 전 PASS 처리하지 않는다.
 
+## 3-1. Dialogue 조건/동적 표시 호환성 이슈 (기능 완성 대상)
+- `DIALOGUE_INITIATOR_FILTER_CONTEXT`: NPC Dialogue에서 `@initiator[]` 조건 적용 문제를 별도 추적한다. 현재 직접 `@initiator[tag=...]` 실패 증거는 없으므로 **재현 필요**. 디지털 리터러시맵에서 확인된 것은 **중첩 `execute ... run tag @initiator` FAIL**이며 서로 다른 입력이다.
+- `DIALOGUE_EXECUTE_INITIATOR_NESTED`: 같은 `@s[tag=computer1]` 조건의 `run say`는 성공, `run tag @initiator ...`는 과거 FAIL. NPC 실행 문맥 Validator의 WARNING 및 Raw 원문 보존을 구현한다.
+- `DIALOGUE_DYNAMIC_SCORE_RENDER`: 마인마블에서 Dialogue 동적 Score/Fake Player 표시 실패 관찰이 있다. 점수 조건 판정은 Function과 구분하며, 정적 Scene·Tellraw/Actionbar 우회를 편집기 옵션으로 설계한다.
+- `DIALOGUE_DYNAMIC_SELECTOR_RENDER`: 플레이어 이름 동적 표시 문제를 개발 과제로 등록하되, 문서상 직접 RawText `selector` 재현은 미확인. 공통 RawText는 삭제·차단하지 않고 사용 위치별 WARNING과 검증 기록으로 처리한다.
+- 위 항목들은 LANG/Dialogue 블록 및 브리지 Preview 완성 범위에 포함하되, **게임용 JSON/언어 파일을 전송만으로 갱신할 수 있다고 가정하지 않는다**. 정확성 중심 경로의 기능 구현 후 통합 게임 테스트·성능 최적화를 시행한다.
+- 증거 출처 및 세부 재현 매트릭스: `docs/NPC_DIALOGUE_SELECTOR_RAWTEXT_EVIDENCE_2026-11-20_KO.md`.
+
 ## 4. 설계/기능 구현 순서
 1. 공통 RawText AST / JSON compiler / 보수적 역파서 (C4) + 기본 편집 블록.
 2. LanguageDocument AST / parser / compiler / `languages.json` catalog / Validator / 블록 정의. 예시 입력과의 Round-trip.
