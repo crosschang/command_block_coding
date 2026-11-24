@@ -8,6 +8,9 @@ namespace MCFunctionResourceProject {
     let activeDialogue: MCFunctionResource.DialogueDocument = undefined;
     let activeScene: MCFunctionResource.DialogueScene = undefined;
     let activeButton: MCFunctionResource.DialogueButton = undefined;
+    // C-shaped OPEN/CLOSE sections are UI containers, not a new command format.
+    // 0=none, 1=on_open_commands, 2=on_close_commands
+    let activeSceneSection = 0;
     let structureErrors: string[] = [];
 
     function record(message: string): void {
@@ -58,7 +61,7 @@ namespace MCFunctionResourceProject {
         activeScene = undefined;
     }
     export function addButton(name: MCFunctionResource.TextValue, handler: () => void): void {
-        if (!activeScene || activeButton) {
+        if (!activeScene || activeButton || activeSceneSection != 0) {
             record("DIALOGUE_BUTTON_CONTEXT: Button belongs inside a Dialogue scene.");
             return;
         }
@@ -110,6 +113,27 @@ namespace MCFunctionResourceProject {
         if (line.kind == MCFunctionParser.LineKind.Command && line.command) return line.command;
         return MCFunctionAST.createRawCommand(source);
     }
+    /** Begin an OPEN/CLOSE C-shaped container inside an existing Scene. */
+    export function sceneSection(section: number, handler: () => void): void {
+        if (!activeScene || activeButton || activeSceneSection != 0 ||
+            (section != 1 && section != 2)) {
+            record("DIALOGUE_SCENE_SECTION_CONTEXT: OPEN/CLOSE belongs inside Scene, not Button or another section.");
+            return;
+        }
+        activeSceneSection = section;
+        handler();
+        activeSceneSection = 0;
+    }
+    /** Command line routed to the current Scene OPEN/CLOSE section. */
+    export function sectionCommand(line: string): void {
+        if (!activeScene || activeButton || activeSceneSection == 0) {
+            record("DIALOGUE_SECTION_COMMAND_CONTEXT: Use inside OPEN or CLOSE.");
+            return;
+        }
+        if (activeSceneSection == 1) activeScene.onOpenCommands.push(command(line));
+        else activeScene.onCloseCommands.push(command(line));
+    }
+
     export function onOpen(line: string): void {
         if (!activeScene || activeButton) {
             record("DIALOGUE_ON_OPEN_CONTEXT: On-open command belongs inside a scene.");
