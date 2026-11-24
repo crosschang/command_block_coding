@@ -56,3 +56,9 @@ DialogueFile.define("npc/intro", "1.20.80", function () {
 - https://learn.microsoft.com/en-us/minecraft/creator/documents/preparingrawtextforlocalization?view=minecraft-bedrock-stable
 - https://learn.microsoft.com/en-us/minecraft/creator/reference/content/mctoolsvalreference/langfiles?view=minecraft-bedrock-stable
 - https://learn.microsoft.com/en-us/minecraft/creator/reference/content/rawmessagejson?view=minecraft-bedrock-stable
+
+## 2026-11-24 Scene / Button 연결 블록 보정
+- 사용자 MakeCode 블록 사진에서 Scene와 Button은 둘 다 C자형 내부 공간이 있지만, Button 자체는 상단 이전-명령 연결 돌기가 없는 **이벤트/최상위 블록** 모양이었다. 따라서 Scene 내부에 Button을 꽂을 수 없었다. 이는 구현상의 UI 결함이며 JSON AST 중첩 구조와는 별개다.
+- `DialogueFile.scene`와 `DialogueFile.button`에 **`//% handlerStatement=1`**을 적용한다. MakeCode PXT 디컴파일러는 이 설정을 일반 명령형(이벤트가 아닌 콜백 포함 문장)으로 다루며, 위/아래 연결을 갖는 C자형 블록을 의도한다. 기존 블록 ID·API·콜백 구조·AST·Codec은 변경하지 않는다.
+- 기대 연결: `DialogueFile.define` 안에 여러 `scene`을 연결하고, 각 `scene` 안에 여러 `button` 및 열기/닫기 명령을 연결한다. 각 버튼의 내부 공간에는 `buttonCommand` 명령을 연결한다.
+- **검증:** 변경 파일·메타데이터와 기존 AST/컨텍스트 검증 코드를 정적으로 확인했다. MakeCode 대상 `2.2.14`의 실제 블록 편집기에서 연결 모양, 연결 가능 여부, Blocks↔JavaScript 왕복을 새로 검증해야 한다. 핸들러 블록 메타데이터가 해당 PXT 버전에서 작동하지 않으면 별도 호환 경로 검토. 실게임 실행/행동팩은 변경 없음.

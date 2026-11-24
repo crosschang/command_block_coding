@@ -123,6 +123,7 @@ namespace DialogueFile {
     //% sceneTag.shadow="text" sceneTag.defl="intro"
     //% npcName.shadow="mcresource_text_plain"
     //% message.shadow="mcresource_text_translate"
+    //% handlerStatement=1
     //% inlineInputMode=external
     export function scene(sceneTag: string, npcName: ResourceText.Value,
         message: ResourceText.Value, handler: () => void): void {
@@ -134,6 +135,7 @@ namespace DialogueFile {
     //% group="Button" weight=98
     //% block="button name $name"
     //% name.shadow="mcresource_text_plain"
+    //% handlerStatement=1
     //% inlineInputMode=external
     export function button(name: ResourceText.Value, handler: () => void): void {
         MCFunctionResourceProject.addButton(name ? name.text : undefined,handler);
