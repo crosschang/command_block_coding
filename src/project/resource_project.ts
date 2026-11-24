@@ -77,12 +77,7 @@ namespace MCFunctionResourceProject {
      */
     export function createButtonChoice(name: MCFunctionResource.TextValue,
         lines: string[]): MCFunctionResource.DialogueButton {
-        let buttons: MCFunctionAST.CommandNode[] = [];
-        for (let i = 0; i < lines.length; i++) {
-            if (lines[i] != undefined && lines[i].length > 0)
-                buttons.push(command(lines[i]));
-        }
-        return {name: name, commands: buttons};
+        return {name: name, commands: createSceneCommandList(lines)};
     }
 
     /**
@@ -97,11 +92,7 @@ namespace MCFunctionResourceProject {
             record("DIALOGUE_SCENE_CONTEXT: Scene choices belong immediately inside a Dialogue file.");
             return;
         }
-        let result = MCFunctionResource.scene(tag, npcName, body);
-        for (let i = 0; i < choices.length; i++) {
-            if (choices[i] != undefined) result.buttons.push(choices[i]);
-        }
-        activeDialogue.scenes.push(result);
+        activeDialogue.scenes.push(buildScene(tag, npcName, body, [], [], choices));
     }
 
     /**
@@ -114,6 +105,24 @@ namespace MCFunctionResourceProject {
             if (lines[i] != undefined && lines[i].length > 0) result.push(command(lines[i]));
         }
         return result;
+    }
+
+    /**
+     * Common AST assembly for both Scene Choices and typed Scene authoring.
+     * A missing choice is intentionally omitted, never serialized as an empty button.
+     * Legacy C-shaped Scene continues to populate the same AST using callbacks.
+     */
+    function buildScene(tag: string, npcName: MCFunctionResource.TextValue,
+        body: MCFunctionResource.TextValue, openCommands: MCFunctionAST.CommandNode[],
+        closeCommands: MCFunctionAST.CommandNode[],
+        choices: MCFunctionResource.DialogueButton[]): MCFunctionResource.DialogueScene {
+        let scene = MCFunctionResource.scene(tag, npcName, body);
+        for (let i = 0; i < openCommands.length; i++) scene.onOpenCommands.push(openCommands[i]);
+        for (let i = 0; i < closeCommands.length; i++) scene.onCloseCommands.push(closeCommands[i]);
+        for (let i = 0; i < choices.length; i++) {
+            if (choices[i] != undefined) scene.buttons.push(choices[i]);
+        }
+        return scene;
     }
 
     /** Fixed typed UI slots: OPEN, CLOSE, then 0-6 ordered BUTTON values. */
@@ -131,13 +140,8 @@ namespace MCFunctionResourceProject {
             record("DIALOGUE_TYPED_SCENE_BUTTON_LIMIT: Structured Scene has at most six buttons.");
             return;
         }
-        let scene = MCFunctionResource.scene(tag, npcName, body);
-        for (let i = 0; i < openCommands.length; i++) scene.onOpenCommands.push(openCommands[i]);
-        for (let i = 0; i < closeCommands.length; i++) scene.onCloseCommands.push(closeCommands[i]);
-        for (let i = 0; i < choices.length; i++) {
-            if (choices[i] != undefined) scene.buttons.push(choices[i]);
-        }
-        activeDialogue.scenes.push(scene);
+        activeDialogue.scenes.push(buildScene(tag, npcName, body,
+            openCommands, closeCommands, choices));
     }
 
     /** Parse known command syntax via the existing parser, preserve unknown as Raw. */

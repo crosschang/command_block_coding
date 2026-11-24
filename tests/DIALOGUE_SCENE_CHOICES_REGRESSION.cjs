@@ -16,7 +16,7 @@ const stripTypes = code => code
     .replace(/\bexport (function|class)\b/g, '$1')
     .replace(/(\w+)\s*:\s*(?:MCFunctionResource\.\w+|MCFunctionAST\.\w+|string)\[\]/g, '$1')
     .replace(/(\w+)\??\s*:\s*(MCFunctionResource\.\w+|ResourceText\.\w+|ChoiceValue|string|number|void)\b/g, '$1')
-    .replace(/\)\s*:\s*(MCFunctionResource\.\w+|ChoiceValue|void)\b/g, ')');
+    .replace(/\)\s*:\s*(?:MCFunctionResource\.\w+\b|MCFunctionAST\.\w+\[\]|ChoiceValue\b|void\b)/g, ')');
 
 function loadCore(state, errors) {
     const begin = core.indexOf('    export function createButtonChoice(');

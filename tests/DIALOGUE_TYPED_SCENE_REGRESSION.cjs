@@ -19,7 +19,7 @@ function removeTypes(code) {
       .replace(/^\s*(?:openSlotKind|closeSlotKind): boolean;\s*$/gm,'')
       .replace(/^\s*commands: MCFunctionAST\.CommandNode\[\];\s*$/gm,'')
       .replace(/(\w+)\??:\s*(?:MCFunctionAST\.\w+(?:\[\])?|MCFunctionResource\.\w+(?:\[\])?|string\[\]|ResourceText\.Value|OpenSlotValue|CloseSlotValue|ChoiceValue|string|number|boolean|void)/g,'$1')
-      .replace(/\)\s*:\s*(?:string\[\]|MCFunctionAST\.\w+\[\]|void|OpenSlotValue|CloseSlotValue|ChoiceValue)/g,')');
+      .replace(/\)\s*:\s*(?:string\[\]|MCFunctionAST\.\w+\[\]|MCFunctionResource\.\w+|void|OpenSlotValue|CloseSlotValue|ChoiceValue)/g,')');
 }
 function compileCore(state,problems) {
     const begin=core.indexOf('    export function createSceneCommandList(');

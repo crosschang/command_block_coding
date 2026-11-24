@@ -105,7 +105,7 @@ namespace LanguageFile {
 }
 
 //% color=#C17A38 weight=83 icon="\uf086" block="DIALOGUE FILE"
-//% groups='["DIALOGUE FILE", "Scene", "Button", "Commands"]'
+//% groups='["DIALOGUE FILE", "Structured Scene", "Scene", "Button", "Commands"]'
 namespace DialogueFile {
     //% blockId=mcresource_dialogue_file_define
     //% group="DIALOGUE FILE" weight=100
