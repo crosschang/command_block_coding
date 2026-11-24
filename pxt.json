@@ -172,7 +172,7 @@
         "test.ts"
     ],
     "targetVersions": {
-        "target": "2.2.10",
+        "target": "2.2.14",
         "targetId": "minecraft"
     },
     "supportedTargets": [
