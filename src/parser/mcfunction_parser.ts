@@ -107,7 +107,7 @@ namespace MCFunctionParser {
                     ending = "\r\n";
                 }
             }
-            lines.push(parseLine(text.substring(start, end), ending));
+            lines.push(parseLine(text.substr(start, end - start), ending));
             start = end + ending.length;
         }
         return { bom: bom, lines: lines };
@@ -122,9 +122,9 @@ namespace MCFunctionParser {
         for (let i = 0; i < file.lines.length; i++) {
             let line = file.lines[i];
             if (line.kind == LineKind.Command) {
-                if (!line.command) throw new Error("Missing command AST at line " + (i + 1));
+                if (!line.command) throw "Missing command AST at line " + (i + 1);
                 let compiled = MCFunctionCompiler.compileCommand(line.command);
-                if (!compiled) throw new Error("Compiler rejected command AST at line " + (i + 1));
+                if (!compiled) throw "Compiler rejected command AST at line " + (i + 1);
                 result += compiled;
             } else {
                 result += line.trivia == undefined ? "" : line.trivia;

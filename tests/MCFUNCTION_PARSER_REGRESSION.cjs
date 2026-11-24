@@ -41,6 +41,8 @@ test('mcfunction parser preserves raw, trivia, EOL and AST edits', () => {
             'check(file.lines[2].command.kind==MCFunctionAST.CommandKind.Raw,"raw");',
             '(<MCFunctionAST.SayCommand>file.lines[0].command).message="edited";',
             'check(MCFunctionParser.serializeFile(file)=="say edited\\n# keep\\nunknown @s\\n","AST edit");',
+            'file.lines[0].command=({kind:999} as MCFunctionAST.CommandNode);',
+            'let rejected=false;try{MCFunctionParser.serializeFile(file);}catch(e){rejected=true;}check(rejected,"compiler refused");',
             'file.lines[0].command=undefined;',
             'let refused=false;try{MCFunctionParser.serializeFile(file);}catch(e){refused=true;}check(refused,"fail closed");'
         ].join('\n');
@@ -52,4 +54,14 @@ test('mcfunction parser preserves raw, trivia, EOL and AST edits', () => {
     } finally {
         fs.rmSync(temp, {recursive:true,force:true});
     }
+});
+
+// MakeCode Static TypeScript does not expose JavaScript's full string and Error APIs.
+test('parser avoids unsupported PXT substring and Error constructor', () => {
+    const source = fs.readFileSync(path.resolve(__dirname, '../src/parser/mcfunction_parser.ts'), 'utf8');
+    assert.doesNotMatch(source, /\.substring\s*\(/);
+    assert.doesNotMatch(source, /\bnew\s+Error\s*\(/);
+    assert.match(source, /text\.substr\(start, end - start\)/);
+    assert.match(source, /throw "Missing command AST at line "/);
+    assert.match(source, /throw "Compiler rejected command AST at line "/);
 });
