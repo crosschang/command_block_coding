@@ -68,6 +68,39 @@ namespace MCFunctionResourceProject {
         handler();
         activeButton = undefined;
     }
+    /**
+     * Construct one UI choice without side effects; Scene uses the same DialogueButton AST.
+     * Commands are parsed once using the existing conservative command parser.
+     */
+    export function createButtonChoice(name: MCFunctionResource.TextValue,
+        lines: string[]): MCFunctionResource.DialogueButton {
+        let buttons: MCFunctionAST.CommandNode[] = [];
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i] != undefined && lines[i].length > 0)
+                buttons.push(command(lines[i]));
+        }
+        return {name: name, commands: buttons};
+    }
+
+    /**
+     * Alternate Scene authoring mode: value inputs exposed by MakeCode's built-in
+     * expandable arguments (+/-) yield one ordered button per visible choice.
+     * Nested-C-block Scene remains available, with no change to its semantics.
+     */
+    export function addSceneChoices(tag: string, npcName: MCFunctionResource.TextValue,
+        body: MCFunctionResource.TextValue,
+        choices: MCFunctionResource.DialogueButton[]): void {
+        if (!activeDialogue || activeScene || activeButton || activeLanguage) {
+            record("DIALOGUE_SCENE_CONTEXT: Scene choices belong immediately inside a Dialogue file.");
+            return;
+        }
+        let result = MCFunctionResource.scene(tag, npcName, body);
+        for (let i = 0; i < choices.length; i++) {
+            if (choices[i] != undefined) result.buttons.push(choices[i]);
+        }
+        activeDialogue.scenes.push(result);
+    }
+
     /** Parse known command syntax via the existing parser, preserve unknown as Raw. */
     function command(text: string): MCFunctionAST.CommandNode {
         if (text == undefined) return MCFunctionAST.createRawCommand("");

@@ -161,6 +161,7 @@
         "src/blocks/c2_scoreboard_blocks.ts",
         "src/blocks/c4_help_blocks.ts",
         "src/blocks/resource_blocks.ts",
+        "src/blocks/dialogue_scene_choices_blocks.ts",
         "docs/CHANGELOG_SIMPLE_BATCH_0.0.48_2026-10-14.md",
         "commands/camera.ts",
         "src/libraries/camera_preset_library.ts",
