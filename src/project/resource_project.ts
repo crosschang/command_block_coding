@@ -104,6 +104,42 @@ namespace MCFunctionResourceProject {
         activeDialogue.scenes.push(result);
     }
 
+    /**
+     * Structured Scene slots build the same AST as the legacy C-shaped editor.
+     * Raw/unknown commands remain MCFunctionAST.Raw nodes for later round-trip.
+     */
+    export function createSceneCommandList(lines: string[]): MCFunctionAST.CommandNode[] {
+        let result: MCFunctionAST.CommandNode[] = [];
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i] != undefined && lines[i].length > 0) result.push(command(lines[i]));
+        }
+        return result;
+    }
+
+    /** Fixed typed UI slots: OPEN, CLOSE, then 0-6 ordered BUTTON values. */
+    export function addTypedScene(tag: string, npcName: MCFunctionResource.TextValue,
+        body: MCFunctionResource.TextValue,
+        openCommands: MCFunctionAST.CommandNode[],
+        closeCommands: MCFunctionAST.CommandNode[],
+        choices: MCFunctionResource.DialogueButton[]): void {
+        if (!activeDialogue || activeScene || activeButton || activeLanguage ||
+            activeSceneSection != 0) {
+            record("DIALOGUE_TYPED_SCENE_CONTEXT: Structured Scene belongs directly inside Dialogue JSON file.");
+            return;
+        }
+        if (choices.length > 6) {
+            record("DIALOGUE_TYPED_SCENE_BUTTON_LIMIT: Structured Scene has at most six buttons.");
+            return;
+        }
+        let scene = MCFunctionResource.scene(tag, npcName, body);
+        for (let i = 0; i < openCommands.length; i++) scene.onOpenCommands.push(openCommands[i]);
+        for (let i = 0; i < closeCommands.length; i++) scene.onCloseCommands.push(closeCommands[i]);
+        for (let i = 0; i < choices.length; i++) {
+            if (choices[i] != undefined) scene.buttons.push(choices[i]);
+        }
+        activeDialogue.scenes.push(scene);
+    }
+
     /** Parse known command syntax via the existing parser, preserve unknown as Raw. */
     function command(text: string): MCFunctionAST.CommandNode {
         if (text == undefined) return MCFunctionAST.createRawCommand("");
