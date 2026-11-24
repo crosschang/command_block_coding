@@ -2565,9 +2565,102 @@ namespace MCFunctionValidator {
         return true;
     }
 
+    // C4 runtime /help structure validation, without assuming game execution PASS.
+    function validC4Int(v: number): boolean {
+        return v != undefined && v % 1 == 0 && v >= -2147483648 && v <= 2147483647;
+    }
+    export function validateTitleCommand(c: MCFunctionAST.TitleCommand): ValidationIssue[] {
+        let a: ValidationIssue[] = [];
+        appendIssues(a, validatePlayerReference(c.target));
+        if (c.action == MCFunctionAST.TitleAction.Show) {
+            if (c.location != MCFunctionAST.TitleLocation.Title &&
+                c.location != MCFunctionAST.TitleLocation.Subtitle &&
+                c.location != MCFunctionAST.TitleLocation.Actionbar)
+                addIssue(a,ValidationLevel.Error,"TITLE_LOCATION_INVALID","Choose title, subtitle or actionbar.");
+            if (!c.text || c.text.indexOf("\n") >= 0 || c.text.indexOf("\r") >= 0)
+                addIssue(a,ValidationLevel.Error,"TITLE_TEXT_INVALID","TITLE requires a single-line plain message.");
+            if (c.fadeIn != undefined || c.stay != undefined || c.fadeOut != undefined)
+                addIssue(a,ValidationLevel.Error,"TITLE_SHOW_EXTRA","TITLE show cannot contain timing args.");
+        } else if (c.action == MCFunctionAST.TitleAction.Times) {
+            if (!validC4Int(c.fadeIn) || !validC4Int(c.stay) || !validC4Int(c.fadeOut) ||
+                c.fadeIn < 0 || c.stay < 0 || c.fadeOut < 0)
+                addIssue(a,ValidationLevel.Error,"TITLE_TIMES_INVALID","Time values must be nonnegative integer ticks.");
+            if (c.text != undefined || c.location != undefined)
+                addIssue(a,ValidationLevel.Error,"TITLE_TIMES_EXTRA","TITLE times cannot contain message.");
+        } else if (c.action == MCFunctionAST.TitleAction.Clear ||
+                   c.action == MCFunctionAST.TitleAction.Reset) {
+            if (c.text != undefined || c.location != undefined ||
+                c.fadeIn != undefined || c.stay != undefined || c.fadeOut != undefined)
+                addIssue(a,ValidationLevel.Error,"TITLE_CLEAR_RESET_EXTRA","TITLE clear/reset take no extra args.");
+        } else addIssue(a,ValidationLevel.Error,"TITLE_ACTION_INVALID","Unknown title action.");
+        return a;
+    }
+    export function validateReplaceItemCommand(c: MCFunctionAST.ReplaceItemCommand): ValidationIssue[] {
+        let a: ValidationIssue[] = [];
+        if (c.destination == MCFunctionAST.ReplaceItemDestination.Block) {
+            if (!c.position) addIssue(a,ValidationLevel.Error,"REPLACEITEM_POSITION_MISSING","Block position required.");
+            else appendIssues(a,validatePosition(c.position));
+            if (c.target || c.slot != undefined)
+                addIssue(a,ValidationLevel.Error,"REPLACEITEM_BLOCK_EXTRA","Block form uses slot.container.");
+        } else if (c.destination == MCFunctionAST.ReplaceItemDestination.Entity) {
+            appendIssues(a,validatePlayerReference(c.target,true));
+            if (c.position != undefined)
+                addIssue(a,ValidationLevel.Error,"REPLACEITEM_ENTITY_POSITION","Entity form cannot contain block position.");
+            if (c.slot == undefined || c.slot % 1 != 0 || c.slot < 0 || c.slot > 13)
+                addIssue(a,ValidationLevel.Error,"REPLACEITEM_EQUIPMENT_SLOT","Unsupported entity equipment slot.");
+        } else addIssue(a,ValidationLevel.Error,"REPLACEITEM_TARGET_KIND","Choose block or entity.");
+        if (!validC4Int(c.slotId) || c.slotId < 0)
+            addIssue(a,ValidationLevel.Error,"REPLACEITEM_SLOT_ID","Slot ID must be nonnegative integer.");
+        if (c.handling != undefined && c.handling != MCFunctionAST.ReplaceItemHandling.Keep &&
+            c.handling != MCFunctionAST.ReplaceItemHandling.Destroy)
+            addIssue(a,ValidationLevel.Error,"REPLACEITEM_HANDLING","Handling must be keep/destroy.");
+        if (!c.item) addIssue(a,ValidationLevel.Error,"REPLACEITEM_ITEM_MISSING","Item required.");
+        else appendIssues(a,validateItemStack(c.item));
+        return a;
+    }
+    export function validateAbilityCommand(c: MCFunctionAST.AbilityCommand): ValidationIssue[] {
+        let a: ValidationIssue[] = [];
+        appendIssues(a,validatePlayerReference(c.target));
+        if (c.action == MCFunctionAST.AbilityAction.Set) {
+            if (!isSafeCommandId(c.ability) || c.value == undefined)
+                addIssue(a,ValidationLevel.Error,"ABILITY_SET_INVALID","Set requires ability ID and Boolean.");
+        } else if (c.action == MCFunctionAST.AbilityAction.Query) {
+            if (c.value != undefined || (c.ability != undefined && !isSafeCommandId(c.ability)))
+                addIssue(a,ValidationLevel.Error,"ABILITY_QUERY_INVALID","Query takes optional ability only.");
+            addIssue(a,ValidationLevel.Warning,"ABILITY_QUERY_READBACK","Preview readback for ability query is pending.");
+        } else addIssue(a,ValidationLevel.Error,"ABILITY_ACTION_INVALID","Unsupported ability action.");
+        if (c.ability && isSafeCommandId(c.ability) && c.ability != "mayfly" &&
+            c.ability != "mute" && c.ability != "worldbuilder")
+            addIssue(a,ValidationLevel.Warning,"ABILITY_ID_UNVERIFIED","Ability ID needs Education verification.");
+        addIssue(a,ValidationLevel.Info,"ABILITY_EDUCATION_ONLY","Education command; depends on player privileges.");
+        return a;
+    }
+    export function validateWorldBuilderCommand(c: MCFunctionAST.WorldBuilderCommand): ValidationIssue[] {
+        let a: ValidationIssue[] = [];
+        addIssue(a,ValidationLevel.Warning,"WORLDBUILDER_EXECUTOR",
+            "Toggles executor's World Builder permission. Check executor identity and Operator rights.");
+        return a;
+    }
+    export function validateImmutableWorldCommand(c: MCFunctionAST.ImmutableWorldCommand): ValidationIssue[] {
+        let a: ValidationIssue[] = [];
+        if (c.value != undefined && c.value !== true && c.value !== false)
+            addIssue(a,ValidationLevel.Error,"IMMUTABLEWORLD_BOOL","Value must be Boolean.");
+        if (c.value == undefined)
+            addIssue(a,ValidationLevel.Warning,"IMMUTABLEWORLD_QUERY_READBACK",
+                "Query form cannot yet return the setting in MakeCode Preview.");
+        addIssue(a,ValidationLevel.Warning,"IMMUTABLEWORLD_WORLD_SETTING",
+            "Changes an entire Education world; test on a disposable world with Operator privileges.");
+        return a;
+    }
+
     export function validateCommand(command: MCFunctionAST.CommandNode): ValidationIssue[] {
         if (command.kind == MCFunctionAST.CommandKind.Execute) return validateExecuteCommand(<MCFunctionAST.ExecuteCommand>command);
         let issues: ValidationIssue[] = [];
+        if (command.kind == MCFunctionAST.CommandKind.Title) appendIssues(issues,validateTitleCommand(<MCFunctionAST.TitleCommand>command));
+        if (command.kind == MCFunctionAST.CommandKind.ReplaceItem) appendIssues(issues,validateReplaceItemCommand(<MCFunctionAST.ReplaceItemCommand>command));
+        if (command.kind == MCFunctionAST.CommandKind.Ability) appendIssues(issues,validateAbilityCommand(<MCFunctionAST.AbilityCommand>command));
+        if (command.kind == MCFunctionAST.CommandKind.WorldBuilder) appendIssues(issues,validateWorldBuilderCommand(<MCFunctionAST.WorldBuilderCommand>command));
+        if (command.kind == MCFunctionAST.CommandKind.ImmutableWorld) appendIssues(issues,validateImmutableWorldCommand(<MCFunctionAST.ImmutableWorldCommand>command));
         if (command.kind == MCFunctionAST.CommandKind.Scoreboard) {
             appendIssues(issues, validateScoreboardCommand(<MCFunctionAST.ScoreboardCommand>command));
         }

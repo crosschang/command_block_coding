@@ -44,7 +44,12 @@ namespace MCFunctionAST {
         Ride = 37,
         Dialogue = 38,
         Scoreboard = 39,
-        Execute = 40
+        Execute = 40,
+        Title = 41,
+        ReplaceItem = 42,
+        Ability = 43,
+        WorldBuilder = 44,
+        ImmutableWorld = 45
     }
 
     export interface CommandNode {

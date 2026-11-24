@@ -4,6 +4,16 @@ namespace MCFunctionCompiler {
         if (command.kind == MCFunctionAST.CommandKind.Execute) return compileExecute(<MCFunctionAST.ExecuteCommand>command);
 
         switch (command.kind) {
+            case MCFunctionAST.CommandKind.Title:
+                return compileTitle(<MCFunctionAST.TitleCommand>command);
+            case MCFunctionAST.CommandKind.ReplaceItem:
+                return compileReplaceItem(<MCFunctionAST.ReplaceItemCommand>command);
+            case MCFunctionAST.CommandKind.Ability:
+                return compileAbility(<MCFunctionAST.AbilityCommand>command);
+            case MCFunctionAST.CommandKind.WorldBuilder:
+                return "worldbuilder";
+            case MCFunctionAST.CommandKind.ImmutableWorld:
+                return compileImmutableWorld(<MCFunctionAST.ImmutableWorldCommand>command);
             case MCFunctionAST.CommandKind.Scoreboard:
                 return compileScoreboard(<MCFunctionAST.ScoreboardCommand>command);
             case MCFunctionAST.CommandKind.Ride:
@@ -480,6 +490,46 @@ namespace MCFunctionCompiler {
             "mount", "move_backward", "move_forward", "move_left", "move_right"];
         return "inputpermission set " + compileSelector(command.target) + " " + names[command.permission] +
             (command.state == MCFunctionAST.InputPermissionState.Enabled ? " enabled" : " disabled");
+    }
+
+    /** TITLE has plain text; TITLERAW remains a separate RawText task. */
+    function compileTitle(command: MCFunctionAST.TitleCommand): string {
+        let prefix = "title " + compilePlayerTarget(command.target);
+        if (command.action == MCFunctionAST.TitleAction.Clear) return prefix + " clear";
+        if (command.action == MCFunctionAST.TitleAction.Reset) return prefix + " reset";
+        if (command.action == MCFunctionAST.TitleAction.Times)
+            return prefix + " times " + command.fadeIn + " " + command.stay + " " + command.fadeOut;
+        let loc = command.location == MCFunctionAST.TitleLocation.Subtitle ? "subtitle" :
+            command.location == MCFunctionAST.TitleLocation.Actionbar ? "actionbar" : "title";
+        return prefix + " " + loc + " " + command.text;
+    }
+    function compileReplaceItem(command: MCFunctionAST.ReplaceItemCommand): string {
+        let result = command.destination == MCFunctionAST.ReplaceItemDestination.Block ?
+            "replaceitem block " + compilePosition(command.position) + " slot.container" :
+            "replaceitem entity " + compilePlayerTarget(command.target) + " " +
+                MCFunctionAST.slotLocationToken(command.slot);
+        result += " " + command.slotId;
+        if (command.handling != undefined)
+            result += command.handling == MCFunctionAST.ReplaceItemHandling.Keep ? " keep" : " destroy";
+        let item = command.item;
+        result += " " + item.id;
+        let hasComponents = !!item.components && MCFunctionAST.hasItemCommandComponents(item.components);
+        if (item.amount == undefined && item.data == undefined && !hasComponents) return result;
+        result += " " + (item.amount == undefined ? 1 : item.amount);
+        if (item.data == undefined && !hasComponents) return result;
+        result += " " + (item.data == undefined ? 0 : item.data);
+        if (hasComponents) result += " " + compileItemCommandComponents(item.components);
+        return result;
+    }
+    function compileAbility(command: MCFunctionAST.AbilityCommand): string {
+        let result = "ability " + compilePlayerTarget(command.target);
+        if (command.ability != undefined && command.ability.length > 0) result += " " + command.ability;
+        if (command.action == MCFunctionAST.AbilityAction.Set) result += command.value ? " true" : " false";
+        return result;
+    }
+    function compileImmutableWorld(command: MCFunctionAST.ImmutableWorldCommand): string {
+        return command.value == undefined ? "immutableworld" :
+            command.value ? "immutableworld true" : "immutableworld false";
     }
 
     function compileRaw(command: MCFunctionAST.RawCommand): string {

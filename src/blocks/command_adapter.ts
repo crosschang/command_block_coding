@@ -5,6 +5,32 @@ namespace MCFunctionBlocks {
         return MCFunctionAST.createExecuteCommand(clauses, run);
     }
 
+    // C4 command reporters use the same adapter boundary as the existing blocks.
+    export function createTitleCommand(target: MCFunctionAST.PlayerTarget,
+        action: MCFunctionAST.TitleAction, location?: MCFunctionAST.TitleLocation,
+        text?: string, fadeIn?: number, stay?: number, fadeOut?: number): MCFunctionAST.TitleCommand {
+        return MCFunctionAST.createTitleCommand(target,action,location,text,fadeIn,stay,fadeOut);
+    }
+    export function createReplaceItemBlockCommand(position: MCFunctionAST.Position,slotId: number,
+        item: MCFunctionAST.ItemStack,handling?: MCFunctionAST.ReplaceItemHandling): MCFunctionAST.ReplaceItemCommand {
+        return MCFunctionAST.createReplaceItemBlockCommand(position,slotId,item,handling);
+    }
+    export function createReplaceItemEntityCommand(target: MCFunctionAST.PlayerTarget,
+        slot: MCFunctionAST.SlotLocation,slotId: number,item: MCFunctionAST.ItemStack,
+        handling?: MCFunctionAST.ReplaceItemHandling): MCFunctionAST.ReplaceItemCommand {
+        return MCFunctionAST.createReplaceItemEntityCommand(target,slot,slotId,item,handling);
+    }
+    export function createAbilityCommand(target: MCFunctionAST.PlayerTarget,action: MCFunctionAST.AbilityAction,
+        ability?: string,value?: boolean): MCFunctionAST.AbilityCommand {
+        return MCFunctionAST.createAbilityCommand(target,action,ability,value);
+    }
+    export function createWorldBuilderCommand(): MCFunctionAST.WorldBuilderCommand {
+        return MCFunctionAST.createWorldBuilderCommand();
+    }
+    export function createImmutableWorldCommand(value?: boolean): MCFunctionAST.ImmutableWorldCommand {
+        return MCFunctionAST.createImmutableWorldCommand(value);
+    }
+
     export function createScoreboardCommand(
         source: MCFunctionAST.ScoreboardCommand): MCFunctionAST.ScoreboardCommand {
         // Block reporter has already captured the typed semantic command.
