@@ -10,11 +10,15 @@ namespace ExecuteC {
     class Draft {
         clauses: MCFunctionAST.ExecuteClause[];
         run: MCFunctionAST.CommandNode;
+        runs: MCFunctionAST.CommandNode[];
+        collectingRun: boolean;
         hasRun: boolean;
         error: string;
         constructor() {
             this.clauses = [];
             this.run = undefined;
+            this.runs = [];
+            this.collectingRun = false;
             this.hasRun = false;
             this.error = "";
         }
@@ -27,6 +31,32 @@ namespace ExecuteC {
         } else {
             MCFunctionPreview.previewSay("ERROR [EXECUTE_C_CONTEXT] " + message);
         }
+    }
+
+    /**
+     * Shared capture hook for existing Command.* statement blocks.
+     * FunctionFile.capturePreviewAction invokes it before the normal preview
+     * handler so a RUN C child is stored as AST, never executed prematurely.
+     * Return true only while an EXECUTE C draft is active.
+     */
+    export function captureRunCommand(issues: MCFunctionValidator.ValidationIssue[],
+        command?: MCFunctionAST.CommandNode): boolean {
+        if (!active) return false;
+        if (!active.collectingRun) {
+            fail("Minecraft command blocks belong inside RUN C, not beside EXECUTE clauses.");
+            return true;
+        }
+        if (MCFunctionValidator.hasError(issues)) {
+            fail("Invalid Minecraft command inside RUN C.");
+            return true;
+        }
+        if (!command) {
+            fail("This command block cannot provide an AST for RUN C.");
+            return true;
+        }
+        active.runs.push(command);
+        if (!active.run) active.run = command;
+        return true;
     }
 
     function append(value: Command.ExecuteClauseValue): void {
@@ -61,16 +91,29 @@ namespace ExecuteC {
             MCFunctionPreview.previewSay("ERROR [EXECUTE_C_STRUCTURE] " + draft.error);
             return;
         }
-        if (!draft.hasRun || !draft.run) {
+        if (!draft.hasRun || draft.runs.length == 0) {
             MCFunctionPreview.previewSay("ERROR [EXECUTE_C_RUN_MISSING] A RUN command is required.");
             return;
         }
-        // Rebuild the same typed chain consumed by existing validated Preview/Bridge.
+        // Each RUN child is one canonical execute ... run <command> AST.
+        // Minecraft does not support several commands after a single RUN.
+        // Check every command before dispatching the first to avoid partial runs
+        // when a later RUN child has invalid syntax.
+        for (let i = 0; i < draft.runs.length; i++) {
+            let candidate = MCFunctionBlocks.createExecuteCommand(draft.clauses, draft.runs[i]);
+            if (MCFunctionValidator.hasError(MCFunctionValidator.validateCommand(candidate))) {
+                MCFunctionPreview.previewSay("ERROR [EXECUTE_C_VALIDATION] Invalid RUN command; all RUN actions blocked.");
+                return;
+            }
+        }
+        // Rebuild the same typed chain consumed by existing Preview/Bridge.
         let next = Command.executeEnd();
         for (let i = draft.clauses.length - 1; i >= 0; i--) {
             next = new Command.ExecuteClauseValue(draft.clauses[i], next);
         }
-        Command.execute(next, new Command.ExecuteRunValue(draft.run));
+        for (let i = 0; i < draft.runs.length; i++) {
+            Command.execute(next, new Command.ExecuteRunValue(draft.runs[i]));
+        }
     }
 
     //% group="실행 조건" weight=145
@@ -190,6 +233,24 @@ namespace ExecuteC {
         append(value);
     }
 
+    //% group="RUN" weight=160
+    //% blockId=mcfunction_execute_c_run_container
+    //% block="RUN (C자형)"
+    //% handlerStatement=1
+    export function runC(handler: () => void): void {
+        if (!active) { fail("RUN C belongs inside EXECUTE C."); return; }
+        if (active.hasRun) { fail("Only one RUN container is allowed."); return; }
+        active.hasRun = true;
+        active.collectingRun = true;
+        handler();
+        active.collectingRun = false;
+        if (active.runs.length == 0) {
+            fail("RUN C requires at least one Minecraft command block.");
+        }
+    }
+
+    // Existing value-input RUN remains callable for existing projects.
+    //% blockHidden=true
     //% group="RUN" weight=150
     //% blockId=mcfunction_execute_c_run
     //% block="RUN $action"
@@ -200,6 +261,7 @@ namespace ExecuteC {
         active.hasRun = true;
         if (!action || !action.command) { fail("RUN requires a command."); return; }
         active.run = action.command;
+        active.runs.push(action.command);
     }
 }
 

@@ -248,6 +248,9 @@ namespace FunctionFile {
         action: () => void,
         command?: MCFunctionAST.CommandNode
     ): boolean {
+        // EXECUTE C RUN captures existing Command.* statement AST before it
+        // can execute; outside EXECUTE C the existing FunctionFile path applies.
+        if (ExecuteC.captureRunCommand(issues, command)) return true;
         if (!collectingDefinitionActions) {
             return false;
         }

@@ -16,6 +16,8 @@ const codec=read('src/project/resource_codec.ts');
 const coreExecute=read('src/blocks/c3_execute_blocks.ts');
 const runBlocks=read('src/blocks/c3_execute_run_blocks.ts');
 const pxt=JSON.parse(read('pxt.json'));
+const functionFile=read('function_file.ts');
+const commandBlocks=read('custom.ts');
 function names(s){return [...s.matchAll(/\/\/% blockId=([a-z0-9_]+)/g)].map(x=>x[1]);}
 function extract(src,start,end) {
  const a=src.indexOf(start);
@@ -27,11 +29,11 @@ function extract(src,start,end) {
 function strip(src){
  return src
  .replace(/\bexport function\b/g,'function')
- .replace(/^\s*(?:clauses|run|hasRun|error): [^;\n]+;\s*$/gm,'')
+ .replace(/^\s*(?:clauses|run|runs|collectingRun|hasRun|error): [^;\n]+;\s*$/gm,'')
  .replace(/\blet active: Draft\b/g,'let active')
  .replace(/(\w+)\s*:\s*\(\)\s*=>\s*void\b/g,'$1')
- .replace(/(\w+)\??\s*:\s*(?:MCFunctionAST\.\w+|MCFunctionResource\.\w+|Command\.\w+|MCFunctionFields\.\w+|MCFunctionPositionFields\.\w+|MCFunctionRotationFields\.\w+|ResourceText\.\w+|DialogueFile\.\w+|number|string|boolean|void)(?:\[\])?/g,'$1')
- .replace(/\)\s*:\s*(?:MCFunctionAST\.\w+|MCFunctionResource\.\w+|Command\.\w+|DialogueFile\.\w+|void)(?:\[\])?\s*(?=\{)/g,')');
+ .replace(/(\w+)\??\s*:\s*(?:MCFunctionAST\.\w+|MCFunctionResource\.\w+|MCFunctionValidator\.\w+|Command\.\w+|MCFunctionFields\.\w+|MCFunctionPositionFields\.\w+|MCFunctionRotationFields\.\w+|ResourceText\.\w+|DialogueFile\.\w+|number|string|boolean|void)(?:\[\])?/g,'$1')
+ .replace(/\)\s*:\s*(?:MCFunctionAST\.\w+|MCFunctionResource\.\w+|Command\.\w+|DialogueFile\.\w+|boolean|void)(?:\[\])?\s*(?=\{)/g,')');
 }
 function testContext(){
  const errors=[],dispatched=[];
@@ -51,9 +53,15 @@ function testContext(){
  };
  const src=extract(executeUI,'namespace ExecuteC {','//% color=#7651A8 weight=101');
  const body=strip(src.slice(0,src.lastIndexOf('}')));
- const C=new Function('Command','MCFunctionPreview',
-     body+'\nreturn {execute,asEntity,atEntity,ifEntity,clause,run};')(
-     c,{previewSay:message=>errors.push(message)});
+ const validation={
+   hasError:issues=>issues.some(issue=>issue.level===0),
+   validateCommand:cmd=>cmd.run && cmd.run.invalid
+     ? [{level:0,code:'INVALID_RUN'}] : []
+ };
+ const C=new Function('Command','MCFunctionPreview','MCFunctionBlocks','MCFunctionValidator',
+     body+'\nreturn {execute,asEntity,atEntity,ifEntity,clause,run,runC,captureRunCommand};')(
+     c,{previewSay:message=>errors.push(message)},
+     {createExecuteCommand:(clauses,run)=>({kind:'Execute',clauses,run})},validation);
  return {C,c,errors,dispatched};
 }
 function compileResource(state,errors){
@@ -148,6 +156,117 @@ test('C-shaped Execute preserves more than 32 clauses without truncation',()=>{
  }
  assert.equal(count,40);
  assert.deepEqual(errors,[]);
+});
+test('RUN C is a C-shaped handler and old RUN input remains hidden for compatibility',()=>{
+ assert.match(executeUI,/blockId=mcfunction_execute_c_run_container[\s\S]*?handlerStatement=1/);
+ assert.match(executeUI,/blockId=mcfunction_execute_c_run_container[\s\S]*?export function runC\(handler: \(\) => void\)/);
+ assert.match(executeUI,/blockHidden=true[\s\S]*?blockId=mcfunction_execute_c_run/);
+ assert.match(functionFile,/if \(ExecuteC\.captureRunCommand\(issues, command\)\) return true/);
+});
+test('RUN C captures original Command statement AST without early execution',()=>{
+ const {C,errors,dispatched}=testContext();
+ const sideEffects=[];
+ const say={kind:'say',message:'hello'};
+ const give={kind:'give',item:'diamond'};
+ const statementCommand=command=>{
+   if(!C.captureRunCommand([],command))sideEffects.push(command);
+ };
+ C.execute(()=>{
+   C.asEntity({target:'@a'});
+   C.runC(()=>{
+     statementCommand(say);
+     statementCommand(give);
+   });
+ });
+ assert.deepEqual(sideEffects,[],'Child commands must not execute before EXECUTE');
+ assert.equal(dispatched.length,2);
+ assert.equal(dispatched[0].run.command,say);
+ assert.equal(dispatched[1].run.command,give);
+ assert.equal(dispatched[0].clauses,dispatched[1].clauses);
+ assert.deepEqual(errors,[]);
+});
+test('RUN C blocks commands outside RUN and empty RUN or duplicate RUNs',()=>{
+ const {C,errors,dispatched}=testContext();
+ C.execute(()=>{
+   C.captureRunCommand([],{kind:'say'});
+   C.runC(()=>C.captureRunCommand([],{kind:'say'}));
+ });
+ C.execute(()=>C.runC(()=>{}));
+ C.execute(()=>{
+   C.runC(()=>C.captureRunCommand([],{kind:'say'}));
+   C.runC(()=>C.captureRunCommand([],{kind:'give'}));
+ });
+ assert.equal(dispatched.length,0);
+ assert.equal(errors.length,3);
+ assert.match(errors[0],/belong inside RUN C/);
+ assert.match(errors[1],/requires at least one/);
+ assert.match(errors[2],/Only one RUN/);
+});
+test('RUN C pre-validates all children and aborts atomically on later errors',()=>{
+ const {C,dispatched,errors}=testContext();
+ C.execute(()=>{
+   C.runC(()=>{
+     C.captureRunCommand([],{kind:'say'});
+     C.captureRunCommand([],{kind:'give',invalid:true});
+   });
+ });
+ assert.equal(dispatched.length,0,'invalid later child must block all execution');
+ assert.match(errors[0],/EXECUTE_C_VALIDATION/);
+ const recovery={C:testContext().C};
+ assert.ok(recovery.C,'runtime can rebuild a fresh draft');
+});
+test('RUN C fails closed on unsupported or invalid child before dispatch',()=>{
+ const {C,dispatched,errors}=testContext();
+ C.execute(()=>C.runC(()=>C.captureRunCommand([],undefined)));
+ C.execute(()=>C.runC(()=>C.captureRunCommand([{level:0,code:'WRONG'}],{kind:'say'})));
+ assert.equal(dispatched.length,0);
+ assert.equal(errors.length,2);
+ assert.match(errors[0],/cannot provide an AST/);
+ assert.match(errors[1],/Invalid Minecraft command/);
+});
+test('C-shaped RUN keeps its original legacy value-input behavior',()=>{
+ const {C,c,dispatched,errors}=testContext();
+ C.execute(()=>C.run(new c.ExecuteRunValue({kind:'say',message:'legacy'})));
+ assert.equal(dispatched.length,1);
+ assert.equal(dispatched[0].run.command.message,'legacy');
+ assert.deepEqual(errors,[]);
+});
+test('real FunctionFile capture hook diverts Command statements into RUN C',()=>{
+ const {C,errors,dispatched}=testContext();
+ const hook=extract(functionFile,'    export function capturePreviewAction(',
+   '    /** Preview/debug helper for future project-level validation and tests. */');
+ const js=strip('export function capturePreviewAction('+hook).replace(/<MCFunctionAST\.\w+>/g,'');
+ const capture=new Function('ExecuteC','collectingDefinitionActions',
+   js+'\nreturn capturePreviewAction;')(C,false);
+ const executed=[];
+ const callCommand=cmd=>{
+   if(!capture([],()=>executed.push(cmd),cmd))executed.push(cmd);
+ };
+ const say={kind:'Say',message:'Hello'};
+ const give={kind:'Give',item:'diamond'};
+ C.execute(()=>{
+   C.asEntity({target:'@s'});
+   C.runC(()=>{callCommand(say);callCommand(give);});
+ });
+ assert.deepEqual(executed,[]);
+ assert.equal(dispatched.length,2);
+ assert.equal(dispatched[0].run.command,say);
+ assert.equal(dispatched[1].run.command,give);
+ // Outside the C draft, the original FunctionFile flow is unaffected.
+ callCommand({kind:'Say',message:'outside'});
+ assert.equal(executed.length,1);
+ assert.deepEqual(errors,[]);
+});
+test('standard SAY, GIVE and SETBLOCK blocks use the shared capture path',()=>{
+ for(const name of ['say','give','setblock']){
+   const i=commandBlocks.indexOf('export function '+name+'(');
+   assert.ok(i>=0,'Command.'+name+' missing');
+   const code=commandBlocks.slice(i,i+1700);
+   assert.match(code,/\bexecuteCommand\(/,'Command.'+name+' should use shared dispatcher');
+ }
+ assert.match(commandBlocks,/function executeCommand\(command: MCFunctionAST\.CommandNode\)/);
+ assert.match(commandBlocks,/FunctionFile\.capturePreviewAction\(issues, function \(\) \{/);
+ assert.match(functionFile,/ExecuteC\.captureRunCommand\(issues, command\)/);
 });
 test('Dialogue One stores exact RUN AST in Button, OPEN and CLOSE, never dispatches',()=>{
  const state={activeScene:{onOpenCommands:[],onCloseCommands:[],buttons:[]},
