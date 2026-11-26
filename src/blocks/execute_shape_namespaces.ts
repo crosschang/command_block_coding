@@ -5,7 +5,7 @@
  * Never assemble command-line text in a block.
  */
 //% color=#7651A8 weight=102 icon="\uf04b" block="EXECUTE C자형"
-//% groups='["C자형","실행 조건","위치와 회전","고급 조항","RUN"]'
+//% groups='["C자형","실행 조건","위치와 회전","Execute 원블록 연결용","RUN"]'
 namespace ExecuteC {
     class Draft {
         clauses: MCFunctionAST.ExecuteClause[];
@@ -225,9 +225,9 @@ namespace ExecuteC {
         append(Command.executeIfScoreCompare(mode, target, objective, comparison,
             source, sourceObjective, Command.executeEnd()));
     }
-    //% group="고급 조항" weight=129
+    //% group="Execute 원블록 연결용" weight=129
     //% blockId=mcfunction_execute_c_clause
-    //% block="EXECUTE clause $value"
+    //% block="Execute 원블록 연결용 $value"
     //% value.shadow="mcfunction_execute_end"
     export function clause(value: Command.ExecuteClauseValue): void {
         append(value);

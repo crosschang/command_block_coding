@@ -15,7 +15,7 @@
 
 - C자형 내부 블록은 **MakeCode의 문장 연결**이며, 잘못된 종류를 물리적으로 끼우는 것은 여전히 가능하다. 콜백 실행 중 오류 검사와 기존 Validator로 잘못된 상태의 실행을 차단한다.
 - C자형이 `RUN`을 빼먹거나 두 번 쓰거나 RUN 뒤에 조항을 놓거나, 중첩한 EXECUTE C를 실행하려 하면 오류를 보고하고 실제 실행을 차단한다.
-- 고급/기존 ExecuteClauseValue 체인도 `ExecuteC.clause(value)`로 한 번에 넣을 수 있다. 순서를 유지하고 순환 연결은 차단한다.
+- `Execute 원블록 연결용` 블록으로 기존 `ExecuteClauseValue` 체인을 C자형 안에 한 번에 넣을 수 있다. 순서를 유지하고 순환 연결은 차단한다.
 - C자형 Execute의 명령 실행은 기존 `Command.execute`를 호출하므로, `FunctionFile` 캡처, Validator, Preview/Bridge 경로를 재사용한다.
 - 사용자 프로그램에서 C자형 Execute를 정의하면 실제 실행 계층에 전달된다. **Dialogue 안의 명령을 정의하려면 ExecuteOne.command 값을 사용해야 하며 ExecuteC.execute로 정의를 대체하면 안 된다.**
 
