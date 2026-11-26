@@ -165,6 +165,7 @@
         "src/blocks/dialogue_scene_sections_blocks.ts",
         "src/blocks/dialogue_typed_scene_blocks.ts",
         "src/blocks/dialogue_namespaces.ts",
+        "src/blocks/dialogue_shape_namespaces.ts",
         "docs/CHANGELOG_SIMPLE_BATCH_0.0.48_2026-10-14.md",
         "commands/camera.ts",
         "src/libraries/camera_preset_library.ts",

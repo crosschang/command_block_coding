@@ -108,6 +108,7 @@ namespace LanguageFile {
 //% groups='["DIALOGUE FILE", "Structured Scene", "Scene", "Button", "Commands"]'
 namespace DialogueFile {
     //% blockId=mcresource_dialogue_file_define
+    //% blockHidden=true
     //% group="DIALOGUE FILE" weight=100
     //% block="Dialogue JSON file $fileId format $formatVersion"
     //% fileId.shadow="text" fileId.defl="npc/intro"

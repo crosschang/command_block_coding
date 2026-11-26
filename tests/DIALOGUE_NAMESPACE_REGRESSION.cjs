@@ -61,7 +61,9 @@ test('old Blockly IDs and TypeScript APIs remain hidden for compatibility',()=>{
       const id='mcresource_dialogue_'+item;
       assert.match(extractMeta(legacy,id),/blockHidden=true/,'not hidden: '+id);
     }
-    assert.doesNotMatch(extractMeta(legacy,'mcresource_dialogue_file_define'),/blockHidden=true/);
+    // Shape-separated toolbox now exposes the File C-shaped block in DialogueC.
+    // The old DialogueFile block ID remains hidden to preserve old projects.
+    assert.match(extractMeta(legacy,'mcresource_dialogue_file_define'),/blockHidden=true/);
     assert.ok(pxt.files.includes('src/blocks/dialogue_namespaces.ts'));
     for(const file of legacyPaths) assert.ok(pxt.files.includes(file));
     assert.match(pxt.version,/^\d+\.\d+\.\d+$/);

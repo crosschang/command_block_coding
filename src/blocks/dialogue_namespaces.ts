@@ -8,6 +8,7 @@
 namespace DialogueScene {
     //% group="C-shaped" weight=140
     //% blockId=mcresource_ns_dialogue_scene_define
+    //% blockHidden=true
     //% block="SCENE (C자형) $sceneTag NPC name $npcName text $message"
     //% sceneTag.shadow="text" sceneTag.defl="intro"
     //% npcName.shadow="mcresource_text_plain"
@@ -21,6 +22,7 @@ namespace DialogueScene {
 
     //% group="Alternatives" weight=92
     //% blockId=mcresource_ns_dialogue_scene_choices
+    //% blockHidden=true
     //% block="scene choices $sceneTag NPC name $npcName text $message | button 1 $choice1 || button 2 $choice2 | button 3 $choice3 | button 4 $choice4 | button 5 $choice5 | button 6 $choice6"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external
@@ -42,6 +44,7 @@ namespace DialogueScene {
 
     //% group="Alternatives" weight=91
     //% blockId=mcresource_ns_dialogue_typed_scene
+    //% blockHidden=true
     //% block="SCENE $sceneTag NPC $npcName text $message | OPEN $open | CLOSE $close | BUTTON 1 $button1 || BUTTON 2 $button2 | BUTTON 3 $button3 | BUTTON 4 $button4 | BUTTON 5 $button5 | BUTTON 6 $button6"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external
@@ -69,6 +72,7 @@ namespace DialogueScene {
 namespace DialogueButton {
     //% group="C-shaped" weight=140
     //% blockId=mcresource_ns_dialogue_button
+    //% blockHidden=true
     //% block="BUTTON (C자형) name $name"
     //% name.shadow="mcresource_text_plain"
     //% handlerStatement=1
@@ -79,6 +83,7 @@ namespace DialogueButton {
 
     //% group="Alternatives" weight=92
     //% blockId=mcresource_ns_dialogue_button_choice
+    //% blockHidden=true
     //% block="button choice name $name run $command || next command $command2 | next command $command3"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external
@@ -93,6 +98,7 @@ namespace DialogueButton {
 
     //% group="Alternatives" weight=91
     //% blockId=mcresource_ns_dialogue_typed_button_none
+    //% blockHidden=true
     //% block="BUTTON 없음"
     export function none(): DialogueFile.ChoiceValue {
         return DialogueFile.buttonNone();
@@ -100,6 +106,7 @@ namespace DialogueButton {
 
     //% group="Commands" weight=130
     //% blockId=mcresource_ns_dialogue_button_command
+    //% blockHidden=true
     //% block="button command $line"
     //% line.shadow="text" line.defl="give @initiator minecraft:gold_ingot"
     export function command(line: string): void {
@@ -112,6 +119,7 @@ namespace DialogueButton {
 namespace DialogueEvent {
     //% group="C-shaped" weight=140
     //% blockId=mcresource_ns_dialogue_scene_open_section
+    //% blockHidden=true
     //% block="OPEN (C자형) — when NPC dialogue opens"
     //% handlerStatement=1
     export function openSection(handler: () => void): void {
@@ -120,6 +128,7 @@ namespace DialogueEvent {
 
     //% group="C-shaped" weight=139
     //% blockId=mcresource_ns_dialogue_scene_close_section
+    //% blockHidden=true
     //% block="CLOSE (C자형) — when NPC dialogue closes"
     //% handlerStatement=1
     export function closeSection(handler: () => void): void {
@@ -128,6 +137,7 @@ namespace DialogueEvent {
 
     //% group="Commands" weight=130
     //% blockId=mcresource_ns_dialogue_scene_section_command
+    //% blockHidden=true
     //% block="scene OPEN / CLOSE command $line"
     //% line.shadow="text" line.defl="say hello"
     export function sectionCommand(line: string): void {
@@ -136,6 +146,7 @@ namespace DialogueEvent {
 
     //% group="Alternatives" weight=94
     //% blockId=mcresource_ns_dialogue_typed_open_slot
+    //% blockHidden=true
     //% block="OPEN || command 1 $line1 | command 2 $line2 | command 3 $line3 | command 4 $line4"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external
@@ -150,6 +161,7 @@ namespace DialogueEvent {
 
     //% group="Alternatives" weight=93
     //% blockId=mcresource_ns_dialogue_typed_close_slot
+    //% blockHidden=true
     //% block="CLOSE || command 1 $line1 | command 2 $line2 | command 3 $line3 | command 4 $line4"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external
@@ -164,6 +176,7 @@ namespace DialogueEvent {
 
     //% group="Alternatives" weight=92
     //% blockId=mcresource_ns_dialogue_typed_open_none
+    //% blockHidden=true
     //% block="OPEN 없음"
     export function openNone(): DialogueFile.OpenSlotValue {
         return DialogueFile.openNone();
@@ -171,6 +184,7 @@ namespace DialogueEvent {
 
     //% group="Alternatives" weight=91
     //% blockId=mcresource_ns_dialogue_typed_close_none
+    //% blockHidden=true
     //% block="CLOSE 없음"
     export function closeNone(): DialogueFile.CloseSlotValue {
         return DialogueFile.closeNone();
@@ -178,6 +192,7 @@ namespace DialogueEvent {
 
     //% group="Commands" weight=110
     //% blockId=mcresource_ns_dialogue_on_open_command
+    //% blockHidden=true
     //% block="on open command $line"
     //% line.shadow="text" line.defl="say dialogue opened"
     export function onOpen(line: string): void {
@@ -186,6 +201,7 @@ namespace DialogueEvent {
 
     //% group="Commands" weight=109
     //% blockId=mcresource_ns_dialogue_on_close_command
+    //% blockHidden=true
     //% block="on close command $line"
     //% line.shadow="text" line.defl="say dialogue closed"
     export function onClose(line: string): void {
