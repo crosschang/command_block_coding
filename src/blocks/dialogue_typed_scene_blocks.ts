@@ -35,6 +35,7 @@ namespace DialogueFile {
 
     //% group="Structured Scene" weight=118
     //% blockId=mcresource_dialogue_typed_open_slot
+    //% blockHidden=true
     //% block="OPEN || command 1 $line1 | command 2 $line2 | command 3 $line3 | command 4 $line4"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external
@@ -50,6 +51,7 @@ namespace DialogueFile {
 
     //% group="Structured Scene" weight=117
     //% blockId=mcresource_dialogue_typed_close_slot
+    //% blockHidden=true
     //% block="CLOSE || command 1 $line1 | command 2 $line2 | command 3 $line3 | command 4 $line4"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external
@@ -69,6 +71,7 @@ namespace DialogueFile {
      */
     //% group="Structured Scene" weight=116
     //% blockId=mcresource_dialogue_typed_open_none
+    //% blockHidden=true
     //% block="OPEN 없음"
     export function openNone(): OpenSlotValue {
         return new OpenSlotValue([]);
@@ -76,6 +79,7 @@ namespace DialogueFile {
 
     //% group="Structured Scene" weight=115
     //% blockId=mcresource_dialogue_typed_close_none
+    //% blockHidden=true
     //% block="CLOSE 없음"
     export function closeNone(): CloseSlotValue {
         return new CloseSlotValue([]);
@@ -83,6 +87,7 @@ namespace DialogueFile {
 
     //% group="Structured Scene" weight=114
     //% blockId=mcresource_dialogue_typed_button_none
+    //% blockHidden=true
     //% block="BUTTON 없음"
     export function buttonNone(): ChoiceValue {
         return new ChoiceValue(undefined);
@@ -91,6 +96,7 @@ namespace DialogueFile {
     /** Fixed order; expandable buttons 2-6 are all typed ChoiceValue inputs. */
     //% group="Structured Scene" weight=120
     //% blockId=mcresource_dialogue_typed_scene
+    //% blockHidden=true
     //% block="SCENE $sceneTag NPC $npcName text $message | OPEN $open | CLOSE $close | BUTTON 1 $button1 || BUTTON 2 $button2 | BUTTON 3 $button3 | BUTTON 4 $button4 | BUTTON 5 $button5 | BUTTON 6 $button6"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external

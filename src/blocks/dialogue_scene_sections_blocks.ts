@@ -5,6 +5,7 @@
 namespace DialogueFile {
     //% group="Scene" weight=98
     //% blockId=mcresource_dialogue_scene_open_section
+    //% blockHidden=true
     //% block="OPEN — when NPC dialogue opens"
     //% handlerStatement=1
     export function openSection(handler: () => void): void {
@@ -13,6 +14,7 @@ namespace DialogueFile {
 
     //% group="Scene" weight=97
     //% blockId=mcresource_dialogue_scene_close_section
+    //% blockHidden=true
     //% block="CLOSE — when NPC dialogue closes"
     //% handlerStatement=1
     export function closeSection(handler: () => void): void {
@@ -21,6 +23,7 @@ namespace DialogueFile {
 
     //% group="Commands" weight=99
     //% blockId=mcresource_dialogue_scene_section_command
+    //% blockHidden=true
     //% block="scene OPEN / CLOSE command $line"
     //% line.shadow="text" line.defl="say hello"
     export function sectionCommand(line: string): void {

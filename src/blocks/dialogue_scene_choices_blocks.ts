@@ -13,6 +13,7 @@ namespace DialogueFile {
 
     //% group="Button" weight=110
     //% blockId=mcresource_dialogue_button_choice
+    //% blockHidden=true
     //% block="button choice name $name run $command || next command $command2 | next command $command3"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external
@@ -36,6 +37,7 @@ namespace DialogueFile {
      */
     //% group="Scene" weight=110
     //% blockId=mcresource_dialogue_scene_choices
+    //% blockHidden=true
     //% block="scene choices $sceneTag NPC name $npcName text $message | button 1 $choice1 || button 2 $choice2 | button 3 $choice3 | button 4 $choice4 | button 5 $choice5 | button 6 $choice6"
     //% expandableArgumentMode=enabled
     //% inlineInputMode=external

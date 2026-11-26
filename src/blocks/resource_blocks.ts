@@ -118,6 +118,7 @@ namespace DialogueFile {
         MCFunctionResourceProject.defineDialogue(fileId,formatVersion,handler);
     }
     //% blockId=mcresource_dialogue_scene_define
+    //% blockHidden=true
     //% group="Scene" weight=99
     //% block="scene $sceneTag NPC name $npcName text $message"
     //% sceneTag.shadow="text" sceneTag.defl="intro"
@@ -132,6 +133,7 @@ namespace DialogueFile {
             message ? message.text : undefined,handler);
     }
     //% blockId=mcresource_dialogue_button
+    //% blockHidden=true
     //% group="Button" weight=98
     //% block="button name $name"
     //% name.shadow="mcresource_text_plain"
@@ -141,6 +143,7 @@ namespace DialogueFile {
         MCFunctionResourceProject.addButton(name ? name.text : undefined,handler);
     }
     //% blockId=mcresource_dialogue_on_open_command
+    //% blockHidden=true
     //% group="Commands" weight=97
     //% block="on open command $line"
     //% line.shadow="text" line.defl="say dialogue opened"
@@ -148,6 +151,7 @@ namespace DialogueFile {
         MCFunctionResourceProject.onOpen(line);
     }
     //% blockId=mcresource_dialogue_on_close_command
+    //% blockHidden=true
     //% group="Commands" weight=96
     //% block="on close command $line"
     //% line.shadow="text" line.defl="say dialogue closed"
@@ -155,6 +159,7 @@ namespace DialogueFile {
         MCFunctionResourceProject.onClose(line);
     }
     //% blockId=mcresource_dialogue_button_command
+    //% blockHidden=true
     //% group="Commands" weight=95
     //% block="button command $line"
     //% line.shadow="text" line.defl="give @initiator minecraft:gold_ingot"
