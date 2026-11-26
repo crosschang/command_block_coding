@@ -8,6 +8,7 @@
 namespace MCFunctionExecuteRun {
     //% group="SAY" weight=110
     //% blockId=mcfunction_execute_run_group_say
+    //% blockNamespace=ExecuteOne
     //% block="run SAY $message"
     //% message.shadow="text" message.defl="C3 condition matched"
     export function say(message: string): Command.ExecuteRunValue {
@@ -15,12 +16,14 @@ namespace MCFunctionExecuteRun {
     }
     //% group="SCOREBOARD" weight=100
     //% blockId=mcfunction_execute_run_group_scoreboard
+    //% blockNamespace=ExecuteOne
     //% block="run SCOREBOARD $action"
     export function scoreboard(action: Command.ScoreboardActionValue): Command.ExecuteRunValue {
         return new Command.ExecuteRunValue(action ? MCFunctionBlocks.createScoreboardCommand(action.command) : undefined);
     }
     //% group="RAW COMMAND" weight=90
     //% blockId=mcfunction_execute_run_group_raw
+    //% blockNamespace=ExecuteOne
     //% block="run RAW COMMAND $line"
     //% line.shadow="text" line.defl="say Hello"
     export function raw(line: string): Command.ExecuteRunValue {
@@ -28,6 +31,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="FUNCTION" weight=106
     //% blockId=mcfunction_execute_run_group_mcfunction
+    //% blockNamespace=ExecuteOne
     //% block="run FUNCTION $functionId"
     //% functionId.shadow="text" functionId.defl="test/example"
     export function mcfunction(functionId: string): Command.ExecuteRunValue {
@@ -35,6 +39,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="KILL" weight=106
     //% blockId=mcfunction_execute_run_group_kill
+    //% blockNamespace=ExecuteOne
     //% block="run KILL || target $target"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_selector_self"
@@ -125,12 +130,14 @@ namespace MCFunctionExecuteRun {
     }
     //% group="GAMERULE" weight=103
     //% blockId=mcfunction_execute_run_group_gamerule
+    //% blockNamespace=ExecuteOne
     //% block="run GAMERULE $action"
     export function gamerule(action: Command.GameRuleOperationValue): Command.ExecuteRunValue {
         return new Command.ExecuteRunValue(action ? action.command : undefined);
     }
     //% group="RIDE" weight=103
     //% blockId=mcfunction_execute_run_group_ride
+    //% blockNamespace=ExecuteOne
     //% block="run RIDE target $target action $action"
     //% target.shadow="mcfunction_target_selector"
     //% action.shadow="mcfunction_ride_action_stop"
@@ -146,6 +153,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="DIALOGUE" weight=100
     //% blockId=mcfunction_execute_run_group_dialogue
+    //% blockNamespace=ExecuteOne
     //% block="run DIALOGUE NPC $npc action $action"
     //% npc.shadow="mcfunction_target_selector"
     //% action.shadow="mcfunction_dialogue_action_open"
@@ -162,6 +170,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="EXECUTE" weight=109
     //% blockId=mcfunction_execute_run_group_nested_execute
+    //% blockHidden=true
     //% block="run EXECUTE clauses $clauses RUN $run"
     //% clauses.shadow="mcfunction_execute_end"
     //% run.shadow="mcfunction_execute_run_group_say"
@@ -189,6 +198,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="PLAYANIMATION" weight=110
     //% blockId=mcfunction_execute_run_group_playanimation
+    //% blockNamespace=ExecuteOne
     //% block="run PLAYANIMATION entity $target animation $animation || options $options"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
@@ -208,6 +218,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="FOG" weight=110
     //% blockId=mcfunction_execute_run_group_fog
+    //% blockNamespace=ExecuteOne
     //% block="run FOG player $target action $action"
     //% target.shadow="mcfunction_target_selector"
     //% action.shadow="mcfunction_fog_action_push"
@@ -223,6 +234,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="DAMAGE" weight=110
     //% blockId=mcfunction_execute_run_group_damage
+    //% blockNamespace=ExecuteOne
     //% block="run DAMAGE target $target amount $amount || cause $cause"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_target_selector"
@@ -236,6 +248,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="DAMAGE" weight=109
     //% blockId=mcfunction_execute_run_group_damage_from_entity
+    //% blockNamespace=ExecuteOne
     //% block="run DAMAGE target $target amount $amount cause $cause from $damager"
     //% target.shadow="mcfunction_target_selector"
     //% cause.shadow="mcfunction_damage_cause_choice"
@@ -252,6 +265,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="EVENT" weight=110
     //% blockId=mcfunction_execute_run_group_event
+    //% blockNamespace=ExecuteOne
     //% block="run EVENT entity $target trigger $eventId || owner $ownerEntityId"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_target_selector"
@@ -266,6 +280,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="CONTROLSCHEME" weight=110
     //% blockId=mcfunction_execute_run_group_controlscheme_set
+    //% blockNamespace=ExecuteOne
     //% block="run CONTROLSCHEME player $target set $scheme"
     //% target.shadow="mcfunction_target_selector"
     //% inlineInputMode=external
@@ -277,6 +292,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="CONTROLSCHEME" weight=109
     //% blockId=mcfunction_execute_run_group_controlscheme_clear
+    //% blockNamespace=ExecuteOne
     //% block="run CONTROLSCHEME player $target clear"
     //% target.shadow="mcfunction_target_selector"
     export function controlSchemeClear(target: MCFunctionFields.TargetValue): Command.ExecuteRunValue {
@@ -286,6 +302,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="AIMASSIST" weight=110
     //% blockId=mcfunction_execute_run_group_aimassist_set
+    //% blockNamespace=ExecuteOne
     //% block="run AIMASSIST player $target set || options $options"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_target_selector"
@@ -303,6 +320,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="AIMASSIST" weight=109
     //% blockId=mcfunction_execute_run_group_aimassist_clear
+    //% blockNamespace=ExecuteOne
     //% block="run AIMASSIST player $target clear"
     //% target.shadow="mcfunction_target_selector"
     export function aimAssistClear(target: MCFunctionFields.TargetValue): Command.ExecuteRunValue {
@@ -311,6 +329,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="AIMASSIST" weight=108
     //% blockId=mcfunction_execute_run_group_aimassist_preset
+    //% blockNamespace=ExecuteOne
     //% block="run AIMASSIST player $target preset $presetId"
     //% target.shadow="mcfunction_target_selector"
     //% presetId.shadow="text" presetId.defl="example:my_preset"
@@ -323,6 +342,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="CLONE" weight=110
     //% blockId=mcfunction_execute_run_group_clone
+    //% blockNamespace=ExecuteOne
     //% block="run CLONE begin $begin end $end destination $destination || $mask $mode"
     //% expandableArgumentMode="enabled"
     //% begin.shadow="mcfunction_position_relative"
@@ -346,6 +366,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="PARTICLE" weight=110
     //% blockId=mcfunction_execute_run_group_particle
+    //% blockNamespace=ExecuteOne
     //% block="run PARTICLE $particle || at $position"
     //% expandableArgumentMode="enabled"
     //% particle.shadow="mcfunction_particle_registry_minecraft_basic_flame_particle"
@@ -359,6 +380,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="SOUND" weight=110
     //% blockId=mcfunction_execute_run_group_playsound
+    //% blockNamespace=ExecuteOne
     //% block="run PLAYSOUND $sound || target $target position $position $volume $pitch $minimumVolume"
     //% expandableArgumentMode="enabled"
     //% sound.shadow="mcfunction_sound_registry_random_click"
@@ -382,6 +404,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="SOUND" weight=109
     //% blockId=mcfunction_execute_run_group_stopsound
+    //% blockNamespace=ExecuteOne
     //% block="run STOPSOUND $target || sound $sound"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_selector_all_players"
@@ -395,6 +418,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="MUSIC" weight=110
     //% blockId=mcfunction_execute_run_group_music
+    //% blockNamespace=ExecuteOne
     //% block="run MUSIC $operation"
     //% operation.shadow="mcfunction_music_playback_action"
     //% inlineInputMode=external
@@ -404,6 +428,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="ENCHANT" weight=110
     //% blockId=mcfunction_execute_run_group_enchant
+    //% blockNamespace=ExecuteOne
     //% block="run ENCHANT target $target enchantment $enchantment || level $level"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_selector_self"
@@ -423,6 +448,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="TELL" weight=110
     //% blockId=mcfunction_execute_run_group_tell
+    //% blockNamespace=ExecuteOne
     //% block="run TELL $target message $message"
     //% target.shadow="mcfunction_selector_self"
     //% message.shadow="text" message.defl="Hello!"
@@ -435,6 +461,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="TIME" weight=110
     //% blockId=mcfunction_execute_run_group_time_preset
+    //% blockNamespace=ExecuteOne
     //% block="run TIME set $preset"
     export function timeSetPreset(preset: Command.TimePresetChoice): Command.ExecuteRunValue {
         return new Command.ExecuteRunValue(MCFunctionBlocks.createTimeCommand(
@@ -442,6 +469,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="TIME" weight=109
     //% blockId=mcfunction_execute_run_group_time_ticks
+    //% blockNamespace=ExecuteOne
     //% block="run TIME set ticks $ticks" ticks.defl=6000
     export function timeSetTicks(ticks: number): Command.ExecuteRunValue {
         return new Command.ExecuteRunValue(MCFunctionBlocks.createTimeCommand(
@@ -449,6 +477,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="TIME" weight=108
     //% blockId=mcfunction_execute_run_group_time_add
+    //% blockNamespace=ExecuteOne
     //% block="run TIME add ticks $ticks" ticks.defl=1000
     export function timeAddTicks(ticks: number): Command.ExecuteRunValue {
         return new Command.ExecuteRunValue(MCFunctionBlocks.createTimeCommand(
@@ -456,6 +485,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="TIME" weight=107
     //% blockId=mcfunction_execute_run_group_time_query
+    //% blockNamespace=ExecuteOne
     //% block="run TIME query $query"
     export function timeQuery(query: Command.TimeQueryChoice): Command.ExecuteRunValue {
         return new Command.ExecuteRunValue(MCFunctionBlocks.createTimeCommand(
@@ -465,6 +495,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="WEATHER" weight=110
     //% blockId=mcfunction_execute_run_group_weather
+    //% blockNamespace=ExecuteOne
     //% block="run WEATHER $weather || duration $duration"
     //% expandableArgumentMode="enabled"
     //% duration.shadow="mcfunction_weather_duration_seconds"
@@ -477,6 +508,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="DIFFICULTY" weight=110
     //% blockId=mcfunction_execute_run_group_difficulty
+    //% blockNamespace=ExecuteOne
     //% block="run DIFFICULTY $difficulty"
     export function difficulty(difficulty: Command.DifficultyChoice): Command.ExecuteRunValue {
         return new Command.ExecuteRunValue(MCFunctionBlocks.createDifficultyCommand(
@@ -485,6 +517,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="CAMERASHAKE" weight=110
     //% blockId=mcfunction_execute_run_group_camerashake_add
+    //% blockNamespace=ExecuteOne
     //% block="run CAMERASHAKE add target $target || $intensity $seconds $shakeType"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_selector_self"
@@ -503,6 +536,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="CAMERASHAKE" weight=109
     //% blockId=mcfunction_execute_run_group_camerashake_stop
+    //% blockNamespace=ExecuteOne
     //% block="run CAMERASHAKE stop || target $target"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_selector_self"
@@ -513,6 +547,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="CAMERA" weight=110
     //% blockId=mcfunction_execute_run_group_camera
+    //% blockNamespace=ExecuteOne
     //% block="run CAMERA target $target action $action"
     //% target.shadow="mcfunction_selector_self"
     //% action.shadow="mcfunction_camera_action_set_chain"
@@ -525,6 +560,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="HUD" weight=110
     //% blockId=mcfunction_execute_run_group_hud
+    //% blockNamespace=ExecuteOne
     //% block="run HUD target $target $visibility || element $element"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_selector_self"
@@ -540,6 +576,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="INPUTPERMISSION" weight=110
     //% blockId=mcfunction_execute_run_group_inputpermission
+    //% blockNamespace=ExecuteOne
     //% block="run INPUTPERMISSION target $target permission $permission state $state"
     //% target.shadow="mcfunction_selector_self"
     //% inlineInputMode=external
@@ -554,6 +591,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="SPAWNPOINT" weight=110
     //% blockId=mcfunction_execute_run_group_spawnpoint
+    //% blockNamespace=ExecuteOne
     //% block="run SPAWNPOINT || target $target position $position"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_target_selector"
@@ -568,6 +606,7 @@ namespace MCFunctionExecuteRun {
     }
     //% group="SPAWNPOINT" weight=109
     //% blockId=mcfunction_execute_run_group_clearspawnpoint
+    //% blockNamespace=ExecuteOne
     //% block="run CLEARSPAWNPOINT || target $target"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_target_selector"
@@ -579,6 +618,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="SETWORLDSPAWN" weight=110
     //% blockId=mcfunction_execute_run_group_setworldspawn
+    //% blockNamespace=ExecuteOne
     //% block="run SETWORLDSPAWN || position $position"
     //% expandableArgumentMode="enabled"
     //% position.shadow="mcfunction_position_absolute"
@@ -590,6 +630,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="GAMEMODE" weight=110
     //% blockId=mcfunction_execute_run_group_gamemode
+    //% blockNamespace=ExecuteOne
     //% block="run GAMEMODE $mode || target $target"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_selector_self"
@@ -602,6 +643,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="CLEAR" weight=110
     //% blockId=mcfunction_execute_run_group_clear
+    //% blockNamespace=ExecuteOne
     //% block="run CLEAR || target $target $item $data $maxCount"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_selector_self"
@@ -619,6 +661,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="EFFECT" weight=110
     //% blockId=mcfunction_execute_run_group_effect
+    //% blockNamespace=ExecuteOne
     //% block="run EFFECT target $target action $action || $duration $amplifier $particles"
     //% expandableArgumentMode="enabled"
     //% target.shadow="mcfunction_selector_self"
@@ -646,6 +689,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="SUMMON" weight=109
     //% blockId=mcfunction_execute_run_summon_simple_full
+    //% blockNamespace=ExecuteOne
     //% block="run SUMMON entity $entity || name $nameTag at $spawnPosition"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
@@ -661,6 +705,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="SUMMON" weight=108
     //% blockId=mcfunction_execute_run_summon_advanced
+    //% blockNamespace=ExecuteOne
     //% block="run SUMMON ADVANCED entity $entity at $spawnPosition orientation $orientation || spawn event $spawnEvent name $nameTag"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
@@ -681,6 +726,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="TELEPORT" weight=109
     //% blockId=mcfunction_execute_run_tp_self
+    //% blockNamespace=ExecuteOne
     //% block="run TP destination $destination check blocks $checkForBlocks || $orientation"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
@@ -697,6 +743,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="TELEPORT" weight=108
     //% blockId=mcfunction_execute_run_tp_target
+    //% blockNamespace=ExecuteOne
     //% block="run TP TARGET victim $victim destination $destination check blocks $checkForBlocks || $orientation"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
@@ -716,6 +763,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="TAG" weight=106
     //% blockId=mcfunction_execute_run_tag_action
+    //% blockNamespace=ExecuteOne
     //% block="run TAG target $target action $action"
     //% target.shadow="mcfunction_selector_self"
     //% action.shadow="mcfunction_tag_action_add"
@@ -730,6 +778,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="GIVE" weight=106
     //% blockId=mcfunction_execute_run_give_full
+    //% blockNamespace=ExecuteOne
     //% block="run GIVE target $target item $item || $count $data $components"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
@@ -753,6 +802,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="SETBLOCK" weight=109
     //% blockId=mcfunction_execute_run_setblock_full
+    //% blockNamespace=ExecuteOne
     //% block="run SETBLOCK position $position block $block || $states $mode"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external
@@ -773,6 +823,7 @@ namespace MCFunctionExecuteRun {
 
     //% group="FILL" weight=106
     //% blockId=mcfunction_execute_run_fill_full
+    //% blockNamespace=ExecuteOne
     //% block="run FILL from $from to $to block $block || $states $handling"
     //% expandableArgumentMode="enabled"
     //% inlineInputMode=external

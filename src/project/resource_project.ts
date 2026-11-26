@@ -195,6 +195,77 @@ namespace MCFunctionResourceProject {
         }
         activeButton.commands.push(command(line));
     }
+    /**
+     * Shared AST-only entry point for RUN reporters used in Dialogue resources.
+     * These do not execute a command. The existing Resource Codec compiles AST
+     * to JSON strings when the output plan is explicitly requested.
+     */
+    export function runCommandNodes(action: MCFunctionAST.CommandNode): MCFunctionAST.CommandNode[] {
+        if (!action) {
+            record("DIALOGUE_RUN_MISSING: A RUN command is required.");
+            return [];
+        }
+        // A cyclic/empty nested Execute must never reach ResourceCodec.compileCommand.
+        // Avoid extra string assembly and keep the AST untouched.
+        let visited: MCFunctionAST.CommandNode[] = [];
+        let current = action;
+        while (current && current.kind == MCFunctionAST.CommandKind.Execute) {
+            for (let i = 0; i < visited.length; i++) {
+                if (visited[i] == current) {
+                    record("DIALOGUE_RUN_CYCLE: Cyclic nested execute is invalid.");
+                    return [];
+                }
+            }
+            visited.push(current);
+            current = (<MCFunctionAST.ExecuteCommand>current).run;
+            if (!current) {
+                record("DIALOGUE_RUN_NESTED_MISSING: Nested execute requires RUN.");
+                return [];
+            }
+        }
+        return [action];
+    }
+    export function buttonRunChoice(name: MCFunctionResource.TextValue,
+        action: MCFunctionAST.CommandNode): MCFunctionResource.DialogueButton {
+        return {name: name, commands: runCommandNodes(action)};
+    }
+    /**
+     * Reuse Dialogue definition context for AST RUN commands.
+     * target: 1=OPEN, 2=CLOSE, 3=BUTTON, 4=OPEN/CLOSE section.
+     */
+    export function addRunCommand(target: number, action: MCFunctionAST.CommandNode): void {
+        if (target == 3) {
+            if (!activeButton) {
+                record("DIALOGUE_BUTTON_COMMAND_CONTEXT: Use RUN inside a button.");
+                return;
+            }
+            let commands = runCommandNodes(action);
+            for (let i = 0; i < commands.length; i++) activeButton.commands.push(commands[i]);
+        } else if (target == 4) {
+            if (!activeScene || activeButton || activeSceneSection == 0) {
+                record("DIALOGUE_SECTION_COMMAND_CONTEXT: Use RUN inside OPEN/CLOSE.");
+                return;
+            }
+            let commands = runCommandNodes(action);
+            for (let i = 0; i < commands.length; i++) {
+                if (activeSceneSection == 1) activeScene.onOpenCommands.push(commands[i]);
+                else activeScene.onCloseCommands.push(commands[i]);
+            }
+        } else if (target == 1 || target == 2) {
+            if (!activeScene || activeButton || activeSceneSection != 0) {
+                record("DIALOGUE_SCENE_RUN_CONTEXT: Use RUN directly inside a Scene.");
+                return;
+            }
+            let commands = runCommandNodes(action);
+            for (let i = 0; i < commands.length; i++) {
+                if (target == 1) activeScene.onOpenCommands.push(commands[i]);
+                else activeScene.onCloseCommands.push(commands[i]);
+            }
+        } else {
+            record("DIALOGUE_RUN_TARGET_INVALID: Unknown resource command target.");
+        }
+    }
+
     /** Project state is kept as AST, not serialized text. */
     export function languageDocuments(): MCFunctionResource.LanguageDocument[] {
         return languages;

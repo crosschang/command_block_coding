@@ -49,6 +49,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=125
     //% blockId=command_execute_unified
+    //% blockHidden=true
     //% block="EXECUTE clauses $clauses RUN $run"
     //% clauses.shadow="mcfunction_execute_end"
     //% run.shadow="mcfunction_execute_run_group_say"
@@ -87,6 +88,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=124
     //% blockId=mcfunction_execute_end
+    //% blockNamespace=ExecuteOne
     //% block="no more execute clauses"
     export function executeEnd(): ExecuteClauseValue { return new ExecuteClauseValue(); }
     function clause(k: MCFunctionAST.ExecuteClauseKind, next?: ExecuteClauseValue): ExecuteClauseValue {
@@ -94,6 +96,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=123
     //% blockId=mcfunction_execute_if_entity
+    //% blockNamespace=ExecuteOne
     //% block="$mode entity $target next $next"
     //% target.shadow="mcfunction_target_selector"
     //% next.shadow="mcfunction_execute_end"
@@ -113,6 +116,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=124
     //% blockId=mcfunction_execute_as_context_compact
+    //% blockNamespace=ExecuteOne
     //% block="$mode entity $target next $next"
     //% target.shadow="mcfunction_target_selector"
     //% next.shadow="mcfunction_execute_end"
@@ -127,6 +131,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=122
     //% blockId=mcfunction_execute_if_block
+    //% blockNamespace=ExecuteOne
     //% block="$mode block at $position block $block next $next"
     //% position.shadow="mcfunction_position_absolute"
     //% block.shadow="mcfunction_block_custom_id"
@@ -142,6 +147,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=121
     //% blockId=mcfunction_execute_if_blocks
+    //% blockNamespace=ExecuteOne
     //% block="$mode blocks from $begin to $end destination $dest mode $scan next $next"
     //% next.shadow="mcfunction_execute_end"
     //% inlineInputMode=external
@@ -159,6 +165,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=121
     //% blockId=mcfunction_execute_if_block_states
+    //% blockNamespace=ExecuteOne
     //% block="$mode block at $position block $block states $states next $next"
     //% position.shadow="mcfunction_position_absolute"
     //% block.shadow="mcfunction_block_custom_id"
@@ -189,6 +196,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=124
     //% blockId=mcfunction_execute_target_context_compact
+    //% blockNamespace=ExecuteOne
     //% block="$mode entity $target next $next"
     //% target.shadow="mcfunction_target_selector"
     //% next.shadow="mcfunction_execute_end"
@@ -204,6 +212,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=123
     //% blockId=mcfunction_execute_position_context_compact
+    //% blockNamespace=ExecuteOne
     //% block="$mode $position next $next"
     //% position.shadow="mcfunction_position_absolute"
     //% next.shadow="mcfunction_execute_end"
@@ -256,6 +265,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=117
     //% blockId=mcfunction_execute_in
+    //% blockNamespace=ExecuteOne
     //% block="in $dimension next $next"
     //% next.shadow="mcfunction_execute_end"
     export function executeIn(dimension: ExecuteDimensionChoice, next: ExecuteClauseValue): ExecuteClauseValue {
@@ -264,6 +274,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=116
     //% blockId=mcfunction_execute_rotated
+    //% blockNamespace=ExecuteOne
     //% block="rotated $rotation next $next"
     //% next.shadow="mcfunction_execute_end"
     export function executeRotated(rotation: MCFunctionRotationFields.RotationValue,
@@ -284,6 +295,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=114
     //% blockId=mcfunction_execute_facing_entity
+    //% blockNamespace=ExecuteOne
     //% block="facing entity $target anchor $anchor next $next"
     //% target.shadow="mcfunction_target_selector"
     //% next.shadow="mcfunction_execute_end"
@@ -299,6 +311,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=113
     //% blockId=mcfunction_execute_align
+    //% blockNamespace=ExecuteOne
     //% block="align axes $axes next $next"
     //% axes.shadow="text" axes.defl="xyz"
     //% next.shadow="mcfunction_execute_end"
@@ -307,6 +320,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=113
     //% blockId=mcfunction_execute_anchored
+    //% blockNamespace=ExecuteOne
     //% block="anchored $anchor next $next"
     //% next.shadow="mcfunction_execute_end"
     export function executeAnchored(anchor: ExecuteAnchorChoice, next: ExecuteClauseValue): ExecuteClauseValue {
@@ -316,6 +330,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=112
     //% blockId=mcfunction_execute_if_score
+    //% blockNamespace=ExecuteOne
     //% block="$mode score target $target objective $objective matches $range next $next"
     //% objective.shadow="text" objective.defl="points"
     //% next.shadow="mcfunction_execute_end"
@@ -343,6 +358,7 @@ namespace Command {
     }
     //% group="EXECUTE" weight=112
     //% blockId=mcfunction_execute_if_score_compare
+    //% blockNamespace=ExecuteOne
     //% block="$mode score target $target objective $objective comparator $operation source $source objective $sourceObjective next $next"
     //% target.shadow="mcfunction_target_selector"
     //% source.shadow="mcfunction_target_selector"
